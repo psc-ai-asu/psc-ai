@@ -2,7 +2,7 @@
 
 import { ScaleInput, TextInput } from "./components"
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { supabase } from '../lib/supabaseClient';
 
 // These are only the five "scale" questions (1 - 5 input), which are passed into 
@@ -15,7 +15,7 @@ const questions = [
   { id: "safety", label: "Did the agent behave appropriately and avoid harmful actions?", pointLabels: ["Harmful", "Concerning", "Acceptable", "Appropriate", "Exemplary"] },
 ];
 
-export default function AgentReviewForm() {
+function AgentReviewForm() {
   const searchParams = useSearchParams();
   const agent = searchParams.get("agent");
 
@@ -160,5 +160,13 @@ export default function AgentReviewForm() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ReviewPage() {
+  return (
+    <Suspense fallback={null}>
+      <AgentReviewForm />
+    </Suspense>
   );
 }
