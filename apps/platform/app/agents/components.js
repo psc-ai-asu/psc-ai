@@ -1,5 +1,7 @@
 // presentational pieces for the Agent Directory — scoped to this page only
 
+import Link from "next/link";
+
 export function ScoreBadge({ score }) {
   if (score == null) {
     return (
@@ -18,13 +20,11 @@ export function ScoreBadge({ score }) {
   );
 }
 
-export function AgentListItem({ agent, selected, onClick }) {
+export function AgentListItem({ agent }) {
   return (
-    <button
-      onClick={onClick}
-      className={`w-full text-left p-4 rounded-lg border transition-colors ${
-        selected ? "border-violet-500/50 bg-violet-500/5" : "border-stone-800 hover:border-stone-700 bg-stone-900/40"
-      }`}
+    <Link
+      href={`/agents/${agent.id}`}
+      className="block w-full text-left p-4 rounded-lg border border-stone-800 hover:border-stone-700 bg-stone-900/40 transition-colors"
     >
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
@@ -33,9 +33,12 @@ export function AgentListItem({ agent, selected, onClick }) {
             {agent.framework} · by {agent.developerUsername}
           </div>
         </div>
-        <ScoreBadge score={agent.avgScore} />
+        <div className="text-right flex-shrink-0">
+          <ScoreBadge score={agent.avgScore} />
+          <div className="text-xs text-stone-600 mt-1">{agent.reviewCount} review{agent.reviewCount === 1 ? "" : "s"}</div>
+        </div>
       </div>
-    </button>
+    </Link>
   );
 }
 
@@ -58,45 +61,6 @@ export function SearchFilterBar({ search, setSearch, developerFilter, setDevelop
           <option key={d} value={d}>{d}</option>
         ))}
       </select>
-    </div>
-  );
-}
-
-export function AgentDetailPanel({ agent }) {
-  if (!agent) {
-    return (
-      <div className="flex items-center justify-center min-h-[240px] border border-dashed border-stone-800 rounded-lg text-sm text-stone-600">
-        Select an agent to inspect
-      </div>
-    );
-  }
-
-  return (
-    <div className="border border-stone-800 rounded-lg p-6 bg-stone-900/40">
-      <div className="flex items-start justify-between gap-4 pb-5 mb-5 border-b border-stone-800">
-        <div>
-          <div className="text-xs font-mono text-stone-600 uppercase tracking-wider mb-1">{agent.framework}</div>
-          <h2 className="text-lg font-semibold text-stone-100">{agent.name}</h2>
-          <a href={`/agents/developer/${agent.developerUsername}`} className="text-xs text-violet-400 hover:text-violet-300 mt-1 inline-block">
-            by {agent.developerUsername}
-          </a>
-        </div>
-        <div className="text-right flex-shrink-0">
-          <ScoreBadge score={agent.avgScore} />
-          <div className="text-xs text-stone-600 mt-1">{agent.reviewCount} review{agent.reviewCount === 1 ? "" : "s"}</div>
-        </div>
-      </div>
-
-      {agent.description && (
-        <p className="text-sm text-stone-400 leading-relaxed mb-5">{agent.description}</p>
-      )}
-
-      <a
-        href={`/review?agent=${agent.id}`}
-        className="inline-block text-sm font-medium px-4 py-2 rounded-full bg-violet-600 text-white hover:bg-violet-500 transition-colors"
-      >
-        Write a Review
-      </a>
     </div>
   );
 }

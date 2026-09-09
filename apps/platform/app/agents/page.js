@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { AgentListItem, AgentDetailPanel, SearchFilterBar } from "./components";
+import { AgentListItem, SearchFilterBar } from "./components";
 
 function mapAgent(row) {
   const reviewCount = row.reviews?.length ?? 0;
@@ -14,7 +14,6 @@ function mapAgent(row) {
   return {
     id: row.id,
     name: row.name,
-    description: row.description,
     framework: row.framework,
     developerUsername: row.developer?.username ?? "unknown",
     reviewCount,
@@ -27,7 +26,6 @@ export default function AgentDirectoryPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [developerFilter, setDeveloperFilter] = useState("all");
-  const [selectedId, setSelectedId] = useState(null);
 
   useEffect(() => {
     async function fetchAgents() {
@@ -56,8 +54,6 @@ export default function AgentDirectoryPage() {
     return matchesSearch && matchesDeveloper;
   });
 
-  const selected = filtered.find((a) => a.id === selectedId) ?? filtered[0] ?? null;
-
   return (
     <div className="h-screen bg-stone-950 text-stone-200 font-sans flex flex-col">
       <header className="border-b border-stone-800 px-6 py-4 flex items-center justify-between flex-shrink-0">
@@ -71,7 +67,7 @@ export default function AgentDirectoryPage() {
       </header>
 
       <div className="flex-1 overflow-y-auto min-h-0">
-        <div className="max-w-5xl mx-auto px-6 py-10">
+        <div className="max-w-2xl mx-auto px-6 py-10">
           <div className="mb-8">
             <h1 className="text-xl font-semibold text-stone-100 mb-1">Agent Directory</h1>
             <p className="text-sm text-stone-500">Browse agents onboarded to the platform. Select one to see its reviews, or filter by developer.</p>
@@ -88,21 +84,13 @@ export default function AgentDirectoryPage() {
           {loading ? (
             <p className="text-sm text-stone-600 mt-8">Loading agents…</p>
           ) : (
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-[320px_1fr] gap-6 items-start">
-              <div className="space-y-3">
-                {filtered.length === 0 && (
-                  <p className="text-sm text-stone-600">No agents match your filters.</p>
-                )}
-                {filtered.map((agent) => (
-                  <AgentListItem
-                    key={agent.id}
-                    agent={agent}
-                    selected={selected?.id === agent.id}
-                    onClick={() => setSelectedId(agent.id)}
-                  />
-                ))}
-              </div>
-              <AgentDetailPanel agent={selected} />
+            <div className="mt-6 space-y-3">
+              {filtered.length === 0 && (
+                <p className="text-sm text-stone-600">No agents match your filters.</p>
+              )}
+              {filtered.map((agent) => (
+                <AgentListItem key={agent.id} agent={agent} />
+              ))}
             </div>
           )}
         </div>

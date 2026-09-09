@@ -42,14 +42,12 @@ function AgentReviewForm() {
     if (answered === totalQuestions) {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser()
-      const overall_score = (answers.completion + answers.helpfulness + answers.coherence + answers.factuality + answers.safety) / 5;
 
       const { error } = await supabase
         .from('reviews')
         .insert({
           agent_id: agent,
           task: answers.task_description,
-          overall_score: overall_score,
           goal_completion: answers.completion,
           helpfulness: answers.helpfulness,
           coherence: answers.coherence,
@@ -67,7 +65,7 @@ function AgentReviewForm() {
         // This should eventually navigate the user back 
         // to the reviews page with their review selected
         console.log("Successfully submitted review");
-        window.location.href = "/agents";
+        window.location.href = `/agents/${agent}`;
       }
     }
   };
