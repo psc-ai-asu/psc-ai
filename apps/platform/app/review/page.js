@@ -3,7 +3,7 @@
 import { ScaleInput, TextInput } from "./components"
 import { useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
-import { supabase } from '../lib/supabaseClient';
+import { createClient } from '@/lib/supabase/client';
 
 // These are only the five "scale" questions (1 - 5 input), which are passed into 
 // the ScaleInput component to dynamically create the unique scale rating.
@@ -40,6 +40,7 @@ function AgentReviewForm() {
 
   const handleSubmit = async (e) => {
     if (answered === totalQuestions) {
+      const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser()
       const overall_score = (answers.completion + answers.helpfulness + answers.coherence + answers.factuality + answers.safety) / 5;
 
@@ -66,7 +67,7 @@ function AgentReviewForm() {
         // This should eventually navigate the user back 
         // to the reviews page with their review selected
         console.log("Successfully submitted review");
-        window.location.href = "/builders";
+        window.location.href = "/agents";
       }
     }
   };
