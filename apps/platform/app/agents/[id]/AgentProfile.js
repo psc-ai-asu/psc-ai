@@ -5,17 +5,23 @@ import Link from "next/link";
 
 import { ScoreBar, ScoreBadge, VerificationBadge } from "./components";
 
+function formatDate(dateString) {
+  return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric'});
+}
+
 function mapReview(review) {
   return {
     ...review,
     reviewedBy: review.reviewer?.username ?? "Unknown",
+    rawDate: review.date,
+    date: formatDate(review.date),
   };
 }
 
 export default function AgentProfile({ agent }) {
   const allReviews = (agent.reviews ?? [])
     .map(mapReview)
-    .sort((a, b) => new Date(b.date) - new Date(a.date));
+    .sort((a, b) => new Date(b.rawDate) - new Date(a.rawDate));
 
   const [selected, setSelected] = useState(allReviews[0] ?? null);
   const [tab, setTab] = useState("experience");
