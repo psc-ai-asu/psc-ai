@@ -140,6 +140,11 @@ function AgentReviewForm() {
           </div>
         </div>
 
+        <div className="mt-4 flex items-start gap-2 text-xs text-zinc-500 bg-zinc-900/40 border border-zinc-800/60 rounded-lg px-3 py-2">
+          <span className="text-violet-400">ⓘ</span>
+          <span>This review will be marked <span className="text-zinc-300 font-medium">Unverified</span>. Verified reviews backed by execution traces are coming soon.</span>
+        </div>
+
         {/* Submit */}
         <div className="mt-12 pt-8 border-t border-zinc-800 flex items-center justify-between">
           <p className="text-xs text-zinc-600">
