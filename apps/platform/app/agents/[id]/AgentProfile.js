@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 
-import { ScoreBar, ScoreBadge } from "./components";
+import { ScoreBar, ScoreBadge, VerificationBadge } from "./components";
 
 function mapReview(review) {
   return {
@@ -120,11 +120,14 @@ export default function AgentProfile({ agent }) {
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <span className="text-sm text-stone-300 truncate block">{r.reviewedBy}</span>
                       <span className="text-xs font-mono text-stone-600">{r.date}</span>
                     </div>
-                    <ScoreBadge score={r.overall_score} />
+                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                      <ScoreBadge score={r.overall_score} />
+                      <VerificationBadge status={r.verification_status} />
+                    </div>
                   </div>
                 </button>
               ))
@@ -137,7 +140,10 @@ export default function AgentProfile({ agent }) {
             <div className="px-6 py-4 border-b border-stone-800 flex items-start justify-between gap-4">
               <div>
                 <h1 className="text-lg font-semibold text-stone-100 mb-0.5">{agent.name}</h1>
-                <p className="text-xs text-stone-500 mb-2">Review by {selected.reviewedBy} · {selected.date}</p>
+                <p className="text-xs text-stone-500 mb-2 flex items-center gap-2">
+                  <span>Review by {selected.reviewedBy} · {selected.date}</span>
+                  <VerificationBadge status={selected.verification_status} />
+                </p>
                 <span className="text-xs text-stone-600 font-mono">{agent.framework}</span>
               </div>
               <div className="flex-shrink-0 text-right">

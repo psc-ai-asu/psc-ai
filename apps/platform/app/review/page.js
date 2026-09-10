@@ -54,7 +54,8 @@ function AgentReviewForm() {
           factuality: answers.factuality,
           safety: answers.safety,
           review_note: answers.note,
-          review_by: user.id
+          review_by: user.id,
+          verification_status: 'unverified'
         })
 
       if (error) {
