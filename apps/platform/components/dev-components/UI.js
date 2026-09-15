@@ -25,7 +25,7 @@ export function Avatar({ name, avatarUrl, size = 65 }) {
     justifyContent: "center",
     fontSize,
     fontWeight: 600,
-    fontFamily: "Roboto, Helvetica, sans-serif",
+    fontFamily: "var(--font-sans)",
     flexShrink: 0,
     overflow: "hidden",
     border: `1.5px solid var(--accent)`,
@@ -60,7 +60,7 @@ export function Pill({ children, textColor, bgColor }) {
         borderRadius: 99,
         padding: "2px 7px",
         whiteSpace: "nowrap",
-        fontFamily: "Roboto, Helvetica, sans-serif",
+        fontFamily: "var(--font-sans)",
       }}
     >
       {children}
@@ -109,7 +109,7 @@ export function StatCard({ label, value, sub }) {
     <div style={{
         fontSize: 10,
         color: "var(--text-muted)",
-        fontFamily: "Roboto, Helvetica, sans-serif",
+        fontFamily: "var(--font-sans)",
         marginBottom: 6,
         letterSpacing: 0.5,
         textTransform: "uppercase",
@@ -119,7 +119,7 @@ export function StatCard({ label, value, sub }) {
     <div style={{
         fontSize: 24,
         fontWeight: 700,
-        fontFamily: "Roboto, Helvetica, sans-serif",
+        fontFamily: "var(--font-sans)",
         color: "var(--text)",
         lineHeight: 1,
         }}>
@@ -128,7 +128,7 @@ export function StatCard({ label, value, sub }) {
     {sub && ( <div style={{
             fontSize: 11,
             color: "var(--text-dim)",
-            fontFamily: "Roboto, Helvetica, sans-serif",
+            fontFamily: "var(--font-sans)",
             marginTop: 4,
             }}>
         {sub}

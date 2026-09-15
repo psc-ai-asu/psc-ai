@@ -28,7 +28,7 @@ export default function AgentCard({ agent, onFire, onViewReviews }) {
             style={{
               fontSize: 15,
               fontWeight: 600,
-              fontFamily: "Roboto, Helvetica, sans-serif",
+              fontFamily: "var(--font-sans)",
               color: "var(--text)",
               marginBottom: 2,
               whiteSpace: "nowrap",
@@ -37,7 +37,7 @@ export default function AgentCard({ agent, onFire, onViewReviews }) {
             }}>
             {agent.name}
           </div>
-          <div style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "Roboto, Helvetica, sans-serif" }}>
+          <div style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "var(--font-sans)" }}>
             {agent.version} · updated {timeAgo(agent.updated_at)}
           </div>
         </div>
@@ -50,7 +50,7 @@ export default function AgentCard({ agent, onFire, onViewReviews }) {
             margin: 0,
             fontSize: 12,
             color: "var(--text-muted)",
-            fontFamily: "Roboto, Helvetica, sans-serif",
+            fontFamily: "var(--font-sans)",
             lineHeight: 1.5,
             display: "-webkit-box",
             WebkitLineClamp: 2,
@@ -90,7 +90,7 @@ export default function AgentCard({ agent, onFire, onViewReviews }) {
               style={{
                 fontSize: 10,
                 color: "var(--text-dim)",
-                fontFamily: "Roboto, Helvetica, sans-serif",
+                fontFamily: "var(--font-sans)",
                 textTransform: "uppercase",
                 letterSpacing: 0.4,
                 marginBottom: 2,
@@ -101,7 +101,7 @@ export default function AgentCard({ agent, onFire, onViewReviews }) {
               style={{
                 fontSize: 12,
                 fontWeight: 600,
-                fontFamily: "Roboto, Helvetica, sans-serif",
+                fontFamily: "var(--font-sans)",
                 color: "var(--text)",
               }}>
               {value}
@@ -118,7 +118,7 @@ export default function AgentCard({ agent, onFire, onViewReviews }) {
             flex: 1,
             padding: "6px 10px",
             fontSize: 11,
-            fontFamily: "Roboto, Helvetica, sans-serif",
+            fontFamily: "var(--font-sans)",
             fontWeight: 500,
             color: "var(--text-muted)",
             background: "var(--bg-raised)",
@@ -134,9 +134,9 @@ export default function AgentCard({ agent, onFire, onViewReviews }) {
             style={{
               padding: "6px 12px",
               fontSize: 11,
-              fontFamily: "Roboto, Helvetica, sans-serif",
+              fontFamily: "var(--font-sans)",
               fontWeight: 500,
-              color: "#FF4D4D",
+              color: "var(--red)",
               background: "rgba(255,77,77,0.09)",
               border: `1px solid rgba(255,77,77,0.15)`,
               borderRadius: 7,

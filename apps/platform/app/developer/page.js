@@ -1,7 +1,6 @@
 // The main page for developer dashboard
 "use client";
 
-import Link from 'next/link';
 import { supabase } from '../lib/supabaseClient';
 import { useState , useEffect } from "react";
 import { Avatar, StatCard } from "../../components/dev-components/UI";
@@ -9,6 +8,8 @@ import AgentCard from "../../components/dev-components/AgentCard";
 import { fetchProfile, fetchAgents, insertAgent, updateAgent } from "../../components/dev-components/data";
 import EditBioModal from "../../components/dev-components/EditProfile";
 import RegisterAgentModal from "../../components/RegisterAgentModal";
+import Footer from "@/components/Footer";
+import PlatformHeader from "@/components/PlatformHeader";
 
 export default function BuilderDashboard() {
   const [profile, setProfile] = useState(null);
@@ -76,28 +77,10 @@ export default function BuilderDashboard() {
   const totalReviews = agents.reduce((s, a) => s + (a.review_count || 0), 0);
   
   return (
-    <>
-      {/* Navigation Bar */}
-      <nav className="topbar">
-        <div className="topbar-box">
-          <div className="topbar-left">
-            <Link
-              href="/" className="topbar-logo">
-              <div className="logo-mark">R</div>
-              ReviewMyAgent
-            </Link>
-          </div>
-          <div className="topbar-right">
-            <span style={{ 
-              fontSize: 12, 
-              color: "var(--text-muted)" 
-              }}>@{profile?.username}
-            </span>
-          </div>
-        </div>
-      </nav>
+    <div className="app-shell">
+      <PlatformHeader current="developer" />
 
-      <main style={{ maxWidth: 1100, margin: "0 auto", padding: "80px 24px 64px" }}>
+      <main style={{ maxWidth: 1100, margin: "0 auto", padding: "48px 24px 64px" }}>
 
         {/* Profile Header */}
         <div
@@ -125,7 +108,7 @@ export default function BuilderDashboard() {
               onMouseEnter={(e) => e.currentTarget.style.opacity = 1}
               onMouseLeave={(e) => e.currentTarget.style.opacity = 0}
             >
-          <span style={{ fontSize: 11, color: "#fff", fontFamily: "Roboto, Helvetica, sans-serif", fontWeight: 500 }}>
+          <span style={{ fontSize: 11, color: "var(--text)", fontFamily: "var(--font-sans)", fontWeight: 500 }}>
             Edit
           </span>
         </div>
@@ -137,7 +120,7 @@ export default function BuilderDashboard() {
             <div style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 3 }}>@{profile?.username}</div>
             {profile?.email && (
               <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4, display: "flex", alignItems: "center", gap: 4 }}>
-                🏢 {profile?.email}
+                Email: {profile?.email}
               </div>
             )}
             {profile?.bio && (
@@ -179,8 +162,8 @@ export default function BuilderDashboard() {
               style={{
                 display: "flex", alignItems: "center", gap: 5,
                 padding: "8px 14px", fontSize: 12, fontWeight: 600,
-                fontFamily: "Roboto, Helvetica, sans-serif",
-                color: "#fff", background: "var(--accent)", border: "none",
+                fontFamily: "var(--font-sans)",
+                color: "var(--text)", background: "var(--accent)", border: "none",
                 borderRadius: 8, cursor: "pointer",
               }}
             >
@@ -196,7 +179,7 @@ export default function BuilderDashboard() {
               onChange={(e) => setSearch(e.target.value)}
               style={{
                 flex: 1, minWidth: 180, padding: "7px 11px", fontSize: 12,
-                fontFamily: "Roboto, Helvetica, sans-serif", color: "var(--text)",
+                fontFamily: "var(--font-sans)", color: "var(--text)",
                 background: "var(--bg-raised)", border: "var(--border)",
                 borderRadius: 8, outline: "none",
               }}
@@ -208,7 +191,7 @@ export default function BuilderDashboard() {
                   onClick={() => setFilterStatus(s)}
                   style={{
                     padding: "5px 11px", fontSize: 11,
-                    fontFamily: "Roboto, Helvetica, sans-serif", fontWeight: 500,
+                    fontFamily: "var(--font-sans)", fontWeight: 500,
                     borderRadius: 7,
                     border: `1px solid ${filterStatus === s ? "var(--accent)" : "var(--border)"}`,
                     background: filterStatus === s ? "var(--accentDim)" : "var(--bg-raised)",
@@ -225,7 +208,7 @@ export default function BuilderDashboard() {
               onChange={(e) => setFilterFramework(e.target.value)}
               style={{
                 padding: "5px 10px", fontSize: 11,
-                fontFamily: "Roboto, Helvetica, sans-serif",
+                fontFamily: "var(--font-sans)",
                 color: "var(--text-muted)", background: "var(--bg-raised)",
                 border: "var(--border)", borderRadius: 7, cursor: "pointer", outline: "none",
               }}
@@ -264,8 +247,8 @@ export default function BuilderDashboard() {
                   onClick={() => setShowRegister(true)}
                   style={{
                     padding: "9px 18px", fontSize: 12, fontWeight: 600,
-                    fontFamily: "Roboto, Helvetica, sans-serif",
-                    color: "#fff", background: "var(--accent)", border: "none",
+                    fontFamily: "var(--font-sans)",
+                    color: "var(--text)", background: "var(--accent)", border: "none",
                     borderRadius: 8, cursor: "pointer",
                   }}
                 >
@@ -301,21 +284,8 @@ export default function BuilderDashboard() {
           onSuccess={handleAgentRegistered}
         />
       )}
-      {/* Footer */}
-      <footer className="platform-footer">
-      <div className="container">
-        <div className="footer-row">
-          <span className="footer-brand">ReviewMyAgent</span>
-          <div className="footer-links">
-            {/* Replace with proper links after style fix */}
-            <Link href="/">Privacy Policy</Link> 
-            <Link href="/">Terms of Service</Link>
-          </div>
-          <span className="footer-copy">© 2026 Gentle Systems</span>
-        </div>
-      </div>
-    </footer>
-    </>
+      <Footer />
+    </div>
   );
   
 }

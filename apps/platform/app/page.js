@@ -1,7 +1,10 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { supabase } from './lib/supabaseClient';
+import { verifyCaptchaAction } from './actions';
 import useScrollFade from './hooks/useScrollFade';
 
 import Footer from '@/components/Footer';
@@ -11,12 +14,19 @@ export default function PlatformPage() {
   const [user, setUser] = useState(null);
   const [showSignUp, setShowSignUp] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [resetStep, setResetStep] = useState('email');
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetCode, setResetCode] = useState('');
+  const [resetPasswordValue, setResetPasswordValue] = useState('');
+  const [resetPasswordConfirm, setResetPasswordConfirm] = useState('');
+  const [resetMessage, setResetMessage] = useState('');
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
-  const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [passwordValue, setPasswordValue] = useState('');
-  const recaptchaRef = useRef(null);
+  const captchaRef = useRef(null);
 
   // Password rules: 8+ chars, starts with capital, ends with special char
   const PASSWORD_RULES = [
@@ -30,8 +40,7 @@ export default function PlatformPage() {
   // Email must match full RFC-style format (no fake domains blocked by pattern)
   const validateEmail = (em) => /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z]{2,})+$/.test(em.trim());
 
-  //recaptcha test key from google
-  const RECAPTCHA_SITE_KEY = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI';
+  const HCAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY;
 
   //check if user login when page start
   useEffect(() => {
@@ -44,59 +53,6 @@ export default function PlatformPage() {
     return () => subscription.unsubscribe();
   }, []);
 
-  //load recaptcha script when modal open
-  useEffect(() => {
-    if (!showSignUp) {
-      setCaptchaVerified(false);
-      return;
-    }
-
-    window.onRecaptchaSuccess = () => setCaptchaVerified(true);
-    window.onRecaptchaExpired = () => setCaptchaVerified(false);
-
-    const renderCaptcha = () => {
-      if (recaptchaRef.current && window.grecaptcha && window.grecaptcha.render) {
-        //clear old widget away
-        recaptchaRef.current.innerHTML = '';
-        try {
-          window.grecaptcha.render(recaptchaRef.current, {
-            sitekey: RECAPTCHA_SITE_KEY,
-            theme: 'dark',
-            callback: 'onRecaptchaSuccess',
-            'expired-callback': 'onRecaptchaExpired',
-          });
-        } catch (e) {
-          //widget maybe render already
-        }
-      }
-    };
-
-    //check if script load already
-    if (window.grecaptcha && window.grecaptcha.render) {
-      //wait small time for dom
-      setTimeout(renderCaptcha, 100);
-    } else {
-      //load script for recaptcha
-      const existing = document.querySelector('script[src*="recaptcha"]');
-      if (!existing) {
-        const script = document.createElement('script');
-        script.src = 'https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit';
-        script.async = true;
-        script.defer = true;
-        window.onRecaptchaLoad = renderCaptcha;
-        document.head.appendChild(script);
-      } else {
-        setTimeout(renderCaptcha, 300);
-      }
-    }
-
-    return () => {
-      //delete global callback
-      delete window.onRecaptchaSuccess;
-      delete window.onRecaptchaExpired;
-    };
-  }, [showSignUp]);
-
   //function for sign up
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -106,6 +62,18 @@ export default function PlatformPage() {
     const email = e.target.querySelector('#signup-email').value;
     const password = e.target.querySelector('#signup-password').value;
     const confirmPassword = e.target.querySelector('#signup-confirm-password').value;
+
+    if (!HCAPTCHA_SITE_KEY) {
+      setAuthError('CAPTCHA is not configured. Add the hCaptcha site key before creating accounts.');
+      setAuthLoading(false);
+      return;
+    }
+
+    if (!captchaToken) {
+      setAuthError('Please complete the CAPTCHA challenge.');
+      setAuthLoading(false);
+      return;
+    }
 
     // Validate email format
     if (!validateEmail(email)) {
@@ -128,6 +96,15 @@ export default function PlatformPage() {
       return;
     }
 
+    const captchaVerification = await verifyCaptchaAction(captchaToken);
+    if (captchaVerification?.error) {
+      captchaRef.current?.resetCaptcha();
+      setCaptchaToken(null);
+      setAuthError(captchaVerification.error);
+      setAuthLoading(false);
+      return;
+    }
+
     // Store username in auth metadata — this always works regardless of DB table state
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -136,6 +113,8 @@ export default function PlatformPage() {
         data: { username, email },
       },
     });
+    captchaRef.current?.resetCaptcha();
+    setCaptchaToken(null);
     if (error) {
       setAuthError(error.message);
       setAuthLoading(false);
@@ -207,8 +186,131 @@ export default function PlatformPage() {
     setUser(null);
   };
 
-  const openSignUp = () => { setAuthError(''); setShowSignIn(false); setShowSignUp(true); setShowPassword(false); setPasswordValue(''); };
-  const openSignIn = () => { setAuthError(''); setShowSignUp(false); setShowSignIn(true); setShowPassword(false); };
+  // Reset password
+  const handleResetRequest = async (e) => {
+    e.preventDefault();
+    setAuthError('');
+    setResetMessage('');
+
+    if (!validateEmail(resetEmail)) {
+      setAuthError('Please enter a valid email address (e.g. you@company.com).');
+      return;
+    }
+
+    setAuthLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail.trim());
+    setAuthLoading(false);
+
+    if (error) {
+      setAuthError(error.message);
+      return;
+    }
+
+    setResetStep('code');
+    setResetMessage('If an account exists for this email, a reset code has been sent.');
+  };
+
+  const handleResetCode = async (e) => {
+    e.preventDefault();
+    setAuthError('');
+    setResetMessage('');
+    setAuthLoading(true);
+
+    const { error } = await supabase.auth.verifyOtp({
+      email: resetEmail.trim(),
+      token: resetCode.trim(),
+      type: 'recovery',
+    });
+    setAuthLoading(false);
+
+    if (error) {
+      setAuthError('That code is invalid or has expired. Request a new code and try again.');
+      return;
+    }
+
+    setResetStep('password');
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    setAuthError('');
+
+    if (!validatePassword(resetPasswordValue)) {
+      const failed = PASSWORD_RULES.filter(r => !r.test(resetPasswordValue)).map(r => r.label);
+      setAuthError('Password must: ' + failed.join(', ') + '.');
+      return;
+    }
+
+    if (resetPasswordValue !== resetPasswordConfirm) {
+      setAuthError('Passwords do not match.');
+      return;
+    }
+
+    setAuthLoading(true);
+    const { error } = await supabase.auth.updateUser({ password: resetPasswordValue });
+
+    if (error) {
+      setAuthError(error.message);
+      setAuthLoading(false);
+      return;
+    }
+
+    await supabase.auth.signOut();
+    setUser(null);
+    setAuthLoading(false);
+    setResetStep('success');
+  };
+
+  const resendResetCode = async () => {
+    setAuthError('');
+    setResetMessage('');
+
+    setAuthLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail.trim());
+    setAuthLoading(false);
+
+    if (error) {
+      setAuthError(error.message);
+      return;
+    }
+
+    setResetMessage('A new reset code has been sent.');
+  };
+
+  const closeResetPassword = async () => {
+    if (resetStep === 'password') {
+      await supabase.auth.signOut();
+      setUser(null);
+    }
+
+    setShowResetPassword(false);
+    setResetStep('email');
+    setResetEmail('');
+    setResetCode('');
+    setResetPasswordValue('');
+    setResetPasswordConfirm('');
+    setResetMessage('');
+    setAuthError('');
+    setAuthLoading(false);
+    setShowPassword(false);
+  };
+
+  const openResetPassword = () => {
+    setAuthError('');
+    setResetMessage('');
+    setShowSignIn(false);
+    setShowSignUp(false);
+    setShowResetPassword(true);
+    setResetStep('email');
+    setResetEmail('');
+    setResetCode('');
+    setResetPasswordValue('');
+    setResetPasswordConfirm('');
+    setShowPassword(false);
+  };
+
+  const openSignUp = () => { setAuthError(''); setShowSignIn(false); setShowResetPassword(false); setShowSignUp(true); setShowPassword(false); setPasswordValue(''); setCaptchaToken(null); };
+  const openSignIn = () => { setAuthError(''); setShowSignUp(false); setShowResetPassword(false); setShowSignIn(true); setShowPassword(false); };
 
   //scroll fade effect for card
   const pageRef = useScrollFade({ threshold: 0.1 });
@@ -318,10 +420,10 @@ export default function PlatformPage() {
       <header className="topbar">
         <div className="topbar-box">
           <div className="topbar-left">
-            <a href="#" className="topbar-logo">
+            <Link href="/" className="topbar-logo">
               <span className="logo-mark">R</span>
               ReviewMyAgent
-            </a>
+            </Link>
             <nav className="topbar-nav">
               <a href="#features">Features</a>
               <a href="#how-it-works">How It Works</a>
@@ -336,8 +438,8 @@ export default function PlatformPage() {
                 <button className="topbar-signup-btn" onClick={openSignIn}>Sign In</button>
               </>
             )}
-            <a href="/builders" className="topbar-btn">Reviewer Dashboard</a>
-            <a href="/developer" className="topbar-btn">Developer Dashboard</a>
+            <Link href="/builders" className="topbar-btn">Reviewer Dashboard</Link>
+            <Link href="/developer" className="topbar-btn">Developer Dashboard</Link>
           </div>
         </div>
       </header>
@@ -394,7 +496,7 @@ export default function PlatformPage() {
                       const ok = rule.test(passwordValue);
                       return (
                         <li key={rule.display} className={`password-rule ${ok ? 'rule-ok' : 'rule-fail'}`}>
-                          <span className="rule-icon">{ok ? '✓' : '✗'}</span>
+                          <span className="rule-icon">{ok ? 'Met' : 'Needed'}</span>
                           {rule.display}
                         </li>
                       );
@@ -415,9 +517,25 @@ export default function PlatformPage() {
                 <label htmlFor="show-signup-password" style={{ marginLeft: '8px', fontSize: '13px', color: 'var(--text-dim)', cursor: 'pointer' }}>Show password</label>
               </div>
               <div className="signup-captcha">
-                <div ref={recaptchaRef} id="recaptcha-container" />
+                {HCAPTCHA_SITE_KEY ? (
+                  <HCaptcha
+                    ref={captchaRef}
+                    sitekey={HCAPTCHA_SITE_KEY}
+                    theme="dark"
+                    onVerify={setCaptchaToken}
+                    onExpire={() => setCaptchaToken(null)}
+                    onError={() => {
+                      setCaptchaToken(null);
+                      setAuthError('hCaptcha cannot run on localhost. Open http://psc-ai.localtest.me:3001 instead.');
+                    }}
+                  />
+                ) : (
+                  <p className="captcha-config-error">
+                    CAPTCHA setup is required before account creation can be enabled.
+                  </p>
+                )}
               </div>
-              <button type="submit" className={`signup-submit${!captchaVerified || authLoading ? ' signup-submit-disabled' : ''}`} disabled={!captchaVerified || authLoading}>
+              <button type="submit" className={`signup-submit${!captchaToken || authLoading ? ' signup-submit-disabled' : ''}`} disabled={!captchaToken || authLoading}>
                 {authLoading ? 'Creating account...' : 'Create Account'}
               </button>
               <p className="signup-footer-text">Already have an account? <a href="#" className="signup-link" onClick={(e) => { e.preventDefault(); openSignIn(); }}>Sign in</a></p>
@@ -449,6 +567,7 @@ export default function PlatformPage() {
               <div className="signup-field">
                 <label htmlFor="signin-password" className="signup-label mono">Password</label>
                 <input id="signin-password" type={showPassword ? "text" : "password"} className="signup-input" placeholder="••••••••" autoComplete="current-password" required />
+                <a href="#" className="reset-password-link" onClick={(e) => { e.preventDefault(); openResetPassword(); }}>Forgot password?</a>
               </div>
               <div className="signup-field" style={{ flexDirection: 'row', alignItems: 'center', marginTop: '-4px' }}>
                 <input id="show-signin-password" type="checkbox" checked={showPassword} onChange={(e) => setShowPassword(e.target.checked)} style={{ cursor: 'pointer' }} />
@@ -457,8 +576,115 @@ export default function PlatformPage() {
               <button type="submit" className={`signup-submit${authLoading ? ' signup-submit-disabled' : ''}`} disabled={authLoading}>
                 {authLoading ? 'Signing in...' : 'Sign In'}
               </button>
-              <p className="signup-footer-text">Don't have an account? <a href="#" className="signup-link" onClick={(e) => { e.preventDefault(); openSignUp(); }}>Sign up</a></p>
+              <p className="signup-footer-text">Don’t have an account? <a href="#" className="signup-link" onClick={(e) => { e.preventDefault(); openSignUp(); }}>Sign up</a></p>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showResetPassword && (
+        <div className="signup-overlay" onClick={closeResetPassword}>
+          <div className="signup-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="signup-close" onClick={closeResetPassword} aria-label="Close">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+
+            {resetStep === 'email' && (
+              <>
+                <div className="signup-header">
+                  <h2>Reset your password</h2>
+                  <p className="signup-subtitle">Enter the email connected to your account</p>
+                </div>
+                {authError && <div className="auth-error">{authError}</div>}
+                <form className="signup-form" onSubmit={handleResetRequest}>
+                  <div className="signup-field">
+                    <label htmlFor="reset-email" className="signup-label mono">Email</label>
+                    <input id="reset-email" type="email" className="signup-input" placeholder="you@company.com" autoComplete="email" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} required />
+                  </div>
+                  <button type="submit" className={`signup-submit${authLoading ? ' signup-submit-disabled' : ''}`} disabled={authLoading}>
+                    {authLoading ? 'Sending code...' : 'Send Reset Code'}
+                  </button>
+                  <p className="signup-footer-text">Remember your password? <a href="#" className="signup-link" onClick={(e) => { e.preventDefault(); closeResetPassword(); openSignIn(); }}>Sign in</a></p>
+                </form>
+              </>
+            )}
+
+            {resetStep === 'code' && (
+              <>
+                <div className="signup-header">
+                  <h2>Check your email</h2>
+                  <p className="signup-subtitle">Enter the code sent to {resetEmail}</p>
+                </div>
+                {authError && <div className="auth-error">{authError}</div>}
+                {resetMessage && <div className="auth-success">{resetMessage}</div>}
+                <form className="signup-form" onSubmit={handleResetCode}>
+                  <div className="signup-field">
+                    <label htmlFor="reset-code" className="signup-label mono">Reset Code</label>
+                    <input id="reset-code" type="text" className="signup-input reset-code-input" autoComplete="one-time-code" inputMode="numeric" pattern="[0-9]{6,10}" minLength="6" maxLength="10" value={resetCode} onChange={(e) => setResetCode(e.target.value.replace(/\D/g, ''))} required />
+                  </div>
+                  <button type="submit" className={`signup-submit${authLoading ? ' signup-submit-disabled' : ''}`} disabled={authLoading || resetCode.length < 6 || resetCode.length > 10}>
+                    {authLoading ? 'Verifying code...' : 'Verify Code'}
+                  </button>
+                  <button type="button" className="reset-secondary-button" onClick={resendResetCode} disabled={authLoading}>Send a new code</button>
+                </form>
+              </>
+            )}
+
+            {resetStep === 'password' && (
+              <>
+                <div className="signup-header">
+                  <h2>Choose a new password</h2>
+                  <p className="signup-subtitle">Create a secure password for your account</p>
+                </div>
+                {authError && <div className="auth-error">{authError}</div>}
+                <form className="signup-form" onSubmit={handleResetPassword}>
+                  <div className="signup-field">
+                    <label htmlFor="reset-password" className="signup-label mono">New Password</label>
+                    <input id="reset-password" type={showPassword ? 'text' : 'password'} className="signup-input" placeholder="••••••••" autoComplete="new-password" value={resetPasswordValue} onChange={(e) => setResetPasswordValue(e.target.value)} required />
+                    {resetPasswordValue.length > 0 ? (
+                      <ul className="password-rules">
+                        {PASSWORD_RULES.map((rule) => {
+                          const ok = rule.test(resetPasswordValue);
+                          return (
+                            <li key={rule.display} className={`password-rule ${ok ? 'rule-ok' : 'rule-fail'}`}>
+                              <span className="rule-icon">{ok ? 'Met' : 'Needed'}</span>
+                              {rule.display}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <p className="password-hint">Min. 8 chars · starts with capital · ends with special (!@#$%…)</p>
+                    )}
+                  </div>
+                  <div className="signup-field">
+                    <label htmlFor="reset-password-confirm" className="signup-label mono">Confirm New Password</label>
+                    <input id="reset-password-confirm" type={showPassword ? 'text' : 'password'} className="signup-input" placeholder="••••••••" autoComplete="new-password" value={resetPasswordConfirm} onChange={(e) => setResetPasswordConfirm(e.target.value)} required />
+                  </div>
+                  <div className="signup-field reset-password-toggle">
+                    <input id="show-reset-password" type="checkbox" checked={showPassword} onChange={(e) => setShowPassword(e.target.checked)} />
+                    <label htmlFor="show-reset-password">Show password</label>
+                  </div>
+                  <button type="submit" className={`signup-submit${authLoading ? ' signup-submit-disabled' : ''}`} disabled={authLoading}>
+                    {authLoading ? 'Updating password...' : 'Update Password'}
+                  </button>
+                </form>
+              </>
+            )}
+
+            {resetStep === 'success' && (
+              <div className="reset-success-state">
+                <div className="reset-success-icon" aria-hidden="true">✓</div>
+                <div className="signup-header">
+                  <h2>Password updated</h2>
+                  <p className="signup-subtitle">Your new password is ready to use.</p>
+                </div>
+                <button type="button" className="signup-submit" onClick={() => { closeResetPassword(); openSignIn(); }}>Return to Sign In</button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -482,7 +708,6 @@ export default function PlatformPage() {
           <div className="hero-actions">
             <a href="#features" className="btn-primary">
               Explore Platform
-              <span style={{ fontSize: '12px' }}>↓</span>
             </a>
             <a href="#how-it-works" className="btn-secondary">How It Works</a>
           </div>
@@ -569,10 +794,10 @@ export default function PlatformPage() {
       <section className="section audience-section" id="who-its-for">
         <div className="container">
           <div style={{ textAlign: 'center', maxWidth: '560px', margin: '0 auto 56px' }}>
-            <div className="section-label mono">Who It's For</div>
+            <div className="section-label mono">Who It’s For</div>
             <div className="section-heading">Built for both sides<br />of the AI equation</div>
             <p className="section-desc" style={{ margin: '0 auto' }}>
-              Whether you're evaluating agents as an end user or building and shipping them as a developer,
+              Whether you’re evaluating agents as an end user or building and shipping them as a developer,
               ReviewMyAgent has a dedicated workspace for you.
             </p>
           </div>
@@ -588,14 +813,14 @@ export default function PlatformPage() {
                 </svg>
               </div>
               <div className="audience-tag mono">For Users</div>
-              <h3>Review agents you've used</h3>
-              <p>Share structured feedback on any AI agent you've interacted with. Rate accuracy, helpfulness, and task completion. Your experience helps developers build better tools.</p>
+              <h3>Review agents you’ve used</h3>
+              <p>Share structured feedback on any AI agent you’ve interacted with. Rate accuracy, helpfulness, and task completion. Your experience helps developers build better tools.</p>
               <ul className="audience-list">
                 <li>Submit ratings and written reviews</li>
                 <li>See how others rate the same agents</li>
                 <li>Track your review history</li>
               </ul>
-              <a href="/builders" className="audience-btn audience-btn-user">Go to Reviewer Dashboard →</a>
+              <Link href="/builders" className="audience-btn audience-btn-user">Go to Reviewer Dashboard</Link>
             </div>
 
             {/*developers card */}
@@ -615,7 +840,7 @@ export default function PlatformPage() {
                 <li>Track cost, latency, and error rates</li>
                 <li>Compare agent versions over time</li>
               </ul>
-              <a href="/developer" className="audience-btn audience-btn-dev">Go to Developer Dashboard →</a>
+              <Link href="/developer" className="audience-btn audience-btn-dev">Go to Developer Dashboard</Link>
             </div>
           </div>
         </div>

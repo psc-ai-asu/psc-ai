@@ -55,10 +55,10 @@ export default function EditBioModal({ currentBio, onClose, onSave }) {
         }}>
         {/* Header */}
         <div>
-          <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700, fontFamily: "Roboto, Helvetica, sans-serif", color: "var(--text)" }}>
+          <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700, fontFamily: "var(--font-sans)", color: "var(--text)" }}>
             Edit bio
           </h2>
-          <p style={{ margin: "3px 0 0", fontSize: 12, color: "var(--text-muted)", fontFamily: "Roboto, Helvetica, sans-serif" }}>
+          <p style={{ margin: "3px 0 0", fontSize: 12, color: "var(--text-muted)", fontFamily: "var(--font-sans)" }}>
             Tell others a little about yourself.
           </p>
         </div>
@@ -76,7 +76,7 @@ export default function EditBioModal({ currentBio, onClose, onSave }) {
               boxSizing: "border-box",
               padding: "8px 11px",
               fontSize: 12,
-              fontFamily: "Roboto, Helvetica, sans-serif",
+              fontFamily: "var(--font-sans)",
               color: "var(--text)",
               background: "var(--bg-raised)",
               border: "var(--border)",
@@ -84,14 +84,14 @@ export default function EditBioModal({ currentBio, onClose, onSave }) {
               outline: "none",
               resize: "vertical",
             }}/>
-          <div style={{ fontSize: 10, color: "var(--textDim)", fontFamily: "Roboto, Helvetica, sans-serif", marginTop: 4, textAlign: "right" }}>
+          <div style={{ fontSize: 10, color: "var(--textDim)", fontFamily: "var(--font-sans)", marginTop: 4, textAlign: "right" }}>
             {bio.length} / 300
           </div>
         </div>
 
         {/* Error */}
         {error && (
-          <div style={{ fontSize: 12, color: "var(--red)", fontFamily: "Roboto, Helvetica, sans-serif" }}>
+          <div style={{ fontSize: 12, color: "var(--red)", fontFamily: "var(--font-sans)" }}>
             {error}
           </div>
         )}
@@ -102,7 +102,7 @@ export default function EditBioModal({ currentBio, onClose, onSave }) {
             onClick={onClose}
             style={{
               flex: 1, padding: "9px", fontSize: 12,
-              fontFamily: "Roboto, Helvetica, sans-serif", fontWeight: 500,
+              fontFamily: "var(--font-sans)", fontWeight: 500,
               color: "var(--textMuted)", background: "var(--surface2)",
               border: "var(--border)", borderRadius: 8, cursor: "pointer",
             }}>
@@ -113,8 +113,8 @@ export default function EditBioModal({ currentBio, onClose, onSave }) {
             disabled={saving}
             style={{
               flex: 2, padding: "9px", fontSize: 12,
-              fontFamily: "Roboto, Helvetica, sans-serif", fontWeight: 600,
-              color: "#fff", background: saving ? "var(--textDim)" : "var(--accent)",
+              fontFamily: "var(--font-sans)", fontWeight: 600,
+              color: "var(--text)", background: saving ? "var(--textDim)" : "var(--accent)",
               border: "none", borderRadius: 8,
               cursor: saving ? "not-allowed" : "pointer",
             }}>

@@ -150,7 +150,7 @@ export default function RegisterAgentModal({ onClose, onSuccess }) {
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             </div>
-            <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: 20, fontWeight: 600, color: 'var(--text)', marginBottom: 8, letterSpacing: '-0.3px' }}>
+            <h2 style={{ fontFamily: "var(--font-sans)", fontSize: 20, fontWeight: 600, color: 'var(--text)', marginBottom: 8, letterSpacing: '-0.3px' }}>
               Agent Registered!
             </h2>
             <p style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 300, marginBottom: 28 }}>
@@ -159,11 +159,11 @@ export default function RegisterAgentModal({ onClose, onSuccess }) {
             <button
               onClick={onClose}
               style={{
-                fontFamily: 'monospace',
+                fontFamily: 'var(--font-mono)',
                 fontSize: 13,
                 fontWeight: 600,
-                color: '#fff',
-                background: 'linear-gradient(135deg, var(--accent), #6d28d9)',
+                color: 'var(--text)',
+                background: 'linear-gradient(135deg, var(--accent), var(--accent-strong))',
                 border: 'none',
                 padding: '12px 32px',
                 borderRadius: 10,
@@ -190,9 +190,9 @@ export default function RegisterAgentModal({ onClose, onSuccess }) {
                 marginBottom: 16,
               }}>
                 <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block' }} />
-                <span style={{ fontFamily: 'monospace', fontSize: 10, color: 'var(--accent)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Agent Onboarding</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--accent)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Agent Onboarding</span>
               </div>
-              <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: 22, fontWeight: 600, letterSpacing: '-0.4px', color: 'var(--text)', marginBottom: 6 }}>
+              <h2 style={{ fontFamily: "var(--font-sans)", fontSize: 22, fontWeight: 600, letterSpacing: '-0.4px', color: 'var(--text)', marginBottom: 6 }}>
                 Register New Agent
               </h2>
               <p style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 300, lineHeight: 1.6 }}>
@@ -205,7 +205,7 @@ export default function RegisterAgentModal({ onClose, onSuccess }) {
               <div style={{
                 background: 'rgba(255,77,77,0.08)',
                 border: '1px solid rgba(255,77,77,0.3)',
-                color: '#FF6B6B',
+                color: 'var(--red)',
                 padding: '10px 14px',
                 borderRadius: 8,
                 fontSize: 13,
@@ -219,7 +219,7 @@ export default function RegisterAgentModal({ onClose, onSuccess }) {
 
               {/* agent name */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <label style={{ fontFamily: 'monospace', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 500 }}>
+                <label style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 500 }}>
                   Agent Name <span style={{ color: 'var(--accent)' }}>*</span>
                 </label>
                 <input
@@ -236,7 +236,7 @@ export default function RegisterAgentModal({ onClose, onSuccess }) {
 
               {/* framework */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <label style={{ fontFamily: 'monospace', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 500 }}>
+                <label style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 500 }}>
                   Framework <span style={{ color: 'var(--accent)' }}>*</span>
                 </label>
                 <select
@@ -246,16 +246,16 @@ export default function RegisterAgentModal({ onClose, onSuccess }) {
                   onFocus={e => { e.target.style.borderColor = 'rgba(139,92,246,0.5)'; e.target.style.boxShadow = '0 0 0 3px rgba(139,92,246,0.08)'; e.target.style.background = 'var(--surface2)'; }}
                   onBlur={e => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; e.target.style.background = 'var(--surface)'; }}
                 >
-                  <option value="" disabled style={{ background: '#1A1A1A', color: '#888' }}>Select a framework…</option>
+                  <option value="" disabled style={{ background: 'var(--surface)', color: 'var(--text-muted)' }}>Select a framework…</option>
                   {FRAMEWORKS.map(f => (
-                    <option key={f} value={f} style={{ background: '#1A1A1A', color: '#EAE6F4' }}>{f}</option>
+                    <option key={f} value={f} style={{ background: 'var(--surface)', color: 'var(--text)' }}>{f}</option>
                   ))}
                 </select>
               </div>
 
               {/* description */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <label style={{ fontFamily: 'monospace', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 500 }}>
+                <label style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 500 }}>
                   Description <span style={{ color: 'var(--text-dim)' }}>(optional)</span>
                 </label>
                 <textarea
@@ -268,7 +268,7 @@ export default function RegisterAgentModal({ onClose, onSuccess }) {
                   onFocus={e => { e.target.style.borderColor = 'rgba(139,92,246,0.5)'; e.target.style.boxShadow = '0 0 0 3px rgba(139,92,246,0.08)'; e.target.style.background = 'var(--surface2)'; }}
                   onBlur={e => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; e.target.style.background = 'var(--surface)'; }}
                 />
-                <span style={{ fontFamily: 'monospace', fontSize: 10, color: 'var(--text-dim)', textAlign: 'right' }}>{description.length}/500</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-dim)', textAlign: 'right' }}>{description.length}/500</span>
               </div>
 
               {/* public metrics toggle */}
@@ -311,7 +311,7 @@ export default function RegisterAgentModal({ onClose, onSuccess }) {
                     width: 18,
                     height: 18,
                     borderRadius: '50%',
-                    background: '#fff',
+                    background: 'var(--text)',
                     transition: 'left 0.2s',
                     boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
                   }} />
@@ -323,11 +323,11 @@ export default function RegisterAgentModal({ onClose, onSuccess }) {
                 type="submit"
                 disabled={loading}
                 style={{
-                  fontFamily: 'monospace',
+                  fontFamily: 'var(--font-mono)',
                   fontSize: 13,
                   fontWeight: 600,
-                  color: '#fff',
-                  background: loading ? 'var(--surface2)' : 'linear-gradient(135deg, var(--accent), #6d28d9)',
+                  color: 'var(--text)',
+                  background: loading ? 'var(--surface2)' : 'linear-gradient(135deg, var(--accent), var(--accent-strong))',
                   border: 'none',
                   padding: '14px 24px',
                   borderRadius: 10,
@@ -366,7 +366,7 @@ export default function RegisterAgentModal({ onClose, onSuccess }) {
 }
 
 const inputStyle = {
-  fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+  fontFamily: "var(--font-sans)",
   fontSize: 14,
   fontWeight: 400,
   color: 'var(--text)',
