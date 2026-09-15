@@ -24,7 +24,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${roboto.variable} ${robotoMono.variable}`}>
-      <body style={{ fontFamily: 'var(--font-roboto), sans-serif' }}>
+      <body style={{ fontFamily: 'var(--font-sans)' }}>
         {children}
       </body>
     </html>

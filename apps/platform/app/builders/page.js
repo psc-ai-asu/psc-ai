@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from '../lib/supabaseClient';
 import Link from "next/link";
+import PlatformHeader from "@/components/PlatformHeader";
 
 export default function BuilderDirectory() {
   const [builders, setBuilders] = useState([]);
@@ -38,16 +39,8 @@ export default function BuilderDirectory() {
   };
 
   return (
-    <div className="h-screen bg-stone-950 text-stone-200 font-sans flex flex-col">
-      {/* Header */}
-      <header className="border-b border-stone-800 px-6 py-4 flex items-center justify-between flex-shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-6 h-6 rounded bg-violet-500/20 border border-violet-500/40 flex items-center justify-center">
-            <div className="w-2 h-2 rounded-full bg-violet-400" />
-          </div>
-          <span className="text-sm font-medium tracking-wide text-stone-300">ReviewMyAgent</span>
-        </div>
-      </header>
+    <div className="app-shell h-screen flex flex-col">
+      <PlatformHeader current="builders" />
 
       {/* Page content */}
       <div className="flex-1 overflow-y-auto min-h-0">

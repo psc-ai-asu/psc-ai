@@ -14,7 +14,7 @@ export default function SearchFilters({ search, setSearch, filterStatus, setFilt
           border: '1px solid var(--border)',
           borderRadius: 10,
           padding: '10px 14px',
-          fontFamily: "'Inter', sans-serif",
+          fontFamily: 'var(--font-sans)',
           fontSize: 13,
           color: 'var(--text)',
           outline: 'none',
@@ -32,7 +32,7 @@ export default function SearchFilters({ search, setSearch, filterStatus, setFilt
               onClick={() => setFilterStatus(s)}
               style={{
                 fontSize: 10,
-                fontFamily: 'monospace',
+                fontFamily: 'var(--font-mono)',
                 padding: '4px 12px',
                 borderRadius: 6,
                 border: `1px solid ${active ? 'var(--accent)' : 'var(--border)'}`,
