@@ -1,8 +1,8 @@
-import ReCAPTCHA from 'react-google-recaptcha'
+import HCaptcha from '@hcaptcha/react-hcaptcha'
 
-const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+const HCAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY
 
-export function SignUpForm({ signupEmail, setSignupEmail, roleOptions, selectedRole, setSelectedRole, handleSignupSubmit, recaptchaRef, captchaVerified, onCaptchaChange }) {
+export function SignUpForm({ signupEmail, setSignupEmail, roleOptions, selectedRole, setSelectedRole, handleSignupSubmit, captchaRef, captchaVerified, onCaptchaChange }) {
   return (
     <>
       <div className="text-[11px] font-medium tracking-[0.08em] uppercase text-neutral-500 mb-[18px]">
@@ -47,11 +47,13 @@ export function SignUpForm({ signupEmail, setSignupEmail, roleOptions, selectedR
           </div>
         </div>
         <div className="flex justify-center my-1">
-          <ReCAPTCHA
-            ref={recaptchaRef}
-            sitekey={RECAPTCHA_SITE_KEY}
+          <HCaptcha
+            ref={captchaRef}
+            sitekey={HCAPTCHA_SITE_KEY}
             theme="dark"
-            onChange={onCaptchaChange}
+            onVerify={onCaptchaChange}
+            onExpire={() => onCaptchaChange(null)}
+            onError={() => onCaptchaChange(null)}
           />
         </div>
         <button
