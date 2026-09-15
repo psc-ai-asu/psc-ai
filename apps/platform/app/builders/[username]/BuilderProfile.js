@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from 'next/link';
+import PlatformHeader from "@/components/PlatformHeader";
 
 import { ScoreBar, MetricTile, ScoreBadge } from "../components";
 
@@ -74,15 +75,10 @@ export default function BuilderProfile({ builder }) {
   ];
 
   return (
-    <div className="h-screen bg-stone-950 text-stone-200 font-sans flex flex-col">
-      {/* Header */}
-      <header className="border-b border-stone-800 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-medium tracking-wide text-stone-300">ReviewMyAgent</span>
-        </div>
-      </header>
+    <div className="app-shell h-screen flex flex-col">
+      <PlatformHeader current="builders" />
 
-      <div className="flex flex-1 overflow-hidden" style={{ height: "calc(100vh - 57px)" }}>
+      <div className="flex flex-1 overflow-hidden" style={{ height: "calc(100vh - 65px)" }}>
         {/* Sidebar */}
         <aside className="w-72 border-r border-stone-800 flex flex-col overflow-hidden flex-shrink-0">
 

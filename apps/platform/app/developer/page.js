@@ -3,7 +3,8 @@
 'use client';
 
 import { useState } from 'react';
-import NavigationBar from '../../components/NavigationBar';
+import PlatformHeader from '../../components/PlatformHeader';
+import Footer from '../../components/Footer';
 import StatsRow from '../../components/StatsRow';
 import SearchFilters from '../../components/SearchFilters';
 import AgentList from '../../components/AgentList';
@@ -71,7 +72,7 @@ export default function DeveloperPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
-      <NavigationBar />
+      <PlatformHeader current="developer" />
 
       {/* page hero */}
       <div style={{
@@ -91,10 +92,10 @@ export default function DeveloperPage() {
             marginBottom: 20,
           }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block' }} />
-            <span style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--accent)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Developer View</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--accent)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Developer View</span>
           </div>
           <h1 style={{
-            fontFamily: "'Inter', sans-serif",
+            fontFamily: 'var(--font-sans)',
             fontSize: 36,
             fontWeight: 700,
             letterSpacing: '-0.5px',
@@ -122,13 +123,8 @@ export default function DeveloperPage() {
       </div>
 
       {/* agent browser */}
-      <div className="container" style={{ padding: '32px 40px' }}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '320px 1fr',
-          gap: 20,
-          alignItems: 'start',
-        }}>
+      <div className="app-page">
+        <div className="developer-grid">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <SearchFilters
               search={search}
@@ -146,6 +142,7 @@ export default function DeveloperPage() {
           <AgentDetail agent={selectedAgent} />
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
