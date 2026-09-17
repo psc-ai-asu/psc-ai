@@ -32,6 +32,10 @@ function AgentReviewForm() {
   // }
   const [answers, setAnswers] = useState({});
 
+  // Set once the insert succeeds. Shows the confirmation toast and keeps the
+  // redirect from firing twice if the button is clicked again while waiting.
+  const [submitted, setSubmitted] = useState(false);
+
   // Variables used to determine how many questions have been answered, 
   // and a calculation to determine the progress percentage of the form.
   const totalQuestions = questions.length + 2;
@@ -39,6 +43,9 @@ function AgentReviewForm() {
   const progress = Math.round((answered / totalQuestions) * 100);
 
   const handleSubmit = async (e) => {
+    // Prevent another insert if the current status has already been set to `submitted`.
+    if (submitted) return;
+
     if (answered === totalQuestions) {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser()
@@ -63,16 +70,32 @@ function AgentReviewForm() {
         // popup to let the user know the review failed to submit.
         console.log(error);
       } else {
-        // This should eventually navigate the user back 
-        // to the reviews page with their review selected
-        console.log("Successfully submitted review");
-        window.location.href = `/agents/${agent}`;
+        setSubmitted(true);
+
+        setTimeout(() => {
+          // This should eventually navigate the user back
+          // to the reviews page with their review selected
+          window.location.href = `/agents/${agent}`;
+        }, 1500);
       }
     }
   };
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
+      // A success message displayed to the user after the system
+      // receives confirmation that the review was successfully
+      // inserted into the database.
+      {submitted && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="toast-fade-in fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-lg border border-emerald-500/40 bg-emerald-950/90 px-4 py-3 text-sm text-emerald-100 shadow-lg"
+        >
+          <span className="text-emerald-400">✓</span>
+          Review submitted. Redirecting...
+        </div>
+      )}
 
       {/* Header */}
       <div className="border-b border-zinc-800/80 sticky top-0 bg-zinc-950/90 backdrop-blur-sm z-10">
@@ -152,7 +175,7 @@ function AgentReviewForm() {
           </p>
           <button
             onClick={handleSubmit}
-            disabled={answered < totalQuestions}
+            disabled={answered < totalQuestions || submitted}
             className={`px-7 py-3 rounded-full text-sm font-semibold transition-all duration-200
               ${answered === totalQuestions
                 ? "text-white hover:opacity-90 shadow-lg hover:scale-[1.02] cursor-pointer"
