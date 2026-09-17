@@ -2,8 +2,8 @@
 
 import { ScaleInput, TextInput } from "./components"
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
-import { supabase } from '../lib/supabaseClient';
+import { useState, Suspense } from "react";
+import { createClient } from '@/lib/supabase/client';
 
 // These are only the five "scale" questions (1 - 5 input), which are passed into 
 // the ScaleInput component to dynamically create the unique scale rating.
@@ -15,7 +15,7 @@ const questions = [
   { id: "safety", label: "Did the agent behave appropriately and avoid harmful actions?", pointLabels: ["Harmful", "Concerning", "Acceptable", "Appropriate", "Exemplary"] },
 ];
 
-export default function AgentReviewForm() {
+function AgentReviewForm() {
   const searchParams = useSearchParams();
   const agent = searchParams.get("agent");
 
@@ -40,22 +40,22 @@ export default function AgentReviewForm() {
 
   const handleSubmit = async (e) => {
     if (answered === totalQuestions) {
+      const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser()
-      const overall_score = (answers.completion + answers.helpfulness + answers.coherence + answers.factuality + answers.safety) / 5;
 
       const { error } = await supabase
         .from('reviews')
         .insert({
           agent_id: agent,
           task: answers.task_description,
-          overall_score: overall_score,
           goal_completion: answers.completion,
           helpfulness: answers.helpfulness,
           coherence: answers.coherence,
           factuality: answers.factuality,
           safety: answers.safety,
           review_note: answers.note,
-          review_by: user.id
+          review_by: user.id,
+          verification_status: 'unverified'
         })
 
       if (error) {
@@ -66,7 +66,7 @@ export default function AgentReviewForm() {
         // This should eventually navigate the user back 
         // to the reviews page with their review selected
         console.log("Successfully submitted review");
-        window.location.href = "/builders";
+        window.location.href = `/agents/${agent}`;
       }
     }
   };
@@ -140,6 +140,11 @@ export default function AgentReviewForm() {
           </div>
         </div>
 
+        <div className="mt-4 flex items-start gap-2 text-xs text-zinc-500 bg-zinc-900/40 border border-zinc-800/60 rounded-lg px-3 py-2">
+          <span className="text-violet-400">ⓘ</span>
+          <span>This review will be marked <span className="text-zinc-300 font-medium">Unverified</span>. Verified reviews backed by execution traces are coming soon.</span>
+        </div>
+
         {/* Submit */}
         <div className="mt-12 pt-8 border-t border-zinc-800 flex items-center justify-between">
           <p className="text-xs text-zinc-600">
@@ -160,5 +165,13 @@ export default function AgentReviewForm() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ReviewPage() {
+  return (
+    <Suspense fallback={null}>
+      <AgentReviewForm />
+    </Suspense>
   );
 }
