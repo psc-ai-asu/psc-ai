@@ -18,23 +18,14 @@ const questions = [
 function AgentReviewForm() {
   const searchParams = useSearchParams();
   const agent = searchParams.get("agent");
-
-  // Example of `answers` object
-  //
-  // {
-  //   task: "...",
-  //   goal_completion: 5,
-  //   helpfulness: 3,
-  //   coherence: 2,
-  //   factuality: 1,
-  //   safety: 2,
-  //   review_note: "...",
-  // }
   const [answers, setAnswers] = useState({});
 
   // Set once the insert succeeds. Shows the confirmation toast and keeps the
   // redirect from firing twice if the button is clicked again while waiting.
-  const [submitted, setSubmitted] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  // Set when the insert returns an error. Shows the error toast.
+  const [submitError, setSubmitError] = useState(false);
 
   // Variables used to determine how many questions have been answered, 
   // and a calculation to determine the progress percentage of the form.
@@ -43,10 +34,13 @@ function AgentReviewForm() {
   const progress = Math.round((answered / totalQuestions) * 100);
 
   const handleSubmit = async (e) => {
-    // Prevent another insert if the current status has already been set to `submitted`.
-    if (submitted) return;
+    // Prevent another insert if the review has already been submitted successfully.
+    if (submitSuccess) return;
 
     if (answered === totalQuestions) {
+      // Clear any previous error so a retry that fails again fades back in.
+      setSubmitError(false);
+
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser()
 
@@ -66,11 +60,10 @@ function AgentReviewForm() {
         })
 
       if (error) {
-        // This should eventually be replaced with an actual UI 
-        // popup to let the user know the review failed to submit.
         console.log(error);
+        setSubmitError(true);
       } else {
-        setSubmitted(true);
+        setSubmitSuccess(true);
 
         setTimeout(() => {
           // This should eventually navigate the user back
@@ -83,10 +76,8 @@ function AgentReviewForm() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
-      // A success message displayed to the user after the system
-      // receives confirmation that the review was successfully
-      // inserted into the database.
-      {submitted && (
+      {/* A success message displayed to the user if the insert is successful. */}
+      {submitSuccess && (
         <div
           role="status"
           aria-live="polite"
@@ -94,6 +85,17 @@ function AgentReviewForm() {
         >
           <span className="text-emerald-400">✓</span>
           Review submitted. Redirecting...
+        </div>
+      )}
+
+      {/* An error message displayed to the user if the insert fails. */}
+      {submitError && (
+        <div
+          role="alert"
+          className="toast-fade-in fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-lg border border-rose-500/40 bg-rose-950/90 px-4 py-3 text-sm text-rose-100 shadow-lg"
+        >
+          <span className="text-rose-400">✕</span>
+          Something went wrong submitting your review. Please try again.
         </div>
       )}
 
@@ -175,7 +177,7 @@ function AgentReviewForm() {
           </p>
           <button
             onClick={handleSubmit}
-            disabled={answered < totalQuestions || submitted}
+            disabled={answered < totalQuestions || submitSuccess}
             className={`px-7 py-3 rounded-full text-sm font-semibold transition-all duration-200
               ${answered === totalQuestions
                 ? "text-white hover:opacity-90 shadow-lg hover:scale-[1.02] cursor-pointer"
