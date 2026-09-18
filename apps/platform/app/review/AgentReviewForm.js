@@ -1,6 +1,7 @@
 "use client";
 
 import { ScaleInput, TextInput } from "./components"
+import Link from "next/link";
 import { useState } from "react";
 import { createClient } from '@/lib/supabase/client';
 import { isAuthRetryableFetchError } from "@supabase/supabase-js";
@@ -135,7 +136,10 @@ export default function AgentReviewForm({ agent }) {
       <div className="border-b border-zinc-800/80 sticky top-0 bg-zinc-950/90 backdrop-blur-sm z-10">
         <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
           <div>
-            <h1 className="text-lg font-bold tracking-tight">Agent Review</h1>
+            <Link href={`/agents/${agent.id}`} className="text-xs text-zinc-500 hover:text-zinc-300">
+              ← Back to agent
+            </Link>
+            <h1 className="text-lg font-bold tracking-tight mt-1">Reviewing {agent.name}</h1>
             <p className="text-xs text-zinc-500 font-mono mt-0.5">{answered}/{totalQuestions} answered</p>
           </div>
           {/* Progress bar */}

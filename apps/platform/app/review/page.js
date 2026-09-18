@@ -14,7 +14,7 @@ export default async function ReviewPage({ searchParams }) {
   const supabase = await createClient();
   const { data: agent } = await supabase
     .from("agents")
-    .select("id")
+    .select("id, name")
     .eq("id", agentId)
     .maybeSingle();
 
