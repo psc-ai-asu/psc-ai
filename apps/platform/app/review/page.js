@@ -4,6 +4,8 @@ import { ScaleInput, TextInput } from "./components"
 import { useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
 import { createClient } from '@/lib/supabase/client';
+import { isAuthRetryableFetchError } from "@supabase/supabase-js";
+import Link from "next/link";
 
 // These are only the five "scale" questions (1 - 5 input), which are passed into 
 // the ScaleInput component to dynamically create the unique scale rating.
@@ -15,6 +17,27 @@ const questions = [
   { id: "safety", label: "Did the agent behave appropriately and avoid harmful actions?", pointLabels: ["Harmful", "Concerning", "Acceptable", "Appropriate", "Exemplary"] },
 ];
 
+function getErrorMessage(error, status) {
+  if (status === 0) {
+    return "Couldn't reach the server. Check your connection and try again.";
+  }
+
+  switch (error.code) {
+    // invalid id / missing id / no matching agent
+    case "22P02":
+    case "23502":
+    case "23503":
+      return "This agent couldn't be found. It may have been removed.";
+    case "42501":
+      return "You don't have permission to submit this review.";
+    case "PGRST301":
+    case "PGRST303":
+      return "Your session has expired. Please sign in again.";
+    default:
+      return "Something went wrong submitting your review. Please try again.";
+  }
+}
+
 function AgentReviewForm() {
   const searchParams = useSearchParams();
   const agent = searchParams.get("agent");
@@ -24,8 +47,9 @@ function AgentReviewForm() {
   // redirect from firing twice if the button is clicked again while waiting.
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
-  // Set when the insert returns an error. Shows the error toast.
-  const [submitError, setSubmitError] = useState(false);
+  // Set when the insert returns an error, which contains
+  // the error toast's message, or null when hidden.
+  const [submitError, setSubmitError] = useState(null);
 
   // Variables used to determine how many questions have been answered, 
   // and a calculation to determine the progress percentage of the form.
@@ -39,12 +63,24 @@ function AgentReviewForm() {
 
     if (answered === totalQuestions) {
       // Clear any previous error so a retry that fails again fades back in.
-      setSubmitError(false);
+      setSubmitError(null);
 
       const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-      const { error } = await supabase
+      if (!user) {
+        console.log(authError);
+
+        setSubmitError(
+          isAuthRetryableFetchError(authError)
+          ? "Couldn't reach the server. Check your connection and try again."
+          : "Your session has expired. Please sign in again."
+        );
+
+        return;
+      }
+
+      const { error, status } = await supabase
         .from('reviews')
         .insert({
           agent_id: agent,
@@ -60,7 +96,7 @@ function AgentReviewForm() {
 
       if (error) {
         console.log(error);
-        setSubmitError(true);
+        setSubmitError(getErrorMessage(error, status));
       } else {
         setSubmitSuccess(true);
 
@@ -72,6 +108,16 @@ function AgentReviewForm() {
       }
     }
   };
+
+  if (!agent) {
+    return (
+      <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center">
+        <p className="text-sm text-zinc-400">
+          No agent selected. <Link href="/agents" className="text-violet-400 hover:text-violet-300">Browse agents</Link>
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
@@ -94,7 +140,7 @@ function AgentReviewForm() {
           className="toast-fade-in fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-lg border border-rose-500/40 bg-rose-950/90 px-4 py-3 text-sm text-rose-100 shadow-lg"
         >
           <span className="text-rose-400">✕</span>
-          Something went wrong submitting your review. Please try again.
+          {submitError}
         </div>
       )}
 
@@ -118,7 +164,7 @@ function AgentReviewForm() {
       <div className="max-w-2xl mx-auto px-6 py-10">
         {/* Intro */}
         <div className="mb-10">
-          <p className="text-zinc-400 text-sm leading-relaxed max-w-lg">Answer each question to help evaluate the quality of the agent's work.</p>
+          <p className="text-zinc-400 text-sm leading-relaxed max-w-lg">Answer each question to help evaluate the quality of the work.</p>
         </div>
 
         {/* Questions */}
