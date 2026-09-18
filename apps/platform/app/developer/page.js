@@ -177,8 +177,6 @@ export default function DeveloperPage() {
             <StatsRow
               activeCount={agents.filter((agent) => agent.status === 'active').length}
               firedCount={agents.filter((agent) => agent.status === 'fired').length}
-              avgScore={agents.length ? Math.round(agents.reduce((sum, agent) => sum + agent.score, 0) / agents.length) : 0}
-              totalReviews={agents.reduce((sum, agent) => sum + (agent.reviews ?? 0), 0)}
             />
           </div>
         </div>

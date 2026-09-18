@@ -1,17 +1,10 @@
-// displays a row of key performance stats
+// displays a row of key stats
 
-export default function StatsRow({ activeCount, firedCount, avgScore, totalReviews }) {
+export default function StatsRow({ activeCount, firedCount }) {
   return (
     <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-      <StatChip label="Active Agents" value={activeCount} sub="total" valueColor="var(--green)" />
-      <StatChip label="Agents Fired"  value={firedCount}  sub="total" valueColor="var(--amber)" />
-      <StatChip
-        label="Avg Score"
-        value={avgScore}
-        sub="composite"
-        valueColor={avgScore >= 80 ? 'var(--green)' : 'var(--amber)'}
-      />
-      <StatChip label="Total Reviews" value={totalReviews} sub="all time" valueColor="var(--text)" />
+      <StatChip label="Active Agents" value={activeCount} sub="running" valueColor="var(--green)" />
+      <StatChip label="Total Agents"  value={activeCount + firedCount}  sub="all time" valueColor="var(--text)" />
     </div>
   );
 }
