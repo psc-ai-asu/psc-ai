@@ -8,7 +8,7 @@ import StatsRow from '../../components/StatsRow';
 import SearchFilters from '../../components/SearchFilters';
 import AgentList from '../../components/AgentList';
 import AgentDetail from '../../components/AgentDetail';
-import { addAgentAction, getAgentsAction } from '../actions';
+import { addAgentAction, deleteAgentAction, getAgentsAction, updateAgentAction } from '../actions';
 import { createClient } from '../lib/supabaseClient';
 
 const EMPTY_FORM = {
@@ -27,8 +27,11 @@ export default function DeveloperPage() {
   const [filterStatus, setFilterStatus] = useState(null);
   const [selectedId, setSelectedId] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState('');
   const [user, setUser] = useState(null);
 
@@ -70,6 +73,14 @@ export default function DeveloperPage() {
   });
   const selectedAgent = agents.find((a) => a.id === selectedId) ?? null;
 
+  const resetFormState = () => {
+    setFormData(EMPTY_FORM);
+    setEditingId(null);
+    setShowAddForm(false);
+    setShowEditForm(false);
+    setError('');
+  };
+
   const handleInputChange = (event) => {
     const { name, value, type, checked } = event.target;
     setFormData((current) => ({
@@ -88,12 +99,70 @@ export default function DeveloperPage() {
 
       setAgents((current) => [newAgent, ...current]);
       setSelectedId(newAgent.id);
-      setFormData(EMPTY_FORM);
-      setShowAddForm(false);
+      resetFormState();
     } catch (err) {
       setError(err.message || 'Could not add agent.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleEditAgent = (agent) => {
+    setEditingId(agent.id);
+    setFormData({
+      name: agent.name ?? '',
+      description: agent.description ?? '',
+      framework: agent.framework ?? 'Custom',
+      public_metrics: Boolean(agent.public_metrics),
+    });
+    setError('');
+    setShowAddForm(false);
+    setShowEditForm(true);
+  };
+
+  const handleUpdateAgent = async (event) => {
+    event.preventDefault();
+    setError('');
+    setIsSubmitting(true);
+
+    try {
+      const updatedAgent = await updateAgentAction(editingId, formData);
+
+      setAgents((current) => current.map((agent) => (
+        agent.id === editingId ? updatedAgent : agent
+      )));
+      setSelectedId(editingId);
+      resetFormState();
+    } catch (err) {
+      setError(err.message || 'Could not update agent.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteAgent = async () => {
+    if (!selectedAgent) {
+      return;
+    }
+
+    const confirmed = window.confirm(`Delete "${selectedAgent.name}"? This action cannot be undone.`);
+    if (!confirmed) {
+      return;
+    }
+
+    setError('');
+    setIsDeleting(true);
+
+    try {
+      await deleteAgentAction(selectedAgent.id);
+
+      const remainingAgents = agents.filter((agent) => agent.id !== selectedAgent.id);
+      setAgents(remainingAgents);
+      setSelectedId(remainingAgents[0]?.id ?? null);
+    } catch (err) {
+      setError(err.message || 'Could not delete agent.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -157,7 +226,13 @@ export default function DeveloperPage() {
             </div>
             <button
               type="button"
-              onClick={() => setShowAddForm((current) => !current)}
+              onClick={() => {
+                setShowAddForm((current) => !current);
+                setShowEditForm(false);
+                setEditingId(null);
+                setFormData(EMPTY_FORM);
+                setError('');
+              }}
               style={{
                 background: 'var(--accent)',
                 color: '#fff',
@@ -182,7 +257,7 @@ export default function DeveloperPage() {
         </div>
       </div>
 
-      {showAddForm && (
+      {(showAddForm || showEditForm) && (
         <div style={{
           position: 'fixed',
           inset: 0,
@@ -194,7 +269,7 @@ export default function DeveloperPage() {
           padding: 20,
         }}>
           <form
-            onSubmit={handleAddAgent}
+            onSubmit={showEditForm ? handleUpdateAgent : handleAddAgent}
             style={{
               width: '100%',
               maxWidth: 480,
@@ -206,10 +281,12 @@ export default function DeveloperPage() {
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h3 style={{ margin: 0, color: 'var(--text)', fontFamily: 'monospace' }}>Add Agent</h3>
+              <h3 style={{ margin: 0, color: 'var(--text)', fontFamily: 'monospace' }}>
+                {showEditForm ? 'Edit Agent' : 'Add Agent'}
+              </h3>
               <button
                 type="button"
-                onClick={() => setShowAddForm(false)}
+                onClick={resetFormState}
                 style={{
                   background: 'transparent',
                   color: 'var(--text-muted)',
@@ -272,7 +349,7 @@ export default function DeveloperPage() {
                   cursor: isSubmitting ? 'not-allowed' : 'pointer',
                   opacity: isSubmitting ? 0.7 : 1,
                 }}>
-                  {isSubmitting ? 'Saving…' : 'Save Agent'}
+                  {isSubmitting ? (showEditForm ? 'Saving…' : 'Saving…') : (showEditForm ? 'Save Changes' : 'Save Agent')}
                 </button>
               </div>
             </div>
@@ -302,7 +379,12 @@ export default function DeveloperPage() {
               setSelectedId={setSelectedId}
             />
           </div>
-          <AgentDetail agent={selectedAgent} />
+          <AgentDetail
+            agent={selectedAgent}
+            onEdit={handleEditAgent}
+            onDelete={handleDeleteAgent}
+            isDeleting={isDeleting}
+          />
         </div>
       </div>
     </div>

@@ -75,3 +75,68 @@ export async function addAgentAction(formData = {}) {
 
   return buildAgentRow(data);
 }
+
+export async function updateAgentAction(agentId, formData = {}) {
+  const client = await createClient();
+
+  if (!client) {
+    throw new Error('Supabase client is not configured.');
+  }
+
+  const { data: { user }, error: userError } = await client.auth.getUser();
+
+  if (userError || !user) {
+    throw new Error('You must be signed in to update an agent.');
+  }
+
+  const payload = {
+    name: formData.name?.trim() || 'Untitled Agent',
+    description: formData.description ?? '',
+    framework: formData.framework || 'Custom',
+    public_metrics: Boolean(formData.public_metrics),
+  };
+
+  const { data, error } = await client
+    .from('agents')
+    .update(payload)
+    .eq('id', agentId)
+    .eq('developed_by', user.id)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data) {
+    throw new Error('Agent not found or you do not have permission to edit it.');
+  }
+
+  return buildAgentRow(data);
+}
+
+export async function deleteAgentAction(agentId) {
+  const client = await createClient();
+
+  if (!client) {
+    throw new Error('Supabase client is not configured.');
+  }
+
+  const { data: { user }, error: userError } = await client.auth.getUser();
+
+  if (userError || !user) {
+    throw new Error('You must be signed in to delete an agent.');
+  }
+
+  const { error } = await client
+    .from('agents')
+    .delete()
+    .eq('id', agentId)
+    .eq('developed_by', user.id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return true;
+}

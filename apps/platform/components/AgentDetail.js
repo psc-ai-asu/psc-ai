@@ -2,7 +2,7 @@
 
 'use client';
 
-export default function AgentDetail({ agent }) {
+export default function AgentDetail({ agent, onEdit, onDelete, isDeleting = false }) {
   if (!agent) {
     return (
       <div style={{
@@ -42,26 +42,68 @@ export default function AgentDetail({ agent }) {
         paddingBottom: 20,
         borderBottom: '1px solid var(--border)',
       }}>
-        <div style={{
-          fontFamily: 'monospace',
-          fontSize: 10,
-          color: 'var(--text-muted)',
-          letterSpacing: '0.1em',
-          textTransform: 'uppercase',
-          marginBottom: 8,
-        }}>
-          Agent Details
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+          <div>
+            <div style={{
+              fontFamily: 'monospace',
+              fontSize: 10,
+              color: 'var(--text-muted)',
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              marginBottom: 8,
+            }}>
+              Agent Details
+            </div>
+            <h2 style={{
+              fontFamily: "'Inter', sans-serif",
+              fontSize: 28,
+              fontWeight: 700,
+              color: 'var(--text)',
+              letterSpacing: '-0.5px',
+              margin: '0 0 14px 0',
+            }}>
+              {agent.name}
+            </h2>
+          </div>
+
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={() => onEdit?.(agent)}
+              style={{
+                background: 'transparent',
+                color: 'var(--text)',
+                border: '1px solid var(--border)',
+                borderRadius: 6,
+                padding: '7px 10px',
+                cursor: 'pointer',
+                fontFamily: 'monospace',
+                fontSize: 11,
+              }}
+            >
+              Edit
+            </button>
+            <button
+              type="button"
+              onClick={() => onDelete?.()}
+              disabled={isDeleting}
+              style={{
+                background: isDeleting ? 'transparent' : '#FF4D4D',
+                color: isDeleting ? 'var(--text-muted)' : '#fff',
+                border: '1px solid rgba(255,77,77,0.4)',
+                borderRadius: 6,
+                padding: '7px 10px',
+                cursor: isDeleting ? 'not-allowed' : 'pointer',
+                fontFamily: 'monospace',
+                fontSize: 11,
+                opacity: isDeleting ? 0.7 : 1,
+              }}
+            >
+              {isDeleting ? 'Deleting…' : 'Delete'}
+            </button>
+          </div>
         </div>
-        <h2 style={{
-          fontFamily: "'Inter', sans-serif",
-          fontSize: 28,
-          fontWeight: 700,
-          color: 'var(--text)',
-          letterSpacing: '-0.5px',
-          margin: '0 0 14px 0',
-        }}>
-          {agent.name}
-        </h2>
+
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
           <span style={{
             fontSize: 10,
