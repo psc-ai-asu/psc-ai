@@ -13,7 +13,7 @@ export default function AgentDetail({ agent }) {
         background: 'var(--surface)',
         border: '1px dashed var(--border)',
         borderRadius: 16,
-        fontFamily: 'monospace',
+        fontFamily: 'var(--font-mono)',
         fontSize: 12,
         color: 'var(--text-dim)',
         letterSpacing: '0.08em',
@@ -46,7 +46,7 @@ export default function AgentDetail({ agent }) {
       }}>
         <div>
           <div style={{
-            fontFamily: 'monospace',
+            fontFamily: 'var(--font-mono)',
             fontSize: 9,
             color: 'var(--text-muted)',
             letterSpacing: '0.12em',
@@ -56,7 +56,7 @@ export default function AgentDetail({ agent }) {
             Agent Inspector · {agent.id}
           </div>
           <h2 style={{
-            fontFamily: "'Inter', sans-serif",
+            fontFamily: 'var(--font-sans)',
             fontSize: 22,
             fontWeight: 700,
             color: 'var(--text)',
@@ -70,7 +70,7 @@ export default function AgentDetail({ agent }) {
             <StatusPill status={agent.status} />
             <FrameworkTag framework={agent.framework} />
             <span style={{
-              fontFamily: 'monospace',
+              fontFamily: 'var(--font-mono)',
               fontSize: 10,
               color: 'var(--text-muted)',
               padding: '2px 8px',
@@ -83,7 +83,7 @@ export default function AgentDetail({ agent }) {
         </div>
         <div style={{ textAlign: 'right', flexShrink: 0 }}>
           <div style={{
-            fontFamily: 'monospace',
+            fontFamily: 'var(--font-mono)',
             fontSize: 9,
             color: 'var(--text-muted)',
             letterSpacing: '0.1em',
@@ -93,7 +93,7 @@ export default function AgentDetail({ agent }) {
             Composite Score
           </div>
           <div style={{
-            fontFamily: "'Inter', sans-serif",
+            fontFamily: 'var(--font-sans)',
             fontSize: 40,
             fontWeight: 700,
             color: scoreColor,
@@ -103,7 +103,7 @@ export default function AgentDetail({ agent }) {
             {agent.score}
           </div>
           <div style={{
-            fontFamily: 'monospace',
+            fontFamily: 'var(--font-mono)',
             fontSize: 10,
             color: 'var(--text-muted)',
             marginTop: 4,
@@ -116,7 +116,7 @@ export default function AgentDetail({ agent }) {
       {/* runtime metrics */}
       <div>
         <div style={{
-          fontFamily: 'monospace',
+          fontFamily: 'var(--font-mono)',
           fontSize: 9,
           color: 'var(--text-muted)',
           letterSpacing: '0.12em',
@@ -141,7 +141,7 @@ function StatusPill({ status }) {
   return (
     <span style={{
       fontSize: 10,
-      fontFamily: 'monospace',
+      fontFamily: 'var(--font-mono)',
       color,
       padding: '2px 8px',
       border: `1px solid ${color}`,
@@ -158,7 +158,7 @@ function FrameworkTag({ framework }) {
   return (
     <span style={{
       fontSize: 10,
-      fontFamily: 'monospace',
+      fontFamily: 'var(--font-mono)',
       color: 'var(--accent)',
       padding: '2px 8px',
       border: '1px solid rgba(139,92,246,0.4)',
@@ -181,8 +181,8 @@ function MetricBar({ label, value, max = 100, unit = '%', invert = false }) {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-        <span style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-muted)' }}>{label}</span>
-        <span style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text)', fontWeight: 600 }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>{label}</span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text)', fontWeight: 600 }}>
           {value}{unit}
         </span>
       </div>
