@@ -1,4 +1,6 @@
 import { BulletList, ContactCard, DocSection, BodyText } from "@/components/LegalComponents";
+import Footer from "@/components/Footer";
+import PlatformHeader from "@/components/PlatformHeader";
 
 const tocItems = [
   { id: "s1",  label: "About ReviewMyAgent" },
@@ -29,43 +31,23 @@ function Callout({ children }) {
 
 export default function PlatformTermsPage() {
   return (
-    <div className="min-h-screen bg-[#0D0D0D] text-[#e8eaed] font-['Roboto',system-ui,sans-serif]">
-
-      {/* Nav */}
-      <nav className="sticky top-0 z-50 h-14 flex items-center justify-between px-8 border-b border-[#1f1f1f] bg-[#0D0D0D]/85 backdrop-blur-md">
-        <a href="/" className="text-[17px] text-[#e8eaed] no-underline tracking-tight">
-          ReviewMyAgent
-        </a>
-        <ul className="flex gap-6 list-none">
-          {[{ href: "/privacy-policy", label: "Privacy Policy" }, { href: "/terms-of-service", label: "Terms of Service" }].map(({ href, label }) => (
-            <li key={href}>
-              <a
-                href={href}
-                className={`text-[12px] font-normal tracking-widest uppercase no-underline transition-colors duration-200 ${
-                  href === "/terms-of-service" ? "text-violet-400" : "text-[#7a8394] hover:text-violet-400"
-                }`}
-              >
-                {label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
+    <div className="app-shell min-h-screen">
+      <PlatformHeader />
 
       {/* Page layout */}
       <div className="max-w-[1100px] mx-auto px-8 pt-20 pb-32 grid grid-cols-[220px_1fr] gap-16 items-start max-md:grid-cols-1 max-md:gap-8">
 
         {/* TOC */}
         <aside className="sticky top-20 hidden md:block">
-          <p className="text-[11px] font-medium text-[#7a8394] tracking-widest uppercase mb-4">
+          <p className="text-[11px] font-medium text-[var(--text-muted)] tracking-widest uppercase mb-4">
             On this page
           </p>
-          <ol className="list-none border-l border-[#1f1f1f] pl-4 space-y-2">
+          <ol className="list-none border-l border-[var(--border)] pl-4 space-y-2">
             {tocItems.map(({ id, label }) => (
               <li key={id}>
                 <a
                   href={`#${id}`}
-                  className="block text-[13px] leading-snug no-underline transition-colors duration-200 text-[#7a8394] hover:text-[#e8eaed]"
+                  className="block text-[13px] leading-snug no-underline transition-colors duration-200 text-[var(--text-muted)] hover:text-[var(--text)]"
                 >
                   {label}
                 </a>
@@ -76,15 +58,15 @@ export default function PlatformTermsPage() {
 
         {/* Content */}
         <main className="animate-[fadeUp_0.5s_ease_both]">
-          <header className="border-b border-[#1f1f1f] mb-12">
-            <h1 className="text-[44px] font-normal leading-tight text-[#e8eaed] mb-3">
+          <header className="border-b border-[var(--border)] mb-12">
+            <h1 className="text-[44px] font-normal leading-tight text-[var(--text)] mb-3">
               Terms of Service
             </h1>
 
             <BodyText>
-                These Terms of Service ("Terms") govern your access to and use of ReviewMyAgent,
-                operated by <strong className="font-medium text-[#e8eaed]">Gentle Systems</strong> ("we,"
-                "us," or "our") at{" "}
+                These Terms of Service (“Terms”) govern your access to and use of ReviewMyAgent,
+                operated by <strong className="font-medium text-[var(--text)]">Gentle Systems</strong> (“we,”
+                “us,” or “our”) at{" "}
                 <a href="https://reviewmyagent.today" className="text-violet-400 hover:underline">
                 reviewmyagent.today
                 </a>
@@ -177,14 +159,14 @@ export default function PlatformTermsPage() {
             <DocSection id="s6" num="06" title="AI Agent Data">
               <BodyText>
                 When you connect an AI agent to ReviewMyAgent, you are responsible for ensuring that
-                you have the appropriate rights and permissions to submit that agent's trace data to
+                you have the appropriate rights and permissions to submit that agent’s trace data to
                 the platform.
               </BodyText>
 
               <BodyText>
                 You retain ownership of your agent trace data. By submitting it to the platform, you
                 grant Gentle Systems a limited license to store, process, and display that data
-                solely for the purpose of delivering the platform's features to you.
+                solely for the purpose of delivering the platform’s features to you.
               </BodyText>
             </DocSection>
 
@@ -233,7 +215,7 @@ export default function PlatformTermsPage() {
 
             <DocSection id="s10" num="10" title="Disclaimer of Warranties">
               <Callout>
-                REVIEWMYAGENT IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY
+                REVIEWMYAGENT IS PROVIDED “AS IS” AND “AS AVAILABLE” WITHOUT WARRANTIES OF ANY
                 KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF
                 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT. GENTLE
                 SYSTEMS DOES NOT WARRANT THAT THE PLATFORM WILL BE UNINTERRUPTED, ERROR-FREE,
@@ -293,8 +275,9 @@ export default function PlatformTermsPage() {
         </main>
       </div>
 
+      <Footer />
+
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap');
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(16px); }
           to   { opacity: 1; transform: translateY(0); }

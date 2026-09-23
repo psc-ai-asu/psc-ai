@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import PlatformHeader from "@/components/PlatformHeader";
 import { AgentListItem, SearchFilterBar } from "./components";
 
 function mapAgent(row) {
@@ -55,16 +55,8 @@ export default function AgentDirectoryPage() {
   });
 
   return (
-    <div className="h-screen bg-stone-950 text-stone-200 font-sans flex flex-col">
-      <header className="border-b border-stone-800 px-6 py-4 flex items-center justify-between flex-shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-6 h-6 rounded bg-violet-500/20 border border-violet-500/40 flex items-center justify-center">
-            <div className="w-2 h-2 rounded-full bg-violet-400" />
-          </div>
-          <span className="text-sm font-medium tracking-wide text-stone-300">ReviewMyAgent</span>
-        </div>
-        <Link href="/" className="text-xs text-stone-500 hover:text-stone-300">← Back to home</Link>
-      </header>
+    <div className="app-shell h-screen flex flex-col">
+      <PlatformHeader current="agents" />
 
       <div className="flex-1 overflow-y-auto min-h-0">
         <div className="max-w-2xl mx-auto px-6 py-10">

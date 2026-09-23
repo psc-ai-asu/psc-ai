@@ -15,7 +15,7 @@ export default function AgentList({ filtered, selectedId, setSelectedId }) {
       ))}
       {filtered.length === 0 && (
         <div style={{
-          fontFamily: 'monospace',
+          fontFamily: 'var(--font-mono)',
           fontSize: 12,
           color: 'var(--text-dim)',
           textAlign: 'center',
