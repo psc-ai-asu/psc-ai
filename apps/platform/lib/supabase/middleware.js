@@ -1,7 +1,9 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 
-export async function middleware(request) {
+// Refreshes the Supabase session cookie (if needed) and reports the
+// current user. Called from the root middleware.js on every request.
+export async function updateSession(request) {
   let response = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -13,7 +15,9 @@ export async function middleware(request) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
+          )
           response = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options)
@@ -23,11 +27,12 @@ export async function middleware(request) {
     }
   )
 
-  await supabase.auth.getUser()
+  // getUser() re-validates against Supabase's auth server (unlike
+  // getSession(), which just trusts the cookie) — this is what refreshes
+  // an expired access token using the refresh token.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  return response
-}
-
-export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+  return { response, user }
 }

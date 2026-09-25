@@ -21,7 +21,7 @@ function StatChip({ label, value, sub, valueColor }) {
       transition: 'border-color 0.2s',
     }}>
       <div style={{
-        fontFamily: 'monospace',
+        fontFamily: 'var(--font-mono)',
         fontSize: 9,
         color: 'var(--text-muted)',
         letterSpacing: '0.12em',
@@ -31,7 +31,7 @@ function StatChip({ label, value, sub, valueColor }) {
         {label}
       </div>
       <div style={{
-        fontFamily: "'Inter', sans-serif",
+        fontFamily: 'var(--font-sans)',
         fontSize: 26,
         fontWeight: 700,
         color: valueColor,
@@ -42,7 +42,7 @@ function StatChip({ label, value, sub, valueColor }) {
       </div>
       {sub && (
         <div style={{
-          fontFamily: 'monospace',
+          fontFamily: 'var(--font-mono)',
           fontSize: 10,
           color: 'var(--text-dim)',
           marginTop: 6,

@@ -2,6 +2,8 @@
 'use client';
 
 import NavigationBar from '../../components/NavigationBar';
+import PlatformHeader from '../../components/PlatformHeader';
+import Footer from '../../components/Footer';
 import StatsRow from '../../components/StatsRow';
 import SearchFilters from '../../components/SearchFilters';
 import AgentList from '../../components/AgentList';
@@ -188,7 +190,7 @@ export default function DeveloperPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
-      <NavigationBar />
+      <PlatformHeader current="developer" />
 
       {/* Page Hero Details 
           Contains the title, subtitle, and "Add Agent" button. The button toggles the add agent modal.
@@ -304,6 +306,7 @@ export default function DeveloperPage() {
           />
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

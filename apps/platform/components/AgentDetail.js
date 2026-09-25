@@ -13,7 +13,7 @@ export default function AgentDetail({ agent, onEdit, onDelete, isDeleting = fals
         background: 'var(--surface)',
         border: '1px dashed var(--border)',
         borderRadius: 16,
-        fontFamily: 'monospace',
+        fontFamily: 'var(--font-mono)',
         fontSize: 12,
         color: 'var(--text-dim)',
         letterSpacing: '0.08em',
@@ -146,7 +146,7 @@ export default function AgentDetail({ agent, onEdit, onDelete, isDeleting = fals
       {agent.description && (
         <div style={{ marginBottom: 28 }}>
           <div style={{
-            fontFamily: 'monospace',
+            fontFamily: 'var(--font-mono)',
             fontSize: 10,
             color: 'var(--text-muted)',
             letterSpacing: '0.1em',

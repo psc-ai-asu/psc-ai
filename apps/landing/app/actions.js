@@ -12,13 +12,14 @@ export async function submitEmailAction(email, role, captchaToken) {
         return { error: "Missing required fields" };
     }
 
-    // Verify reCAPTCHA token
     try {
-        const googleVerifyUrl = "https://www.google.com/recaptcha/api/siteverify";
-        const response = await fetch(googleVerifyUrl, {
+        const response = await fetch("https://api.hcaptcha.com/siteverify", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: `secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${captchaToken}`,
+            body: new URLSearchParams({
+                secret: process.env.HCAPTCHA_SECRET_KEY || "",
+                response: captchaToken,
+            }),
         });
 
         const data = await response.json();
