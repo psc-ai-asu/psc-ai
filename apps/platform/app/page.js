@@ -1,34 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
 import useScrollFade from './hooks/useScrollFade';
+import useAuth from './hooks/useAuth';
 
 import Footer from '@/components/Footer';
 
 export default function PlatformPage() {
-  //auth variable for page
-  const [user, setUser] = useState(null);
-
-  //check if user login when page start
-  useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-    return () => subscription.unsubscribe();
-  }, []);
-
-  //function for log out
-  const handleLogout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    setUser(null);
-  };
+  // Auth state for the home page
+  const { user, logout } = useAuth();
 
   //scroll fade effect for card
   const pageRef = useScrollFade({ threshold: 0.1 });
@@ -149,15 +129,19 @@ export default function PlatformPage() {
           </div>
           <div className="topbar-right">
             {user ? (
-              <button className="topbar-logout-btn" onClick={handleLogout}>Log Out</button>
+              <button className="topbar-logout-btn" onClick={logout}>Log Out</button>
             ) : (
               <>
                 <Link href="/login?mode=signup" className="topbar-signup-btn">Sign Up</Link>
                 <Link href="/login" className="topbar-signup-btn">Sign In</Link>
               </>
             )}
-            <Link href="/agents" className="topbar-btn">Agent Directory</Link>
-            <Link href="/developer" className="topbar-btn">Developer Dashboard</Link>
+            {user && (
+              <>
+                <Link href="/agents" className="topbar-btn">Agent Directory</Link>
+                <Link href="/developer" className="topbar-btn">Developer Dashboard</Link>
+              </>
+            )}
           </div>
         </div>
       </header>
