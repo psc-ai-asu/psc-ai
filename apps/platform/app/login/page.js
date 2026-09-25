@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, Suspense } from 'react';
+import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { createClient } from '@/lib/supabase/client';
@@ -322,6 +323,15 @@ function LoginForm() {
             <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
+
+        <Image
+          src="/rma-logo.png"
+          alt="ReviewMyAgent"
+          width={48}
+          height={48}
+          className="signup-logo-mark"
+          priority
+        />
 
         {mode === 'signup' ? (
           <>
