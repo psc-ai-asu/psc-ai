@@ -12,7 +12,6 @@ function StatusBadge({ status }) {
   const live = status === "live";
   return (
     <span className={`status-badge ${live ? "status-badge-live" : "status-badge-soon"}`}>
-      <span className="status-dot" />
       {live ? "Available now" : "Coming soon"}
     </span>
   );
@@ -233,15 +232,11 @@ export default function PlatformPage() {
               From structured user reviews to deep execution traces,
               ReviewMyAgent bridges human experience and machine performance.
             </p>
-            <div className="status-legend mono">
-              <span><span className="status-dot status-dot-live" /> Available now</span>
-              <span><span className="status-dot status-dot-soon" /> Coming soon</span>
-            </div>
           </div>
 
           <div className="features-grid">
             {features.map((f, i) => (
-              <div className={`feature-card fade-element fade-delay-${i + 1}`} key={f.title}>
+              <div className="feature-card fade-element" style={{ '--fade-index': i + 1 }} key={f.title}>
                 <div className="feature-card-glow" />
                 <div className="feature-card-head">
                   <h3>{f.title}</h3>
@@ -270,7 +265,7 @@ export default function PlatformPage() {
 
           <div className="audience-grid">
             {/*users card */}
-            <div className="audience-card fade-element fade-delay-1">
+            <div className="audience-card fade-element" style={{ '--fade-index': 1 }}>
               <div className="audience-card-glow audience-glow-user" />
               <div className="audience-icon">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -290,7 +285,7 @@ export default function PlatformPage() {
             </div>
 
             {/*developers card */}
-            <div className="audience-card fade-element fade-delay-2">
+            <div className="audience-card fade-element" style={{ '--fade-index': 2 }}>
               <div className="audience-card-glow audience-glow-dev" />
               <div className="audience-icon audience-icon-dev">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
