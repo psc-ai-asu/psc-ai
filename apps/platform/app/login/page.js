@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, Suspense } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
@@ -20,6 +20,8 @@ const validatePassword = (p) => PASSWORD_RULES.every(r => r.test(p));
 const validateEmail = (em) => /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z]{2,})+$/.test(em.trim());
 
 const HCAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY;
+const RESET_RESEND_COOLDOWN_SECONDS = 60;
+const RESET_RATE_LIMIT_MESSAGE = 'Please wait before requesting another reset code.';
 
 function LoginForm() {
   const router = useRouter();
@@ -39,7 +41,24 @@ function LoginForm() {
   const [resetPasswordValue, setResetPasswordValue] = useState('');
   const [resetPasswordConfirm, setResetPasswordConfirm] = useState('');
   const [resetMessage, setResetMessage] = useState('');
+  const [resetCooldown, setResetCooldown] = useState(0);
   const captchaRef = useRef(null);
+
+  useEffect(() => {
+    if (resetCooldown <= 0) return;
+
+    const timer = window.setTimeout(() => {
+      setResetCooldown((seconds) => {
+        if (seconds <= 1) {
+          setAuthError((message) => message === RESET_RATE_LIMIT_MESSAGE ? '' : message);
+          return 0;
+        }
+        return seconds - 1;
+      });
+    }, 1000);
+
+    return () => window.clearTimeout(timer);
+  }, [resetCooldown]);
 
   const switchMode = async (newMode) => {
     if (mode === 'reset' && resetStep === 'password') {
@@ -199,11 +218,32 @@ function LoginForm() {
     }
   };
 
+  const handleResetSendError = (error, fallbackMessage) => {
+    const message = error?.message || '';
+    const isRateLimited = error?.status === 429
+      || error?.code?.includes('rate_limit')
+      || /security purposes|rate limit|too many requests/i.test(message);
+
+    if (isRateLimited) {
+      const seconds = Number(message.match(/(\d+)\s*seconds?/i)?.[1]) || RESET_RESEND_COOLDOWN_SECONDS;
+      setResetCooldown(seconds);
+      setAuthError(RESET_RATE_LIMIT_MESSAGE);
+      return;
+    }
+
+    setAuthError(fallbackMessage);
+  };
+
   const handleResetRequest = async (e) => {
     e.preventDefault();
     if (authLoading) return;
     setAuthError('');
     setResetMessage('');
+
+    if (resetCooldown > 0) {
+      setAuthError(RESET_RATE_LIMIT_MESSAGE);
+      return;
+    }
 
     if (!validateEmail(resetEmail)) {
       setAuthError('Please enter a valid email address (e.g. you@company.com).');
@@ -216,10 +256,11 @@ function LoginForm() {
     setAuthLoading(false);
 
     if (error) {
-      setAuthError('We could not send your ReviewMyAgent reset code. Please try again.');
+      handleResetSendError(error, 'We could not send your ReviewMyAgent reset code. Please try again.');
       return;
     }
 
+    setResetCooldown(RESET_RESEND_COOLDOWN_SECONDS);
     setResetStep('code');
     setResetMessage('If an account exists for this email, a ReviewMyAgent reset code has been sent.');
   };
@@ -287,7 +328,7 @@ function LoginForm() {
   };
 
   const resendResetCode = async () => {
-    if (authLoading) return;
+    if (authLoading || resetCooldown > 0) return;
     setAuthError('');
     setResetMessage('');
     setAuthLoading(true);
@@ -297,10 +338,11 @@ function LoginForm() {
     setAuthLoading(false);
 
     if (error) {
-      setAuthError('We could not send a new ReviewMyAgent reset code. Please try again.');
+      handleResetSendError(error, 'We could not send a new ReviewMyAgent reset code. Please try again.');
       return;
     }
 
+    setResetCooldown(RESET_RESEND_COOLDOWN_SECONDS);
     setResetCode('');
     setResetMessage('If an account exists for this email, a new ReviewMyAgent reset code has been sent.');
   };
@@ -434,8 +476,8 @@ function LoginForm() {
                     <label htmlFor="reset-email" className="signup-label mono">Email</label>
                     <input id="reset-email" type="email" className="signup-input" placeholder="you@company.com" autoComplete="email" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} required />
                   </div>
-                  <button type="submit" className={`signup-submit${authLoading ? ' signup-submit-disabled' : ''}`} disabled={authLoading}>
-                    {authLoading ? 'Sending code...' : 'Send Reset Code'}
+                  <button type="submit" className={`signup-submit${authLoading || resetCooldown > 0 ? ' signup-submit-disabled' : ''}`} disabled={authLoading || resetCooldown > 0}>
+                    {authLoading ? 'Sending code...' : resetCooldown > 0 ? `Try again in ${resetCooldown}s` : 'Send Reset Code'}
                   </button>
                   <p className="signup-footer-text">Remember your password? <a href="#" className="signup-link" onClick={(e) => { e.preventDefault(); switchMode('signin'); }}>Sign in</a></p>
                 </form>
@@ -458,7 +500,14 @@ function LoginForm() {
                   <button type="submit" className={`signup-submit${authLoading ? ' signup-submit-disabled' : ''}`} disabled={authLoading || resetCode.length < 6 || resetCode.length > 10}>
                     {authLoading ? 'Verifying code...' : 'Verify Code'}
                   </button>
-                  <button type="button" className="reset-secondary-button" onClick={resendResetCode} disabled={authLoading}>Send a new code</button>
+                  {resetCooldown > 0 && (
+                    <p className="reset-cooldown" role="status">
+                      You can request another code in {resetCooldown} second{resetCooldown === 1 ? '' : 's'}.
+                    </p>
+                  )}
+                  <button type="button" className="reset-secondary-button" onClick={resendResetCode} disabled={authLoading || resetCooldown > 0}>
+                    {resetCooldown > 0 ? `Wait ${resetCooldown}s` : 'Send a new code'}
+                  </button>
                 </form>
               </>
             )}
