@@ -500,13 +500,8 @@ function LoginForm() {
                   <button type="submit" className={`signup-submit${authLoading ? ' signup-submit-disabled' : ''}`} disabled={authLoading || resetCode.length < 6 || resetCode.length > 10}>
                     {authLoading ? 'Verifying code...' : 'Verify Code'}
                   </button>
-                  {resetCooldown > 0 && (
-                    <p className="reset-cooldown" role="status">
-                      You can request another code in {resetCooldown} second{resetCooldown === 1 ? '' : 's'}.
-                    </p>
-                  )}
                   <button type="button" className="reset-secondary-button" onClick={resendResetCode} disabled={authLoading || resetCooldown > 0}>
-                    {resetCooldown > 0 ? `Wait ${resetCooldown}s` : 'Send a new code'}
+                    {resetCooldown > 0 ? `Send a new code in ${resetCooldown}s` : 'Send a new code'}
                   </button>
                 </form>
               </>

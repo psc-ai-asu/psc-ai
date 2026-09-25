@@ -642,14 +642,6 @@ body {
   cursor: not-allowed;
 }
 
-.reset-cooldown {
-  margin: 2px 0 -4px;
-  color: var(--text-muted);
-  font-size: 12px;
-  line-height: 1.5;
-  text-align: center;
-}
-
 .reset-password-toggle {
   flex-direction: row;
   align-items: center;
