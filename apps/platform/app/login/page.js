@@ -262,7 +262,7 @@ function LoginForm() {
 
     setResetCooldown(RESET_RESEND_COOLDOWN_SECONDS);
     setResetStep('code');
-    setResetMessage('If an account exists for this email, a ReviewMyAgent reset code has been sent.');
+    setResetMessage('If an account exists for this email, a reset code has been sent.');
   };
 
   const handleResetCode = async (e) => {
@@ -344,7 +344,7 @@ function LoginForm() {
 
     setResetCooldown(RESET_RESEND_COOLDOWN_SECONDS);
     setResetCode('');
-    setResetMessage('If an account exists for this email, a new ReviewMyAgent reset code has been sent.');
+    setResetMessage('If an account exists for this email, a new reset code has been sent.');
   };
 
   const handleClose = async () => {
