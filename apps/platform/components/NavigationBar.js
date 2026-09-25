@@ -26,7 +26,7 @@ export default function NavigationBar() {
       <div className="container">
         <div className={styles.navInner}>
           <Link href="/" className={styles.logo}>
-            <Image src="/rma-logo.png" alt="" width={28} height={28} className={styles.logoMark} />
+            <Image src="/rma-brand-logo.png" alt="" width={32} height={32} className={styles.logoMark} />
             ReviewMyAgent
           </Link>
           <div className={styles.statusContainer}>

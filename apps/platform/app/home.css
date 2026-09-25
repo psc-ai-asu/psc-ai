@@ -164,8 +164,8 @@ body {
 }
 
 .logo-mark {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 8px;
   object-fit: contain;
   flex-shrink: 0;
@@ -403,8 +403,8 @@ body {
 }
 
 .signup-logo-mark {
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   border-radius: 14px;
   display: block;
   object-fit: contain;

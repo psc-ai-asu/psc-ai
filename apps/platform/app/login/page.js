@@ -325,10 +325,10 @@ function LoginForm() {
         </button>
 
         <Image
-          src="/rma-logo.png"
+          src="/rma-brand-logo.png"
           alt="ReviewMyAgent"
-          width={48}
-          height={48}
+          width={56}
+          height={56}
           className="signup-logo-mark"
           priority
         />

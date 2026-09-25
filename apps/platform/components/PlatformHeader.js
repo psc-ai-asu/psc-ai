@@ -13,7 +13,7 @@ export default function PlatformHeader({ current }) {
     <header className="app-header">
       <div className="app-header-inner">
         <Link href="/" className="app-brand">
-          <Image src="/rma-logo.png" alt="" width={30} height={30} className="app-brand-mark" />
+          <Image src="/rma-brand-logo.png" alt="" width={32} height={32} className="app-brand-mark" />
           <span>ReviewMyAgent</span>
         </Link>
         <nav className="app-nav" aria-label="Platform navigation">

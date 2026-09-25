@@ -135,9 +135,9 @@ a {
 }
 
 .app-brand-mark {
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   box-shadow: 0 8px 24px rgba(139, 92, 246, 0.2);
   object-fit: contain;
   flex-shrink: 0;

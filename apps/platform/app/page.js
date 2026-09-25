@@ -140,7 +140,7 @@ export default function PlatformPage() {
         <div className="topbar-box">
           <div className="topbar-left">
             <Link href="/" className="topbar-logo">
-              <Image src="/rma-logo.png" alt="" width={28} height={28} className="logo-mark" priority />
+              <Image src="/rma-brand-logo.png" alt="" width={32} height={32} className="logo-mark" priority />
               ReviewMyAgent
             </Link>
             <nav className="topbar-nav">
