@@ -215,12 +215,12 @@ function LoginForm() {
     setAuthLoading(false);
 
     if (error) {
-      setAuthError(error.message);
+      setAuthError('We could not send your ReviewMyAgent reset code. Please try again.');
       return;
     }
 
     setResetStep('code');
-    setResetMessage('If an account exists for this email, a reset code has been sent.');
+    setResetMessage('If an account exists for this email, a ReviewMyAgent reset code has been sent.');
   };
 
   const handleResetCode = async (e) => {
@@ -296,12 +296,12 @@ function LoginForm() {
     setAuthLoading(false);
 
     if (error) {
-      setAuthError(error.message);
+      setAuthError('We could not send a new ReviewMyAgent reset code. Please try again.');
       return;
     }
 
     setResetCode('');
-    setResetMessage('If an account exists for this email, a new reset code has been sent.');
+    setResetMessage('If an account exists for this email, a new ReviewMyAgent reset code has been sent.');
   };
 
   const handleClose = async () => {
