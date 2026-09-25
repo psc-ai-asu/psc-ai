@@ -21,10 +21,6 @@ const robotoMono = Roboto_Mono({
 
 export const metadata = {
   title: "PSC AI: Rate Your Agents' Performance",
-  icons: {
-    icon: '/rma-brand-logo.png',
-    apple: '/rma-brand-logo.png',
-  },
 };
 
 export default function RootLayout({ children }) {
