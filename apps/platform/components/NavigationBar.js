@@ -3,6 +3,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import styles from './NavigationBar.module.css';
 
@@ -25,7 +26,7 @@ export default function NavigationBar() {
       <div className="container">
         <div className={styles.navInner}>
           <Link href="/" className={styles.logo}>
-            <div className={styles.logoMark}>R</div>
+            <Image src="/rma-brand-logo.png" alt="" width={32} height={32} className={styles.logoMark} />
             ReviewMyAgent
           </Link>
           <div className={styles.statusContainer}>
