@@ -1,171 +1,179 @@
 // The main page for developer dashboard
-
 'use client';
 
-import { useEffect, useState } from 'react';
 import NavigationBar from '../../components/NavigationBar';
 import StatsRow from '../../components/StatsRow';
 import SearchFilters from '../../components/SearchFilters';
 import AgentList from '../../components/AgentList';
 import AgentDetail from '../../components/AgentDetail';
-import { addAgentAction, deleteAgentAction, getAgentsAction, updateAgentAction } from '../actions';
-import { createClient } from '../lib/supabaseClient';
+import { useAgents } from './useAgents';
 
-const EMPTY_FORM = {
-  name: '',
-  description: '',
-  framework: 'Custom',
-  public_metrics: false,
+const STATUS_FILTERS = ['all', 'active', 'fired'];
+
+const labelStyle = {
+  display: 'block',
+  marginBottom: 6,
+  color: 'var(--text-muted)',
+  fontFamily: 'monospace',
+  fontSize: 11,
 };
 
-//placeholder filters
-const status = ['all', 'active', 'fired'];
+const inputStyle = {
+  width: '100%',
+  boxSizing: 'border-box',
+  background: 'var(--bg)',
+  border: '1px solid var(--border)',
+  borderRadius: 6,
+  padding: '8px 10px',
+  fontFamily: 'monospace',
+  fontSize: 12,
+  color: 'var(--text)',
+  outline: 'none',
+};
+
+// Styles for the modal overlay and form
+function AgentFormModal({
+  mode,
+  formData,
+  onChange,
+  onSubmit,
+  onClose,
+  isSubmitting,
+  error,
+}) {
+  const isEdit = mode === 'edit';
+
+  return (
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      background: 'rgba(0,0,0,0.7)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 50,
+      padding: 20,
+    }}>
+      <form
+        onSubmit={onSubmit}
+        style={{
+          width: '100%',
+          maxWidth: 480,
+          background: 'var(--bg-raised)',
+          border: '1px solid var(--border)',
+          borderRadius: 12,
+          padding: 20,
+          boxShadow: '0 16px 40px rgba(0,0,0,0.35)',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <h3 style={{ margin: 0, color: 'var(--text)', fontFamily: 'monospace' }}>
+            {isEdit ? 'Edit Agent' : 'Add Agent'}
+          </h3>
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              background: 'transparent',
+              color: 'var(--text-muted)',
+              border: '1px solid var(--border)',
+              borderRadius: 6,
+              padding: '6px 10px',
+              cursor: 'pointer',
+            }}
+          >
+            Close
+          </button>
+        </div>
+
+        <div style={{ display: 'grid', gap: 14 }}>
+          <div>
+            <label style={labelStyle}>Name</label>
+            <input name="name" value={formData.name} onChange={onChange} style={inputStyle} required />
+          </div>
+
+          <div>
+            <label style={labelStyle}>Description</label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={onChange}
+              rows={4}
+              style={{ ...inputStyle, resize: 'vertical' }}
+            />
+          </div>
+
+          <div>
+            <label style={labelStyle}>Framework</label>
+            <input name="framework" value={formData.framework} onChange={onChange} style={inputStyle} />
+          </div>
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--text)', fontFamily: 'monospace', fontSize: 12 }}>
+            <input
+              type="checkbox"
+              name="public_metrics"
+              checked={formData.public_metrics}
+              onChange={onChange}
+              style={{ accentColor: 'var(--accent)' }}
+            />
+            Public metrics
+          </label>
+
+          {error && (
+            <div style={{ color: '#FF4D4D', fontFamily: 'monospace', fontSize: 12 }}>{error}</div>
+          )}
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <button type="submit" disabled={isSubmitting} style={{
+              background: 'var(--accent)',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 8,
+              padding: '10px 16px',
+              fontFamily: 'monospace',
+              fontWeight: 700,
+              cursor: isSubmitting ? 'not-allowed' : 'pointer',
+              opacity: isSubmitting ? 0.7 : 1,
+            }}>
+              {isSubmitting ? 'Saving…' : (isEdit ? 'Save Changes' : 'Save Agent')}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  );
+}
 
 export default function DeveloperPage() {
-  const [agents, setAgents] = useState([]);
-  const [search, setSearch] = useState('');
-  const [filterStatus, setFilterStatus] = useState(null);
-  const [selectedId, setSelectedId] = useState(null);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [showEditForm, setShowEditForm] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [formData, setFormData] = useState(EMPTY_FORM);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [error, setError] = useState('');
-  const [user, setUser] = useState(null);
+  const {
+    agents,
+    filtered,
+    selectedAgent,
+    user,
+    search,
+    setSearch,
+    filterStatus,
+    setFilterStatus,
+    selectedId,
+    setSelectedId,
+    showAddForm,
+    showEditForm,
+    formData,
+    isSubmitting,
+    isDeleting,
+    error,
+    openAddForm,
+    resetFormState,
+    handleInputChange,
+    handleAddAgent,
+    handleUpdateAgent,
+    handleDeleteAgent,
+    handleEditAgent,
+  } = useAgents();
 
-  useEffect(() => {
-    async function loadUserAndAgents() {
-      const supabase = createClient();
-      const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
-
-      if (userError || !currentUser) {
-        setUser(null);
-        setAgents([]);
-        setSelectedId(null);
-        return;
-      }
-
-      setUser(currentUser);
-
-      try {
-        const data = await getAgentsAction();
-        setAgents(Array.isArray(data) ? data : []);
-        setSelectedId((current) => current ?? data?.[0]?.id ?? null);
-      } catch (err) {
-        console.error('Unable to load agents from Supabase:', err);
-        setAgents([]);
-        setSelectedId(null);
-      }
-    }
-
-    loadUserAndAgents();
-  }, []);
-
-  //filter agents by search and status
-  const filtered = agents.filter((a) => {
-    const matchesSearch = a.name.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = !filterStatus || filterStatus === 'all'
-      ? true
-      : a.status === filterStatus;
-    return matchesSearch && matchesStatus;
-  });
-  const selectedAgent = agents.find((a) => a.id === selectedId) ?? null;
-
-  const resetFormState = () => {
-    setFormData(EMPTY_FORM);
-    setEditingId(null);
-    setShowAddForm(false);
-    setShowEditForm(false);
-    setError('');
-  };
-
-  const handleInputChange = (event) => {
-    const { name, value, type, checked } = event.target;
-    setFormData((current) => ({
-      ...current,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-  };
-
-  const handleAddAgent = async (event) => {
-    event.preventDefault();
-    setError('');
-    setIsSubmitting(true);
-
-    try {
-      const newAgent = await addAgentAction(formData);
-
-      setAgents((current) => [newAgent, ...current]);
-      setSelectedId(newAgent.id);
-      resetFormState();
-    } catch (err) {
-      setError(err.message || 'Could not add agent.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleEditAgent = (agent) => {
-    setEditingId(agent.id);
-    setFormData({
-      name: agent.name ?? '',
-      description: agent.description ?? '',
-      framework: agent.framework ?? 'Custom',
-      public_metrics: Boolean(agent.public_metrics),
-    });
-    setError('');
-    setShowAddForm(false);
-    setShowEditForm(true);
-  };
-
-  const handleUpdateAgent = async (event) => {
-    event.preventDefault();
-    setError('');
-    setIsSubmitting(true);
-
-    try {
-      const updatedAgent = await updateAgentAction(editingId, formData);
-
-      setAgents((current) => current.map((agent) => (
-        agent.id === editingId ? updatedAgent : agent
-      )));
-      setSelectedId(editingId);
-      resetFormState();
-    } catch (err) {
-      setError(err.message || 'Could not update agent.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleDeleteAgent = async () => {
-    if (!selectedAgent) {
-      return;
-    }
-
-    const confirmed = window.confirm(`Delete "${selectedAgent.name}"? This action cannot be undone.`);
-    if (!confirmed) {
-      return;
-    }
-
-    setError('');
-    setIsDeleting(true);
-
-    try {
-      await deleteAgentAction(selectedAgent.id);
-
-      const remainingAgents = agents.filter((agent) => agent.id !== selectedAgent.id);
-      setAgents(remainingAgents);
-      setSelectedId(remainingAgents[0]?.id ?? null);
-    } catch (err) {
-      setError(err.message || 'Could not delete agent.');
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
+  // Ensures the user is authenticated
+  // Change this to a proper redirect to the sign-in page.
+  
   if (!user) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
@@ -182,7 +190,10 @@ export default function DeveloperPage() {
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       <NavigationBar />
 
-      {/* page hero */}
+      {/* Page Hero Details 
+          Contains the title, subtitle, and "Add Agent" button. The button toggles the add agent modal.
+          May need to change how fired agents are displayed in the future.
+      */}
       <div style={{
         borderBottom: '1px solid var(--border)',
         background: 'var(--bg-raised)',
@@ -226,13 +237,7 @@ export default function DeveloperPage() {
             </div>
             <button
               type="button"
-              onClick={() => {
-                setShowAddForm((current) => !current);
-                setShowEditForm(false);
-                setEditingId(null);
-                setFormData(EMPTY_FORM);
-                setError('');
-              }}
+              onClick={openAddForm}
               style={{
                 background: 'var(--accent)',
                 color: '#fff',
@@ -256,108 +261,20 @@ export default function DeveloperPage() {
           </div>
         </div>
       </div>
-
+      {/* Handle Add/Edit Agents */}
       {(showAddForm || showEditForm) && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0,0,0,0.7)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 50,
-          padding: 20,
-        }}>
-          <form
-            onSubmit={showEditForm ? handleUpdateAgent : handleAddAgent}
-            style={{
-              width: '100%',
-              maxWidth: 480,
-              background: 'var(--bg-raised)',
-              border: '1px solid var(--border)',
-              borderRadius: 12,
-              padding: 20,
-              boxShadow: '0 16px 40px rgba(0,0,0,0.35)',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h3 style={{ margin: 0, color: 'var(--text)', fontFamily: 'monospace' }}>
-                {showEditForm ? 'Edit Agent' : 'Add Agent'}
-              </h3>
-              <button
-                type="button"
-                onClick={resetFormState}
-                style={{
-                  background: 'transparent',
-                  color: 'var(--text-muted)',
-                  border: '1px solid var(--border)',
-                  borderRadius: 6,
-                  padding: '6px 10px',
-                  cursor: 'pointer',
-                }}
-              >
-                Close
-              </button>
-            </div>
-
-            <div style={{ display: 'grid', gap: 14 }}>
-              <div>
-                <label style={labelStyle}>Name</label>
-                <input name="name" value={formData.name} onChange={handleInputChange} style={inputStyle} required />
-              </div>
-
-              <div>
-                <label style={labelStyle}>Description</label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  rows={4}
-                  style={{ ...inputStyle, resize: 'vertical' }}
-                />
-              </div>
-
-              <div>
-                <label style={labelStyle}>Framework</label>
-                <input name="framework" value={formData.framework} onChange={handleInputChange} style={inputStyle} />
-              </div>
-
-              <label style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--text)', fontFamily: 'monospace', fontSize: 12 }}>
-                <input
-                  type="checkbox"
-                  name="public_metrics"
-                  checked={formData.public_metrics}
-                  onChange={handleInputChange}
-                  style={{ accentColor: 'var(--accent)' }}
-                />
-                Public metrics
-              </label>
-
-              {error && (
-                <div style={{ color: '#FF4D4D', fontFamily: 'monospace', fontSize: 12 }}>{error}</div>
-              )}
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <button type="submit" disabled={isSubmitting} style={{
-                  background: 'var(--accent)',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: 8,
-                  padding: '10px 16px',
-                  fontFamily: 'monospace',
-                  fontWeight: 700,
-                  cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                  opacity: isSubmitting ? 0.7 : 1,
-                }}>
-                  {isSubmitting ? (showEditForm ? 'Saving…' : 'Saving…') : (showEditForm ? 'Save Changes' : 'Save Agent')}
-                </button>
-              </div>
-            </div>
-          </form>
-        </div>
+        <AgentFormModal
+          mode={showEditForm ? 'edit' : 'add'}
+          formData={formData}
+          onChange={handleInputChange}
+          onSubmit={showEditForm ? handleUpdateAgent : handleAddAgent}
+          onClose={resetFormState}
+          isSubmitting={isSubmitting}
+          error={error}
+        />
       )}
 
-      {/* agent browser */}
+      {/* Details for Agent Browser Column */}
       <div className="container" style={{ padding: '32px 40px' }}>
         <div style={{
           display: 'grid',
@@ -371,7 +288,7 @@ export default function DeveloperPage() {
               setSearch={setSearch}
               filterStatus={filterStatus}
               setFilterStatus={setFilterStatus}
-              status={status}
+              status={STATUS_FILTERS}
             />
             <AgentList
               filtered={filtered}
@@ -390,24 +307,3 @@ export default function DeveloperPage() {
     </div>
   );
 }
-
-const labelStyle = {
-  display: 'block',
-  marginBottom: 6,
-  color: 'var(--text-muted)',
-  fontFamily: 'monospace',
-  fontSize: 11,
-};
-
-const inputStyle = {
-  width: '100%',
-  boxSizing: 'border-box',
-  background: 'var(--bg)',
-  border: '1px solid var(--border)',
-  borderRadius: 6,
-  padding: '8px 10px',
-  fontFamily: 'monospace',
-  fontSize: 12,
-  color: 'var(--text)',
-  outline: 'none',
-};
