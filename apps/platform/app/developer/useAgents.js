@@ -12,10 +12,8 @@ export const EMPTY_FORM = {
 };
 
 /**
- * Owns everything about the developer agent dashboard that isn't presentation:
  * auth/user state, loading agents, search/status filtering, and the
- * add/edit/delete CRUD flows (including the shared form state used by the
- * add/edit modal). The page component should only be wiring this up to JSX.
+ * add/edit/delete CRUD flows
  */
 export function useAgents() {
   const [agents, setAgents] = useState([]);
@@ -91,8 +89,7 @@ export function useAgents() {
     setError('');
   };
 
-  // Toggles the "Add Agent" modal from the hero button, clearing any
-  // in-progress edit so the two forms never overlap.
+  // Toggles the "Add Agent" modal from the hero button
   const openAddForm = () => {
     setShowAddForm((current) => !current);
     setShowEditForm(false);
