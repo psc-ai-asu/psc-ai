@@ -1,4 +1,6 @@
 import { BulletList, ContactCard, DocSection, BodyText } from "@/components/LegalComponents"
+import Footer from "@/components/Footer";
+import PlatformHeader from "@/components/PlatformHeader";
 
 const items = [
   { id: "s1",  label: "Who We Are" },
@@ -17,40 +19,20 @@ const items = [
 
 export default function PrivacyPolicy() {
   return (
-    <div className="min-h-screen bg-[#0D0D0D] text-[#e8eaed]">
-
-      {/* Nav */}
-      <nav className="sticky top-0 z-50 h-14 flex items-center justify-between px-8 border-b border-[#1f1f1f] bg-[#0D0D0D]/85 backdrop-blur-md">
-        <a href="/" className="text-[17px] text-[#e8eaed] no-underline tracking-tight">
-          ReviewMyAgent
-        </a>
-        <ul className="flex gap-6 list-none">
-          {[{ href: "/privacy-policy", label: "Privacy Policy" }, { href: "/terms-of-service", label: "Terms of Service" }].map(({ href, label }) => (
-            <li key={href}>
-              <a
-                href={href}
-                className={`text-[12px] font-normal tracking-widest uppercase no-underline transition-colors duration-200 ${
-                  href === "/privacy-policy" ? "text-violet-400" : "text-[#7a8394] hover:text-violet-400"
-                }`}
-              >
-                {label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
+    <div className="app-shell min-h-screen">
+      <PlatformHeader />
 
       {/* Page layout */}
       <div className="max-w-[1100px] mx-auto px-8 pt-20 pb-32 grid grid-cols-[220px_1fr] gap-16 items-start max-md:grid-cols-1 max-md:gap-8">
 
         <aside className="sticky top-20 hidden md:block">
-          <p className="text-[11px] font-medium text-[#7a8394] tracking-widest uppercase mb-4">
+          <p className="text-[11px] font-medium text-[var(--text-muted)] tracking-widest uppercase mb-4">
             On this page
           </p>
-          <ol className="list-none border-l border-[#1f1f1f] pl-4 space-y-2">
+          <ol className="list-none border-l border-[var(--border)] pl-4 space-y-2">
             {items.map(({ id, label }) => (
               <li key={id}>
-                <a href={`#${id}`} className="block text-[13px] leading-snug no-underline transition-colors duration-200 text-[#7a8394] hover:text-[#e8eaed]">
+                <a href={`#${id}`} className="block text-[13px] leading-snug no-underline transition-colors duration-200 text-[var(--text-muted)] hover:text-[var(--text)]">
                   {label}
                 </a>
               </li>
@@ -60,14 +42,14 @@ export default function PrivacyPolicy() {
 
         {/* Content */}
         <main className="animate-[fadeUp_0.5s_ease_both]">
-          <header className="border-b border-[#1f1f1f] mb-12">
-            <h1 className="text-[44px] font-normal leading-tight text-[#e8eaed] mb-3">
+          <header className="border-b border-[var(--border)] mb-12">
+            <h1 className="text-[44px] font-normal leading-tight text-[var(--text)] mb-3">
               Privacy Policy
             </h1>
 
             <BodyText>
-              This Privacy Policy describes how <strong className="font-medium text-[#e8eaed]">Gentle Systems</strong> ("we,"
-              "us," or "our") collects, uses, stores, and protects your information when you use ReviewMyAgent
+              This Privacy Policy describes how <strong className="font-medium text-[var(--text)]">Gentle Systems</strong> (“we,”
+              “us,” or “our”) collects, uses, stores, and protects your information when you use ReviewMyAgent
               at <a href="https://reviewmyagent.today" className="text-violet-400 hover:underline">reviewmyagent.today</a>.
               By creating an account or using the platform, you agree to the practices described below.
             </BodyText>
@@ -87,7 +69,7 @@ export default function PrivacyPolicy() {
             <DocSection id="s2" num="02" title="Information We Collect">
               <BodyText>We collect information in two ways: information you provide directly, and information collected automatically.</BodyText>
  
-              <p className="text-[13px] font-medium text-[#e8eaed] mt-4 mb-2">Account Information</p>
+              <p className="text-[13px] font-medium text-[var(--text)] mt-4 mb-2">Account Information</p>
               <BulletList items={[
                 "Your email address",
                 "Your name or display name",
@@ -96,7 +78,7 @@ export default function PrivacyPolicy() {
                 "Account creation date and last login timestamp",
               ]} />
  
-              <p className="text-[13px] font-medium text-[#e8eaed] mt-4 mb-2">Platform Activity</p>
+              <p className="text-[13px] font-medium text-[var(--text)] mt-4 mb-2">Platform Activity</p>
               <BulletList items={[
                 "Reviews and ratings you submit for AI agent interactions",
                 "Responses to performance review questions and rubrics",
@@ -104,7 +86,7 @@ export default function PrivacyPolicy() {
                 "Any written feedback or comments submitted through the platform",
               ]} />
  
-              <p className="text-[13px] font-medium text-[#e8eaed] mt-4 mb-2">Agent & Trace Data</p>
+              <p className="text-[13px] font-medium text-[var(--text)] mt-4 mb-2">Agent & Trace Data</p>
               <BodyText>
                 The specific data captured from AI agent traces is subject to ongoing development.
                 This section will be updated as the data model is finalized. See Section 4 for more
@@ -232,15 +214,15 @@ export default function PrivacyPolicy() {
               <BodyText>
                 For any questions, requests, or concerns regarding this Privacy Policy:
               </BodyText>
-              <div className="bg-[#161616] border border-[#1f1f1f] rounded-xl p-6 mt-2 space-y-1.5">
-                <p className="text-[14px] font-medium text-[#e8eaed]">Gentle Systems</p>
-                <p className="text-[14px] font-light text-[#7a8394]">
+              <div className="bg-[var(--bg-raised)] border border-[var(--border)] rounded-xl p-6 mt-2 space-y-1.5">
+                <p className="text-[14px] font-medium text-[var(--text)]">Gentle Systems</p>
+                <p className="text-[14px] font-light text-[var(--text-muted)]">
                   Platform:{" "}
                   <a href="http://reviewmyagent.today" className="text-violet-400 hover:underline">
                     reviewmyagent.today
                   </a>
                 </p>
-                <p className="text-[14px] font-light text-[#7a8394]">
+                <p className="text-[14px] font-light text-[var(--text-muted)]">
                   Privacy inquiries:{" "}
                   <a href="mailto:privacy@reviewmyagent.today" className="text-violet-400 hover:underline">
                     privacy@reviewmyagent.today
@@ -252,6 +234,8 @@ export default function PrivacyPolicy() {
           </div>
         </main>
       </div>
+
+      <Footer />
 
       <style>
         {`

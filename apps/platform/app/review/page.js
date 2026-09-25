@@ -4,6 +4,7 @@ import { ScaleInput, TextInput } from "./components"
 import { useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
 import { createClient } from '@/lib/supabase/client';
+import PlatformHeader from "@/components/PlatformHeader";
 
 // These are only the five "scale" questions (1 - 5 input), which are passed into 
 // the ScaleInput component to dynamically create the unique scale rating.
@@ -72,19 +73,20 @@ function AgentReviewForm() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
+    <div className="app-shell min-h-screen">
 
-      {/* Header */}
-      <div className="border-b border-zinc-800/80 sticky top-0 bg-zinc-950/90 backdrop-blur-sm z-10">
-        <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
+      <PlatformHeader current="agents" />
+      <div className="border-b border-zinc-800/80 bg-zinc-950/70">
+        <div className="max-w-2xl mx-auto px-6 py-5 flex items-center justify-between gap-6">
           <div>
+            <p className="app-kicker mb-1">Review workflow</p>
             <h1 className="text-lg font-bold tracking-tight">Agent Review</h1>
-            <p className="text-xs text-zinc-500 font-mono mt-0.5">{answered}/{totalQuestions} answered</p>
+            <p className="text-xs text-zinc-500 font-mono mt-1">{answered}/{totalQuestions} answered</p>
           </div>
           {/* Progress bar */}
           <div className="flex items-center gap-3">
             <div className="w-28 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-              <div className="h-full rounded-full transition-all duration-500" style={{ width: `${progress}%`, backgroundColor: "#8B5CF6" }} />
+              <div className="h-full rounded-full transition-all duration-500" style={{ width: `${progress}%`, backgroundColor: "var(--accent)" }} />
             </div>
             <span className="text-xs text-zinc-500 font-mono w-8 text-right">{progress}%</span>
           </div>
@@ -94,7 +96,7 @@ function AgentReviewForm() {
       <div className="max-w-2xl mx-auto px-6 py-10">
         {/* Intro */}
         <div className="mb-10">
-          <p className="text-zinc-400 text-sm leading-relaxed max-w-lg">Answer each question to help evaluate the quality of the agent's work.</p>
+          <p className="text-zinc-400 text-sm leading-relaxed max-w-lg">Answer each question to help evaluate the quality of the agent’s work.</p>
         </div>
 
         {/* Questions */}
@@ -102,7 +104,7 @@ function AgentReviewForm() {
           <div className={`p-5 rounded-2xl border transition-all duration-200 ${answers.task_description ? "border-zinc-700 bg-zinc-900/50" : "border-zinc-800/60 bg-zinc-900/20"}`}>
             <label className="text-sm text-zinc-200 font-medium leading-snug">
               Describe the agent task
-              {answers.task_description && <span className="ml-2 text-xs text-green-600">✓</span>}
+              {answers.task_description && <span className="ml-2 text-[10px] font-mono uppercase tracking-wider text-green-600">Answered</span>}
             </label>
             <TextInput
               placeholder="What was the goal of this task? What did you ask the agent to do?"
@@ -116,7 +118,7 @@ function AgentReviewForm() {
             <div key={q.id} className={`p-5 rounded-2xl border transition-all duration-200 ${answers[q.id] !== undefined ? "border-zinc-700 bg-zinc-900/50" : "border-zinc-800/60 bg-zinc-900/20"}`}>
               <label className="text-sm text-zinc-200 font-medium leading-snug">
                 {q.label}
-                {answers[q.id] !== undefined && <span className="ml-2 text-xs text-green-600">✓</span>}
+                {answers[q.id] !== undefined && <span className="ml-2 text-[10px] font-mono uppercase tracking-wider text-green-600">Answered</span>}
               </label>
               <ScaleInput
                 question={q}
@@ -129,7 +131,7 @@ function AgentReviewForm() {
           <div className={`p-5 rounded-2xl border transition-all duration-200 ${answers.note ? "border-zinc-700 bg-zinc-900/50" : "border-zinc-800/60 bg-zinc-900/20"}`}>
             <label className="text-sm text-zinc-200 font-medium leading-snug">
               Notes
-              {answers.note && <span className="ml-2 text-xs text-green-600">✓</span>}
+              {answers.note && <span className="ml-2 text-[10px] font-mono uppercase tracking-wider text-green-600">Answered</span>}
             </label>
             <TextInput
               placeholder="Do you have anything else to note about your experience?"
@@ -158,7 +160,7 @@ function AgentReviewForm() {
                 ? "text-white hover:opacity-90 shadow-lg hover:scale-[1.02] cursor-pointer"
                 : "bg-zinc-800 text-zinc-600 cursor-not-allowed border border-zinc-700"
               }`}
-            style={answered === totalQuestions ? { backgroundColor: "#8B5CF6", boxShadow: "0 4px 24px #8B5CF640" } : {}}
+            style={answered === totalQuestions ? { backgroundColor: "var(--accent)", boxShadow: "0 4px 24px rgba(139, 92, 246, 0.25)" } : {}}
           >
             Submit review
           </button>
@@ -170,7 +172,17 @@ function AgentReviewForm() {
 
 export default function ReviewPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense
+      fallback={(
+        <div className="app-shell min-h-screen">
+          <PlatformHeader current="agents" />
+          <main className="app-page">
+            <p className="app-kicker">Review workflow</p>
+            <p className="app-subtitle mt-3">Loading review form…</p>
+          </main>
+        </div>
+      )}
+    >
       <AgentReviewForm />
     </Suspense>
   );

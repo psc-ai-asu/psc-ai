@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect, useRef, Suspense } from 'react';
+import { useState, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { createClient } from '@/lib/supabase/client';
+import { verifyCaptchaAction } from '../actions';
 
 // Password rules: 8+ chars, starts with capital, ends with special char
 const PASSWORD_RULES = [
@@ -17,82 +18,45 @@ const validatePassword = (p) => PASSWORD_RULES.every(r => r.test(p));
 // Email must match full RFC-style format (no fake domains blocked by pattern)
 const validateEmail = (em) => /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z]{2,})+$/.test(em.trim());
 
-//recaptcha test key from google
-const RECAPTCHA_SITE_KEY = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI';
+const HCAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY;
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get('next') || '/';
-  const mode = searchParams.get('mode') === 'signup' ? 'signup' : 'signin';
+  const requestedMode = searchParams.get('mode');
+  const mode = requestedMode === 'signup' || requestedMode === 'reset' ? requestedMode : 'signin';
 
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
-  const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [passwordValue, setPasswordValue] = useState('');
-  const recaptchaRef = useRef(null);
+  const [resetStep, setResetStep] = useState('email');
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetCode, setResetCode] = useState('');
+  const [resetPasswordValue, setResetPasswordValue] = useState('');
+  const [resetPasswordConfirm, setResetPasswordConfirm] = useState('');
+  const [resetMessage, setResetMessage] = useState('');
+  const captchaRef = useRef(null);
 
-  const switchMode = (newMode) => {
+  const switchMode = async (newMode) => {
+    if (mode === 'reset' && resetStep === 'password') {
+      const supabase = createClient();
+      await resetRequest(() => supabase.auth.signOut({ scope: 'local' }));
+    }
     const params = new URLSearchParams(searchParams.toString());
     params.set('mode', newMode);
     router.replace(`/login?${params.toString()}`);
     setAuthError('');
+    setResetMessage('');
+    setResetStep('email');
+    setResetCode('');
+    setResetPasswordValue('');
+    setResetPasswordConfirm('');
+    setCaptchaToken(null);
     setShowPassword(false);
   };
-
-  //load recaptcha script when in sign-up mode
-  useEffect(() => {
-    if (mode !== 'signup') {
-      setCaptchaVerified(false);
-      return;
-    }
-
-    window.onRecaptchaSuccess = () => setCaptchaVerified(true);
-    window.onRecaptchaExpired = () => setCaptchaVerified(false);
-
-    const renderCaptcha = () => {
-      if (recaptchaRef.current && window.grecaptcha && window.grecaptcha.render) {
-        //clear old widget away
-        recaptchaRef.current.innerHTML = '';
-        try {
-          window.grecaptcha.render(recaptchaRef.current, {
-            sitekey: RECAPTCHA_SITE_KEY,
-            theme: 'dark',
-            callback: 'onRecaptchaSuccess',
-            'expired-callback': 'onRecaptchaExpired',
-          });
-        } catch (e) {
-          //widget maybe render already
-        }
-      }
-    };
-
-    //check if script load already
-    if (window.grecaptcha && window.grecaptcha.render) {
-      //wait small time for dom
-      setTimeout(renderCaptcha, 100);
-    } else {
-      //load script for recaptcha
-      const existing = document.querySelector('script[src*="recaptcha"]');
-      if (!existing) {
-        const script = document.createElement('script');
-        script.src = 'https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit';
-        script.async = true;
-        script.defer = true;
-        window.onRecaptchaLoad = renderCaptcha;
-        document.head.appendChild(script);
-      } else {
-        setTimeout(renderCaptcha, 300);
-      }
-    }
-
-    return () => {
-      //delete global callback
-      delete window.onRecaptchaSuccess;
-      delete window.onRecaptchaExpired;
-    };
-  }, [mode]);
 
   //function for sign up
   const handleSignUp = async (e) => {
@@ -104,6 +68,18 @@ function LoginForm() {
     const email = e.target.querySelector('#signup-email').value;
     const password = e.target.querySelector('#signup-password').value;
     const confirmPassword = e.target.querySelector('#signup-confirm-password').value;
+
+    if (!HCAPTCHA_SITE_KEY) {
+      setAuthError('Signups are temporarily unavailable. Please try again later.');
+      setAuthLoading(false);
+      return;
+    }
+
+    if (!captchaToken) {
+      setAuthError('Please complete the CAPTCHA challenge.');
+      setAuthLoading(false);
+      return;
+    }
 
     // Validate email format
     if (!validateEmail(email)) {
@@ -126,6 +102,15 @@ function LoginForm() {
       return;
     }
 
+    const captchaVerification = await verifyCaptchaAction(captchaToken).catch(() => ({ error: 'Unable to complete the security check. Please try again.' }));
+    if (captchaVerification?.error) {
+      captchaRef.current?.resetCaptcha();
+      setCaptchaToken(null);
+      setAuthError(captchaVerification.error);
+      setAuthLoading(false);
+      return;
+    }
+
     // Store username in auth metadata — this always works regardless of DB table state
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -134,6 +119,8 @@ function LoginForm() {
         data: { username, email },
       },
     });
+    captchaRef.current?.resetCaptcha();
+    setCaptchaToken(null);
     if (error) {
       setAuthError(error.message);
       setAuthLoading(false);
@@ -202,15 +189,139 @@ function LoginForm() {
     router.refresh();
   };
 
+  //reset password
+  const resetRequest = async (request) => {
+    try {
+      return await request();
+    } catch (_) {
+      return { error: { message: 'Unable to connect. Please try again.' } };
+    }
+  };
+
+  const handleResetRequest = async (e) => {
+    e.preventDefault();
+    if (authLoading) return;
+    setAuthError('');
+    setResetMessage('');
+
+    if (!validateEmail(resetEmail)) {
+      setAuthError('Please enter a valid email address (e.g. you@company.com).');
+      return;
+    }
+
+    setAuthLoading(true);
+    const supabase = createClient();
+    const { error } = await resetRequest(() => supabase.auth.resetPasswordForEmail(resetEmail.trim()));
+    setAuthLoading(false);
+
+    if (error) {
+      setAuthError(error.message);
+      return;
+    }
+
+    setResetStep('code');
+    setResetMessage('If an account exists for this email, a reset code has been sent.');
+  };
+
+  const handleResetCode = async (e) => {
+    e.preventDefault();
+    if (authLoading) return;
+    setAuthError('');
+    setResetMessage('');
+
+    if (!/^[0-9]{6,10}$/.test(resetCode.trim())) {
+      setAuthError('Enter the full code from your email.');
+      return;
+    }
+
+    setAuthLoading(true);
+    const supabase = createClient();
+    const { error } = await resetRequest(() => supabase.auth.verifyOtp({
+      email: resetEmail.trim(),
+      token: resetCode.trim(),
+      type: 'recovery',
+    }));
+    setAuthLoading(false);
+
+    if (error) {
+      setAuthError('That code is invalid or has expired. Request a new code and try again.');
+      return;
+    }
+
+    setResetStep('password');
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    if (authLoading) return;
+    setAuthError('');
+
+    if (!validatePassword(resetPasswordValue)) {
+      const failed = PASSWORD_RULES.filter(r => !r.test(resetPasswordValue)).map(r => r.label);
+      setAuthError('Password must: ' + failed.join(', ') + '.');
+      return;
+    }
+
+    if (resetPasswordValue !== resetPasswordConfirm) {
+      setAuthError('Passwords do not match.');
+      return;
+    }
+
+    setAuthLoading(true);
+    const supabase = createClient();
+    const { error } = await resetRequest(() => supabase.auth.updateUser({ password: resetPasswordValue }));
+
+    if (error) {
+      setAuthError(error.message);
+      setAuthLoading(false);
+      return;
+    }
+
+    await resetRequest(() => supabase.auth.signOut({ scope: 'local' }));
+    setResetPasswordValue('');
+    setResetPasswordConfirm('');
+    setResetCode('');
+    setAuthLoading(false);
+    setResetStep('success');
+  };
+
+  const resendResetCode = async () => {
+    if (authLoading) return;
+    setAuthError('');
+    setResetMessage('');
+    setAuthLoading(true);
+
+    const supabase = createClient();
+    const { error } = await resetRequest(() => supabase.auth.resetPasswordForEmail(resetEmail.trim()));
+    setAuthLoading(false);
+
+    if (error) {
+      setAuthError(error.message);
+      return;
+    }
+
+    setResetCode('');
+    setResetMessage('If an account exists for this email, a new reset code has been sent.');
+  };
+
+  const handleClose = async () => {
+    if (authLoading) return;
+    if (mode === 'reset' && resetStep === 'password') {
+      const supabase = createClient();
+      await resetRequest(() => supabase.auth.signOut({ scope: 'local' }));
+    }
+    router.push('/');
+  };
+
   return (
     <div className="signup-overlay" style={{ position: 'fixed' }}>
       <div className="signup-modal" onClick={(e) => e.stopPropagation()}>
-        <Link href="/" className="signup-close" aria-label="Back to home">
+        <button type="button" className="signup-close" aria-label="Back to home" onClick={handleClose}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
-        </Link>
+        </button>
 
         {mode === 'signup' ? (
           <>
@@ -277,13 +388,123 @@ function LoginForm() {
                 <label htmlFor="show-signup-password" style={{ marginLeft: '8px', fontSize: '13px', color: 'var(--text-dim)', cursor: 'pointer' }}>Show password</label>
               </div>
               <div className="signup-captcha">
-                <div ref={recaptchaRef} id="recaptcha-container" />
+                {HCAPTCHA_SITE_KEY ? (
+                  <HCaptcha
+                    ref={captchaRef}
+                    sitekey={HCAPTCHA_SITE_KEY}
+                    theme="dark"
+                    onVerify={setCaptchaToken}
+                    onExpire={() => setCaptchaToken(null)}
+                    onError={() => {
+                      setCaptchaToken(null);
+                      setAuthError('The security check could not load. Please refresh and try again.');
+                    }}
+                  />
+                ) : (
+                  <p className="captcha-config-error">Signups are temporarily unavailable. Please try again later.</p>
+                )}
               </div>
-              <button type="submit" className={`signup-submit${!captchaVerified || authLoading ? ' signup-submit-disabled' : ''}`} disabled={!captchaVerified || authLoading}>
+              <button type="submit" className={`signup-submit${!captchaToken || authLoading ? ' signup-submit-disabled' : ''}`} disabled={!captchaToken || authLoading}>
                 {authLoading ? 'Creating account...' : 'Create Account'}
               </button>
               <p className="signup-footer-text">Already have an account? <a href="#" className="signup-link" onClick={(e) => { e.preventDefault(); switchMode('signin'); }}>Sign in</a></p>
             </form>
+          </>
+        ) : mode === 'reset' ? (
+          <>
+            {resetStep === 'email' && (
+              <>
+                <div className="signup-header">
+                  <h2>Reset your password</h2>
+                  <p className="signup-subtitle">Enter the email connected to your account</p>
+                </div>
+                {authError && <div className="auth-error">{authError}</div>}
+                <form className="signup-form" onSubmit={handleResetRequest}>
+                  <div className="signup-field">
+                    <label htmlFor="reset-email" className="signup-label mono">Email</label>
+                    <input id="reset-email" type="email" className="signup-input" placeholder="you@company.com" autoComplete="email" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} required />
+                  </div>
+                  <button type="submit" className={`signup-submit${authLoading ? ' signup-submit-disabled' : ''}`} disabled={authLoading}>
+                    {authLoading ? 'Sending code...' : 'Send Reset Code'}
+                  </button>
+                  <p className="signup-footer-text">Remember your password? <a href="#" className="signup-link" onClick={(e) => { e.preventDefault(); switchMode('signin'); }}>Sign in</a></p>
+                </form>
+              </>
+            )}
+
+            {resetStep === 'code' && (
+              <>
+                <div className="signup-header">
+                  <h2>Check your email</h2>
+                  <p className="signup-subtitle">Enter the code sent to {resetEmail}</p>
+                </div>
+                {authError && <div className="auth-error">{authError}</div>}
+                {resetMessage && <div className="auth-success">{resetMessage}</div>}
+                <form className="signup-form" onSubmit={handleResetCode}>
+                  <div className="signup-field">
+                    <label htmlFor="reset-code" className="signup-label mono">Reset Code</label>
+                    <input id="reset-code" type="text" className="signup-input reset-code-input" autoComplete="one-time-code" inputMode="numeric" pattern="[0-9]{6,10}" minLength="6" maxLength="10" value={resetCode} onChange={(e) => setResetCode(e.target.value.replace(/\D/g, ''))} required />
+                  </div>
+                  <button type="submit" className={`signup-submit${authLoading ? ' signup-submit-disabled' : ''}`} disabled={authLoading || resetCode.length < 6 || resetCode.length > 10}>
+                    {authLoading ? 'Verifying code...' : 'Verify Code'}
+                  </button>
+                  <button type="button" className="reset-secondary-button" onClick={resendResetCode} disabled={authLoading}>Send a new code</button>
+                </form>
+              </>
+            )}
+
+            {resetStep === 'password' && (
+              <>
+                <div className="signup-header">
+                  <h2>Choose a new password</h2>
+                  <p className="signup-subtitle">Create a secure password for your account</p>
+                </div>
+                {authError && <div className="auth-error">{authError}</div>}
+                <form className="signup-form" onSubmit={handleResetPassword}>
+                  <div className="signup-field">
+                    <label htmlFor="reset-password" className="signup-label mono">New Password</label>
+                    <input id="reset-password" type={showPassword ? 'text' : 'password'} className="signup-input" placeholder="••••••••" autoComplete="new-password" value={resetPasswordValue} onChange={(e) => setResetPasswordValue(e.target.value)} required />
+                    {resetPasswordValue.length > 0 ? (
+                      <ul className="password-rules">
+                        {PASSWORD_RULES.map((rule) => {
+                          const ok = rule.test(resetPasswordValue);
+                          return (
+                            <li key={rule.display} className={`password-rule ${ok ? 'rule-ok' : 'rule-fail'}`}>
+                              <span className="rule-icon">{ok ? 'Met' : 'Needed'}</span>
+                              {rule.display}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <p className="password-hint">Min. 8 chars · starts with capital · ends with special (!@#$%…)</p>
+                    )}
+                  </div>
+                  <div className="signup-field">
+                    <label htmlFor="reset-password-confirm" className="signup-label mono">Confirm New Password</label>
+                    <input id="reset-password-confirm" type={showPassword ? 'text' : 'password'} className="signup-input" placeholder="••••••••" autoComplete="new-password" value={resetPasswordConfirm} onChange={(e) => setResetPasswordConfirm(e.target.value)} required />
+                  </div>
+                  <div className="signup-field reset-password-toggle">
+                    <input id="show-reset-password" type="checkbox" checked={showPassword} onChange={(e) => setShowPassword(e.target.checked)} />
+                    <label htmlFor="show-reset-password">Show password</label>
+                  </div>
+                  <button type="submit" className={`signup-submit${authLoading ? ' signup-submit-disabled' : ''}`} disabled={authLoading}>
+                    {authLoading ? 'Updating password...' : 'Update Password'}
+                  </button>
+                </form>
+              </>
+            )}
+
+            {resetStep === 'success' && (
+              <div className="reset-success-state">
+                <div className="reset-success-icon" aria-hidden="true">✓</div>
+                <div className="signup-header">
+                  <h2>Password updated</h2>
+                  <p className="signup-subtitle">Your new password is ready to use.</p>
+                </div>
+                <button type="button" className="signup-submit" onClick={() => switchMode('signin')}>Return to Sign In</button>
+              </div>
+            )}
           </>
         ) : (
           <>
@@ -300,6 +521,7 @@ function LoginForm() {
               <div className="signup-field">
                 <label htmlFor="signin-password" className="signup-label mono">Password</label>
                 <input id="signin-password" type={showPassword ? "text" : "password"} className="signup-input" placeholder="••••••••" autoComplete="current-password" required />
+                <a href="#" className="reset-password-link" onClick={(e) => { e.preventDefault(); switchMode('reset'); }}>Forgot password?</a>
               </div>
               <div className="signup-field" style={{ flexDirection: 'row', alignItems: 'center', marginTop: '-4px' }}>
                 <input id="show-signin-password" type="checkbox" checked={showPassword} onChange={(e) => setShowPassword(e.target.checked)} style={{ cursor: 'pointer' }} />
@@ -308,7 +530,7 @@ function LoginForm() {
               <button type="submit" className={`signup-submit${authLoading ? ' signup-submit-disabled' : ''}`} disabled={authLoading}>
                 {authLoading ? 'Signing in...' : 'Sign In'}
               </button>
-              <p className="signup-footer-text">Don't have an account? <a href="#" className="signup-link" onClick={(e) => { e.preventDefault(); switchMode('signup'); }}>Sign up</a></p>
+              <p className="signup-footer-text">Don’t have an account? <a href="#" className="signup-link" onClick={(e) => { e.preventDefault(); switchMode('signup'); }}>Sign up</a></p>
             </form>
           </>
         )}

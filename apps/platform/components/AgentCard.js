@@ -23,7 +23,7 @@ export default function AgentCard({ agent, selected, onClick }) {
     >
       <div>
         <div style={{
-          fontFamily: "'Inter', sans-serif",
+          fontFamily: 'var(--font-sans)',
           fontSize: 13,
           fontWeight: 600,
           color: 'var(--text)',
@@ -32,7 +32,7 @@ export default function AgentCard({ agent, selected, onClick }) {
           {agent.name}
         </div>
         <div style={{
-          fontFamily: 'monospace',
+          fontFamily: 'var(--font-mono)',
           fontSize: 10,
           color: 'var(--text-muted)',
           textTransform: 'uppercase',
@@ -42,7 +42,7 @@ export default function AgentCard({ agent, selected, onClick }) {
         </div>
       </div>
       <div style={{
-        fontFamily: "'Inter', sans-serif",
+        fontFamily: 'var(--font-sans)',
         fontSize: 18,
         fontWeight: 700,
         color: scoreColor,

@@ -118,10 +118,10 @@ export default function PlatformPage() {
       <header className="topbar">
         <div className="topbar-box">
           <div className="topbar-left">
-            <a href="#" className="topbar-logo">
+            <Link href="/" className="topbar-logo">
               <span className="logo-mark">R</span>
               ReviewMyAgent
-            </a>
+            </Link>
             <nav className="topbar-nav">
               <a href="#features">Features</a>
               <a href="#how-it-works">How It Works</a>
@@ -139,7 +139,7 @@ export default function PlatformPage() {
             {user && (
               <>
                 <Link href="/agents" className="topbar-btn">Agent Directory</Link>
-                <Link href="/developer" className="topbar-btn">Builder Dashboard</Link>
+                <Link href="/developer" className="topbar-btn">Developer Dashboard</Link>
               </>
             )}
           </div>
@@ -165,7 +165,6 @@ export default function PlatformPage() {
           <div className="hero-actions">
             <a href="#features" className="btn-primary">
               Explore Platform
-              <span style={{ fontSize: '12px' }}>↓</span>
             </a>
             <a href="#how-it-works" className="btn-secondary">How It Works</a>
           </div>
@@ -252,10 +251,10 @@ export default function PlatformPage() {
       <section className="section audience-section" id="who-its-for">
         <div className="container">
           <div style={{ textAlign: 'center', maxWidth: '560px', margin: '0 auto 56px' }}>
-            <div className="section-label mono">Who It's For</div>
+            <div className="section-label mono">Who It’s For</div>
             <div className="section-heading">Built for both sides<br />of the AI equation</div>
             <p className="section-desc" style={{ margin: '0 auto' }}>
-              Whether you're evaluating agents as an end user or building and shipping them as a developer,
+              Whether you’re evaluating agents as an end user or building and shipping them as a developer,
               ReviewMyAgent has a dedicated workspace for you.
             </p>
           </div>
@@ -271,14 +270,14 @@ export default function PlatformPage() {
                 </svg>
               </div>
               <div className="audience-tag mono">For Users</div>
-              <h3>Review agents you've used</h3>
-              <p>Share structured feedback on any AI agent you've interacted with. Rate accuracy, helpfulness, and task completion. Your experience helps developers build better tools.</p>
+              <h3>Review agents you’ve used</h3>
+              <p>Share structured feedback on any AI agent you’ve interacted with. Rate accuracy, helpfulness, and task completion. Your experience helps developers build better tools.</p>
               <ul className="audience-list">
                 <li>Submit ratings and written reviews</li>
                 <li>See how others rate the same agents</li>
                 <li>Track your review history</li>
               </ul>
-              <a href="/consumer" className="audience-btn audience-btn-user">Go to User Dashboard →</a>
+              <Link href="/agents" className="audience-btn audience-btn-user">Browse Agent Directory</Link>
             </div>
 
             {/*developers card */}
@@ -298,7 +297,7 @@ export default function PlatformPage() {
                 <li>Track cost, latency, and error rates</li>
                 <li>Compare agent versions over time</li>
               </ul>
-              <a href="/developer" className="audience-btn audience-btn-dev">Go to Developer Dashboard →</a>
+              <Link href="/developer" className="audience-btn audience-btn-dev">Go to Developer Dashboard</Link>
             </div>
           </div>
         </div>
