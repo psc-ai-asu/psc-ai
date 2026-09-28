@@ -6,6 +6,16 @@ import useAuth from './hooks/useAuth';
 
 import Footer from '@/components/Footer';
 
+//small pill marking a feature as shipped or still in development
+function StatusBadge({ status }) {
+  const live = status === "live";
+  return (
+    <span className={`status-badge ${live ? "status-badge-live" : "status-badge-soon"}`}>
+      {live ? "Available now" : "Coming soon"}
+    </span>
+  );
+}
+
 export default function PlatformPage() {
   // Auth state for the home page
   const { user, logout } = useAuth();
@@ -22,35 +32,40 @@ export default function PlatformPage() {
   ];
 
   //main feature of platform
+  // `status: "live"` ships today; `status: "soon"` is on the roadmap and shown as such in the UI
   const features = [
     {
       title: "Review & Rate Agents",
       desc: "Submit structured reviews on any AI agent. Rate task completion, accuracy, speed, and overall satisfaction.",
-    },
-    {
-      title: "Execution Traces",
-      desc: "Attach full execution traces to reviews. See every LLM call, tool use, and decision point under the hood.",
-    },
-    {
-      title: "Observability Dashboard",
-      desc: "Track token usage, cost-per-run, latency, and tool-call success rates. All the data developers need.",
-    },
-    {
-      title: "Framework Support",
-      desc: "Works with LangChain, CrewAI, AutoGen, OpenAI Swarm, and more. Compare agents across your stack.",
+      status: "live",
     },
     {
       title: "Community Reviews",
       desc: "Browse reviews from real users before integrating an agent. Build trust through transparent track records.",
+      status: "live",
+    },
+    {
+      title: "Framework Tagging",
+      desc: "Agents are tagged with the framework they're built on — LangChain, CrewAI, AutoGen, OpenAI Swarm, and more.",
+      status: "live",
+    },
+    {
+      title: "Execution Traces",
+      desc: "Attach full execution traces to reviews. See every LLM call, tool use, and decision point under the hood.",
+      status: "soon",
+    },
+    {
+      title: "Observability Dashboard",
+      desc: "Track token usage, cost-per-run, latency, and tool-call success rates. All the data developers need.",
+      status: "soon",
+    },
+    {
+      title: "Framework Filtering & Comparison",
+      desc: "Filter the directory by framework and compare agents across your stack side by side.",
+      status: "soon",
     },
   ];
 
-  //how platform working
-  const steps = [
-    { num: 1, title: "Connect Your Agent" },
-    { num: 2, title: "Collect Feedback & Data" },
-    { num: 3, title: "Improve & Iterate" },
-  ];
 
   return (
     <div ref={pageRef} className="page-wrapper">
@@ -124,7 +139,7 @@ export default function PlatformPage() {
             </Link>
             <nav className="topbar-nav">
               <a href="#features">Features</a>
-              <a href="#how-it-works">How It Works</a>
+              <a href="#who-its-for">Who It's For</a>
             </nav>
           </div>
           <div className="topbar-right">
@@ -150,23 +165,18 @@ export default function PlatformPage() {
       <section className="hero">
         <div className="hero-grid-pattern" />
         <div className="container">
-          <div className="hero-badge mono fade-element">
-            <span className="badge-dot" />
-            AI Agent Evaluation Platform
-          </div>
           <h1>
-            Understand how your<br />
-            <span className="highlight">AI agents</span> actually perform
+            Explore agents and leave reviews. Help developers build <span className="highlight">better ones</span>.
           </h1>
           <p className="hero-sub">
-            The only platform that connects real user satisfaction scores to
-            execution traces, token costs, and tool-call logs. Stop guessing, start measuring.
+            Browse agents built by the community, rate the ones you've used,
+            and give developers the real-world feedback they can't get anywhere else.
           </p>
           <div className="hero-actions">
             <a href="#features" className="btn-primary">
               Explore Platform
             </a>
-            <a href="#how-it-works" className="btn-secondary">How It Works</a>
+            <a href="#who-its-for" className="btn-secondary">Who It's For</a>
           </div>
         </div>
       </section>
@@ -210,37 +220,15 @@ export default function PlatformPage() {
 
           <div className="features-grid">
             {features.map((f, i) => (
-              <div className={`feature-card fade-element fade-delay-${i + 1}`} key={f.title}>
+              <div className="feature-card fade-element" style={{ '--fade-index': i + 1 }} key={f.title}>
                 <div className="feature-card-glow" />
-                <h3>{f.title}</h3>
+                <div className="feature-card-head">
+                  <h3>{f.title}</h3>
+                  <StatusBadge status={f.status} />
+                </div>
                 <p>{f.desc}</p>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      <div className="gradient-line" />
-
-      {/*how it works */}
-      <section className="section" id="how-it-works">
-        <div className="container">
-          <div style={{ textAlign: 'center', maxWidth: '500px', margin: '0 auto' }}>
-            <div className="section-label mono">How It Works</div>
-            <div className="section-heading">Three steps to better agents</div>
-          </div>
-
-          {/*steps with connecting line */}
-          <div className="steps-wrapper">
-            <div className="steps-connector" />
-            <div className="steps-row">
-              {steps.map((s, i) => (
-                <div className={`step-card fade-element fade-delay-${i + 1}`} key={s.num}>
-                  <div className="step-num mono">{s.num}</div>
-                  <h3>{s.title}</h3>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </section>
@@ -261,7 +249,7 @@ export default function PlatformPage() {
 
           <div className="audience-grid">
             {/*users card */}
-            <div className="audience-card fade-element fade-delay-1">
+            <div className="audience-card fade-element" style={{ '--fade-index': 1 }}>
               <div className="audience-card-glow audience-glow-user" />
               <div className="audience-icon">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -275,13 +263,13 @@ export default function PlatformPage() {
               <ul className="audience-list">
                 <li>Submit ratings and written reviews</li>
                 <li>See how others rate the same agents</li>
-                <li>Track your review history</li>
+                <li>Track your review history <span className="audience-soon-tag mono">Soon</span></li>
               </ul>
               <Link href="/agents" className="audience-btn audience-btn-user">Browse Agent Directory</Link>
             </div>
 
             {/*developers card */}
-            <div className="audience-card fade-element fade-delay-2">
+            <div className="audience-card fade-element" style={{ '--fade-index': 2 }}>
               <div className="audience-card-glow audience-glow-dev" />
               <div className="audience-icon audience-icon-dev">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -291,11 +279,12 @@ export default function PlatformPage() {
               </div>
               <div className="audience-tag audience-tag-dev mono">For Developers</div>
               <h3>Monitor your agents in production</h3>
-              <p>Get a complete view of how your agents are performing, from user satisfaction scores to token costs, latency, tool call success rates, and full execution traces.</p>
+              <p>See how your agents are performing today through real user reviews, with token costs, latency, tool-call success rates, and full execution traces on the way.</p>
               <ul className="audience-list">
-                <li>View satisfaction scores alongside traces</li>
-                <li>Track cost, latency, and error rates</li>
-                <li>Compare agent versions over time</li>
+                <li>View satisfaction scores from real user reviews</li>
+                <li>View execution traces alongside scores <span className="audience-soon-tag mono">Soon</span></li>
+                <li>Track cost, latency, and error rates <span className="audience-soon-tag mono">Soon</span></li>
+                <li>Compare agent versions over time <span className="audience-soon-tag mono">Soon</span></li>
               </ul>
               <Link href="/developer" className="audience-btn audience-btn-dev">Go to Developer Dashboard</Link>
             </div>
