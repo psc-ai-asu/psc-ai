@@ -28,7 +28,7 @@ export default function PlatformPage() {
     { name: "LangChain", color: "#1AA260" },
     { name: "CrewAI", color: "#7C3AED" },
     { name: "AutoGen", color: "#0EA5E9" },
-    { name: "OpenAI Swarm", color: "#F59E0B" },
+    { name: "OpenAI Agents SDK", color: "#F59E0B" },
   ];
 
   //main feature of platform
@@ -46,7 +46,7 @@ export default function PlatformPage() {
     },
     {
       title: "Framework Tagging",
-      desc: "Agents are tagged with the framework they're built on — LangChain, CrewAI, AutoGen, OpenAI Swarm, and more.",
+      desc: "Agents are tagged with the framework they're built on — LangChain, CrewAI, AutoGen, OpenAI Agents SDK, and more.",
       status: "live",
     },
     {
