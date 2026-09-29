@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
+import { createClient } from '@/lib/supabase/client';
 import useScrollFade from './hooks/useScrollFade';
 import useAuth from './hooks/useAuth';
 
@@ -134,7 +136,7 @@ export default function PlatformPage() {
         <div className="topbar-box">
           <div className="topbar-left">
             <Link href="/" className="topbar-logo">
-              <span className="logo-mark">R</span>
+              <Image src="/rma-brand-logo.png" alt="" width={32} height={32} className="logo-mark" priority />
               ReviewMyAgent
             </Link>
             <nav className="topbar-nav">
