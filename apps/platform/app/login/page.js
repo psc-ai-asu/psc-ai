@@ -17,6 +17,7 @@ const validatePassword = (p) => PASSWORD_RULES.every(r => r.test(p));
 
 // Email must match full RFC-style format (no fake domains blocked by pattern)
 const validateEmail = (em) => /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z]{2,})+$/.test(em.trim());
+const validateUsername = (username) => /^[A-Za-z0-9_-]{3,30}$/.test(username);
 
 const HCAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY;
 
@@ -64,7 +65,7 @@ function LoginForm() {
     setAuthError('');
     setAuthLoading(true);
     const supabase = createClient();
-    const username = e.target.querySelector('#signup-name').value;
+    const username = e.target.querySelector('#signup-name').value.trim();
     const email = e.target.querySelector('#signup-email').value;
     const password = e.target.querySelector('#signup-password').value;
     const confirmPassword = e.target.querySelector('#signup-confirm-password').value;
@@ -77,6 +78,12 @@ function LoginForm() {
 
     if (!captchaToken) {
       setAuthError('Please complete the CAPTCHA challenge.');
+      setAuthLoading(false);
+      return;
+    }
+
+    if (!validateUsername(username)) {
+      setAuthError('Username must be 3–30 characters and use only letters, numbers, underscores, or hyphens.');
       setAuthLoading(false);
       return;
     }
@@ -102,6 +109,23 @@ function LoginForm() {
       return;
     }
 
+    const usernamePattern = username.replace(/_/g, '\\_');
+    const { data: matchingProfiles, error: usernameError } = await supabase
+      .from('profiles')
+      .select('username')
+      .ilike('username', usernamePattern)
+      .limit(1);
+    if (usernameError) {
+      setAuthError('Unable to check the username right now. Please try again.');
+      setAuthLoading(false);
+      return;
+    }
+    if (matchingProfiles?.length) {
+      setAuthError('That username is already taken. Please choose another.');
+      setAuthLoading(false);
+      return;
+    }
+
     const captchaVerification = await verifyCaptchaAction(captchaToken).catch(() => ({ error: 'Unable to complete the security check. Please try again.' }));
     if (captchaVerification?.error) {
       captchaRef.current?.resetCaptcha();
@@ -111,8 +135,7 @@ function LoginForm() {
       return;
     }
 
-    // Store username in auth metadata — this always works regardless of DB table state
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -122,18 +145,14 @@ function LoginForm() {
     captchaRef.current?.resetCaptcha();
     setCaptchaToken(null);
     if (error) {
-      setAuthError(error.message);
+      const { data: takenProfiles } = await supabase
+        .from('profiles')
+        .select('username')
+        .ilike('username', usernamePattern)
+        .limit(1);
+      setAuthError(takenProfiles?.length ? 'That username is already taken. Please choose another.' : error.message);
       setAuthLoading(false);
       return;
-    }
-    if (data.user) {
-      try {
-        await supabase
-          .from('profiles')
-          .upsert({ id: data.user.id, username, email }, { onConflict: 'id' });
-      } catch (_) {
-        // Non-blocking — auth account is already created above
-      }
     }
 
     setPasswordValue('');
