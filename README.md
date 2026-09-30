@@ -28,13 +28,14 @@ npm install
 
 3. Add local environment variables:
 
-The fully deployed project uses Supabase and Google reCAPTCHA environment variables set in Railway.
+The fully deployed project uses Supabase and hCaptcha environment variables set in Railway.
 
 To test the landing app locally, create a `.env.local` file inside `apps/landing/` and set the following environment variables:
 
 - NEXT_PUBLIC_SUPABASE_URL
 - NEXT_PUBLIC_SUPABASE_ANON_KEY
-- NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+- NEXT_PUBLIC_HCAPTCHA_SITE_KEY
+- HCAPTCHA_SECRET_KEY
 
 You'll need a Supabase project (unless using the actual team Supabase project). Once created, run the below SQL in the SQL Editor to set up the required table. You can find your environment variable values under Project Settings → API.
 

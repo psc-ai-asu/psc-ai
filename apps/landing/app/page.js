@@ -25,8 +25,7 @@ export default function LandingPage() {
   // Signup form state
   const [signupEmail, setSignupEmail] = useState('');
 
-  // reCAPTCHA v2 ref and token state
-  const recaptchaRef = useRef(null);
+  const captchaRef = useRef(null);
   const [captchaToken, setCaptchaToken] = useState(null);
 
   // Status state, indicating the status of e-mail submission
@@ -81,7 +80,7 @@ export default function LandingPage() {
     } catch (error) {
       setStatus('error');
     } finally {
-      recaptchaRef.current?.reset();
+      captchaRef.current?.resetCaptcha();
       setCaptchaToken(null);
     }
   };
@@ -239,7 +238,7 @@ export default function LandingPage() {
                 selectedRole={selectedRole}
                 setSelectedRole={setSelectedRole}
                 handleSignupSubmit={handleSignupSubmit}
-                recaptchaRef={recaptchaRef}
+                captchaRef={captchaRef}
                 captchaVerified={!!captchaToken}
                 onCaptchaChange={(token) => setCaptchaToken(token)}
                 

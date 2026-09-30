@@ -17,7 +17,7 @@ export default function Icon() {
       // ImageResponse JSX element
       <div
         style={{
-          background: '#8a4baf',
+          background: '#8b5cf6',
           width: '100%',
           height: '100%',
           display: 'flex',

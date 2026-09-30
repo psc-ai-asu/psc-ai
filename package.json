@@ -13,5 +13,8 @@
   },
   "devDependencies": {
     "turbo": "^2.8.20"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.7"
   }
 }

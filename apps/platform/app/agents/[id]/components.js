@@ -32,3 +32,15 @@ export function ScoreBadge({ score }) {
     </span>
   );
 };
+
+export function VerificationBadge({ status }) {
+  const isVerified = status === "verified";
+  const color = isVerified
+    ? "text-teal-400 bg-teal-400/10 border-teal-400/20"
+    : "text-stone-500 bg-stone-800/50 border-stone-700/50";
+  return (
+    <span className={`text-xs font-mono font-medium px-2 py-0.5 rounded border ${color}`}>
+      {isVerified ? "Verified" : "Unverified"}
+    </span>
+  );
+}
