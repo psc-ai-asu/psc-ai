@@ -1340,6 +1340,17 @@ body {
   }
 }
 
+/* hero buttons don't fit side by side on phones, so stack them full-width */
+@media (max-width: 480px) {
+  .hero-actions {
+    flex-direction: column;
+  }
+
+  .hero-actions a {
+    justify-content: center;
+  }
+}
+
 @media (min-width: 821px) and (max-width: 1024px) {
   .features-grid .feature-card {
     width: calc((100% - 16px) / 2);
