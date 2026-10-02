@@ -42,8 +42,8 @@ export default function AgentDetail({ agent, onEdit, onDelete, isDeleting = fals
         paddingBottom: 20,
         borderBottom: '1px solid var(--border)',
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-          <div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 14 }}>
+          <div style={{ minWidth: 0 }}>
             <div style={{
               fontFamily: 'monospace',
               fontSize: 10,
@@ -60,7 +60,8 @@ export default function AgentDetail({ agent, onEdit, onDelete, isDeleting = fals
               fontWeight: 700,
               color: 'var(--text)',
               letterSpacing: '-0.5px',
-              margin: '0 0 14px 0',
+              margin: 0,
+              overflowWrap: 'anywhere',
             }}>
               {agent.name}
             </h2>
@@ -183,7 +184,7 @@ export default function AgentDetail({ agent, onEdit, onDelete, isDeleting = fals
         }}>
           Metadata
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: 12 }}>
           <InfoCard label="Agent ID" value={agent.id} />
           <InfoCard label="Framework" value={agent.framework} />
           <InfoCard label="Status" value={agent.status} />
@@ -201,6 +202,7 @@ function InfoCard({ label, value }) {
       border: '1px solid var(--border)',
       borderRadius: 8,
       padding: '10px 12px',
+      minWidth: 0,
     }}>
       <div style={{
         fontFamily: 'monospace',
