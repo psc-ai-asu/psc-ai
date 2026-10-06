@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef, Suspense } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
+import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { createClient } from '@/lib/supabase/client';
@@ -17,8 +18,11 @@ const validatePassword = (p) => PASSWORD_RULES.every(r => r.test(p));
 
 // Email must match full RFC-style format (no fake domains blocked by pattern)
 const validateEmail = (em) => /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z]{2,})+$/.test(em.trim());
+const validateUsername = (username) => /^[A-Za-z0-9_-]{3,30}$/.test(username);
 
 const HCAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY;
+const RESET_RESEND_COOLDOWN_SECONDS = 60;
+const RESET_RATE_LIMIT_MESSAGE = 'Please wait before requesting another reset code.';
 
 // The normal hCaptcha widget is 303px wide, which only fits inside the modal above this width
 const COMPACT_CAPTCHA_QUERY = '(max-width: 420px)';
@@ -41,6 +45,7 @@ function LoginForm() {
   const [resetPasswordValue, setResetPasswordValue] = useState('');
   const [resetPasswordConfirm, setResetPasswordConfirm] = useState('');
   const [resetMessage, setResetMessage] = useState('');
+  const [resetCooldown, setResetCooldown] = useState(0);
   const captchaRef = useRef(null);
   const [compactCaptcha, setCompactCaptcha] = useState(false);
 
@@ -52,6 +57,22 @@ function LoginForm() {
     mq.addEventListener('change', update);
     return () => mq.removeEventListener('change', update);
   }, []);
+
+  useEffect(() => {
+    if (resetCooldown <= 0) return;
+
+    const timer = window.setTimeout(() => {
+      setResetCooldown((seconds) => {
+        if (seconds <= 1) {
+          setAuthError((message) => message === RESET_RATE_LIMIT_MESSAGE ? '' : message);
+          return 0;
+        }
+        return seconds - 1;
+      });
+    }, 1000);
+
+    return () => window.clearTimeout(timer);
+  }, [resetCooldown]);
 
   const switchMode = async (newMode) => {
     if (mode === 'reset' && resetStep === 'password') {
@@ -77,7 +98,7 @@ function LoginForm() {
     setAuthError('');
     setAuthLoading(true);
     const supabase = createClient();
-    const username = e.target.querySelector('#signup-name').value;
+    const username = e.target.querySelector('#signup-name').value.trim();
     const email = e.target.querySelector('#signup-email').value;
     const password = e.target.querySelector('#signup-password').value;
     const confirmPassword = e.target.querySelector('#signup-confirm-password').value;
@@ -90,6 +111,12 @@ function LoginForm() {
 
     if (!captchaToken) {
       setAuthError('Please complete the CAPTCHA challenge.');
+      setAuthLoading(false);
+      return;
+    }
+
+    if (!validateUsername(username)) {
+      setAuthError('Username must be 3–30 characters and use only letters, numbers, underscores, or hyphens.');
       setAuthLoading(false);
       return;
     }
@@ -115,6 +142,23 @@ function LoginForm() {
       return;
     }
 
+    const usernamePattern = username.replace(/_/g, '\\_');
+    const { data: matchingProfiles, error: usernameError } = await supabase
+      .from('profiles')
+      .select('username')
+      .ilike('username', usernamePattern)
+      .limit(1);
+    if (usernameError) {
+      setAuthError('Unable to check the username right now. Please try again.');
+      setAuthLoading(false);
+      return;
+    }
+    if (matchingProfiles?.length) {
+      setAuthError('That username is already taken. Please choose another.');
+      setAuthLoading(false);
+      return;
+    }
+
     const captchaVerification = await verifyCaptchaAction(captchaToken).catch(() => ({ error: 'Unable to complete the security check. Please try again.' }));
     if (captchaVerification?.error) {
       captchaRef.current?.resetCaptcha();
@@ -124,8 +168,7 @@ function LoginForm() {
       return;
     }
 
-    // Store username in auth metadata — this always works regardless of DB table state
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -135,18 +178,14 @@ function LoginForm() {
     captchaRef.current?.resetCaptcha();
     setCaptchaToken(null);
     if (error) {
-      setAuthError(error.message);
+      const { data: takenProfiles } = await supabase
+        .from('profiles')
+        .select('username')
+        .ilike('username', usernamePattern)
+        .limit(1);
+      setAuthError(takenProfiles?.length ? 'That username is already taken. Please choose another.' : error.message);
       setAuthLoading(false);
       return;
-    }
-    if (data.user) {
-      try {
-        await supabase
-          .from('profiles')
-          .upsert({ id: data.user.id, username, email }, { onConflict: 'id' });
-      } catch (_) {
-        // Non-blocking — auth account is already created above
-      }
     }
 
     setPasswordValue('');
@@ -211,11 +250,32 @@ function LoginForm() {
     }
   };
 
+  const handleResetSendError = (error, fallbackMessage) => {
+    const message = error?.message || '';
+    const isRateLimited = error?.status === 429
+      || error?.code?.includes('rate_limit')
+      || /security purposes|rate limit|too many requests/i.test(message);
+
+    if (isRateLimited) {
+      const seconds = Number(message.match(/(\d+)\s*seconds?/i)?.[1]) || RESET_RESEND_COOLDOWN_SECONDS;
+      setResetCooldown(seconds);
+      setAuthError(RESET_RATE_LIMIT_MESSAGE);
+      return;
+    }
+
+    setAuthError(fallbackMessage);
+  };
+
   const handleResetRequest = async (e) => {
     e.preventDefault();
     if (authLoading) return;
     setAuthError('');
     setResetMessage('');
+
+    if (resetCooldown > 0) {
+      setAuthError(RESET_RATE_LIMIT_MESSAGE);
+      return;
+    }
 
     if (!validateEmail(resetEmail)) {
       setAuthError('Please enter a valid email address (e.g. you@company.com).');
@@ -228,10 +288,11 @@ function LoginForm() {
     setAuthLoading(false);
 
     if (error) {
-      setAuthError(error.message);
+      handleResetSendError(error, 'We could not send your ReviewMyAgent reset code. Please try again.');
       return;
     }
 
+    setResetCooldown(RESET_RESEND_COOLDOWN_SECONDS);
     setResetStep('code');
     setResetMessage('If an account exists for this email, a reset code has been sent.');
   };
@@ -299,7 +360,7 @@ function LoginForm() {
   };
 
   const resendResetCode = async () => {
-    if (authLoading) return;
+    if (authLoading || resetCooldown > 0) return;
     setAuthError('');
     setResetMessage('');
     setAuthLoading(true);
@@ -309,10 +370,11 @@ function LoginForm() {
     setAuthLoading(false);
 
     if (error) {
-      setAuthError(error.message);
+      handleResetSendError(error, 'We could not send a new ReviewMyAgent reset code. Please try again.');
       return;
     }
 
+    setResetCooldown(RESET_RESEND_COOLDOWN_SECONDS);
     setResetCode('');
     setResetMessage('If an account exists for this email, a new reset code has been sent.');
   };
@@ -335,6 +397,15 @@ function LoginForm() {
             <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
+
+        <Image
+          src="/rma-brand-logo.png"
+          alt="ReviewMyAgent"
+          width={56}
+          height={56}
+          className="signup-logo-mark"
+          priority
+        />
 
         {mode === 'signup' ? (
           <>
@@ -436,8 +507,8 @@ function LoginForm() {
                     <label htmlFor="reset-email" className="signup-label mono">Email</label>
                     <input id="reset-email" type="email" className="signup-input" placeholder="you@company.com" autoComplete="email" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} required />
                   </div>
-                  <button type="submit" className={`signup-submit${authLoading ? ' signup-submit-disabled' : ''}`} disabled={authLoading}>
-                    {authLoading ? 'Sending code...' : 'Send Reset Code'}
+                  <button type="submit" className={`signup-submit${authLoading || resetCooldown > 0 ? ' signup-submit-disabled' : ''}`} disabled={authLoading || resetCooldown > 0}>
+                    {authLoading ? 'Sending code...' : resetCooldown > 0 ? `Try again in ${resetCooldown}s` : 'Send Reset Code'}
                   </button>
                   <p className="signup-footer-text">Remember your password? <a href="#" className="signup-link" onClick={(e) => { e.preventDefault(); switchMode('signin'); }}>Sign in</a></p>
                 </form>
@@ -460,7 +531,9 @@ function LoginForm() {
                   <button type="submit" className={`signup-submit${authLoading ? ' signup-submit-disabled' : ''}`} disabled={authLoading || resetCode.length < 6 || resetCode.length > 10}>
                     {authLoading ? 'Verifying code...' : 'Verify Code'}
                   </button>
-                  <button type="button" className="reset-secondary-button" onClick={resendResetCode} disabled={authLoading}>Send a new code</button>
+                  <button type="button" className="reset-secondary-button" onClick={resendResetCode} disabled={authLoading || resetCooldown > 0}>
+                    {resetCooldown > 0 ? `Send a new code in ${resetCooldown}s` : 'Send a new code'}
+                  </button>
                 </form>
               </>
             )}

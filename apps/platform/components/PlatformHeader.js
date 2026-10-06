@@ -1,4 +1,6 @@
 import Link from "next/link";
+import Image from "next/image";
+import BackButton from "./BackButton";
 
 const links = [
   { href: "/", label: "Home", id: "home" },
@@ -11,10 +13,11 @@ export default function PlatformHeader({ current }) {
     <header className="app-header">
       <div className="app-header-inner">
         <Link href="/" className="app-brand">
-          <span className="app-brand-mark" aria-hidden="true">R</span>
+          <Image src="/rma-brand-logo.png" alt="" width={32} height={32} className="app-brand-mark" />
           <span>ReviewMyAgent</span>
         </Link>
         <nav className="app-nav" aria-label="Platform navigation">
+          <BackButton />
           {links.map(({ href, label, id }) => (
             <Link
               key={href}
