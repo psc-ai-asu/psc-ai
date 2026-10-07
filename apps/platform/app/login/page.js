@@ -24,6 +24,9 @@ const HCAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY;
 const RESET_RESEND_COOLDOWN_SECONDS = 60;
 const RESET_RATE_LIMIT_MESSAGE = 'Please wait before requesting another reset code.';
 
+// The normal hCaptcha widget is 303px wide, which only fits inside the modal above this width
+const COMPACT_CAPTCHA_QUERY = '(max-width: 420px)';
+
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -44,6 +47,16 @@ function LoginForm() {
   const [resetMessage, setResetMessage] = useState('');
   const [resetCooldown, setResetCooldown] = useState(0);
   const captchaRef = useRef(null);
+  const [compactCaptcha, setCompactCaptcha] = useState(false);
+
+  // Switch to the compact captcha on narrow screens so it isn't clipped by the modal
+  useEffect(() => {
+    const mq = window.matchMedia(COMPACT_CAPTCHA_QUERY);
+    const update = () => setCompactCaptcha(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
 
   useEffect(() => {
     if (resetCooldown <= 0) return;
@@ -431,8 +444,7 @@ function LoginForm() {
                   value={passwordValue}
                   onChange={(e) => setPasswordValue(e.target.value)}
                 />
-                {/* Live password requirements checklist */}
-                {passwordValue.length > 0 && (
+                {/* {passwordValue.length > 0 && (
                   <ul className="password-rules">
                     {PASSWORD_RULES.map((rule) => {
                       const ok = rule.test(passwordValue);
@@ -445,10 +457,9 @@ function LoginForm() {
                     })}
                   </ul>
                 )}
-                {/* Static hint when field is empty */}
                 {passwordValue.length === 0 && (
                   <p className="password-hint">Min. 8 chars · starts with capital · ends with special (!@#$%…)</p>
-                )}
+                )} */}
               </div>
               <div className="signup-field">
                 <label htmlFor="signup-confirm-password" className="signup-label mono">Confirm Password</label>
@@ -464,6 +475,7 @@ function LoginForm() {
                     ref={captchaRef}
                     sitekey={HCAPTCHA_SITE_KEY}
                     theme="dark"
+                    size={compactCaptcha ? 'compact' : 'normal'}
                     onVerify={setCaptchaToken}
                     onExpire={() => setCaptchaToken(null)}
                     onError={() => {

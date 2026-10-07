@@ -27,6 +27,8 @@ export default function AgentProfile({ agent }) {
   const [selected, setSelected] = useState(allReviews[0] ?? null);
   const [tab, setTab] = useState("experience");
   const [search, setSearch] = useState("");
+  // Below md the list and the detail don't fit side by side, so only one shows at a time
+  const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
 
   const filtered = allReviews.filter((r) =>
     r.reviewedBy.toLowerCase().includes(search.toLowerCase())
@@ -41,11 +43,11 @@ export default function AgentProfile({ agent }) {
   ];
 
   return (
-    <div className="app-shell h-screen flex flex-col">
+    <div className="app-shell h-screen flex flex-col" style={{ height: "100dvh", minHeight: 0 }}>
       <PlatformHeader current="agents" />
 
-      <div className="flex flex-1 overflow-hidden" style={{ height: "calc(100vh - 65px)" }}>
-        <aside className="w-72 border-r border-stone-800 flex flex-col overflow-hidden flex-shrink-0">
+      <div className="flex flex-1 min-h-0 overflow-hidden">
+        <aside className={`${mobileDetailOpen ? "hidden" : "flex"} md:flex w-full md:w-72 md:border-r border-stone-800 flex-col overflow-hidden flex-shrink-0`}>
           <div className="px-4 pt-4 pb-3 border-b border-stone-800">
             <div className="flex items-center justify-between gap-2 mb-2">
               <div>
@@ -114,7 +116,7 @@ export default function AgentProfile({ agent }) {
               filtered.map((r) => (
                 <button
                   key={r.id}
-                  onClick={() => { setSelected(r); setTab("experience"); }}
+                  onClick={() => { setSelected(r); setTab("experience"); setMobileDetailOpen(true); }}
                   className={`w-full text-left px-4 py-3 border-b border-stone-800/40 transition-colors hover:bg-stone-900 ${
                     selected?.id === r.id
                       ? "bg-stone-900 border-l-2 border-l-violet-500"
@@ -138,11 +140,17 @@ export default function AgentProfile({ agent }) {
         </aside>
 
         {selected ? (
-          <main className="flex-1 flex flex-col overflow-hidden">
+          <main className={`${mobileDetailOpen ? "flex" : "hidden"} md:flex flex-1 min-w-0 flex-col overflow-hidden`}>
             <div className="px-6 py-4 border-b border-stone-800 flex items-start justify-between gap-4">
-              <div>
+              <div className="min-w-0">
+                <button
+                  onClick={() => setMobileDetailOpen(false)}
+                  className="md:hidden block text-xs text-stone-500 hover:text-stone-300 transition-colors py-1 mb-1"
+                >
+                  ← All reviews
+                </button>
                 <h1 className="text-lg font-semibold text-stone-100 mb-0.5">{agent.name}</h1>
-                <p className="text-xs text-stone-500 mb-2 flex items-center gap-2">
+                <p className="text-xs text-stone-500 mb-2 flex flex-wrap items-center gap-2">
                   <span>Review by {selected.reviewedBy} · {selected.date}</span>
                   <VerificationBadge status={selected.verification_status} />
                 </p>
@@ -172,7 +180,7 @@ export default function AgentProfile({ agent }) {
 
             <div className="flex-1 overflow-y-auto px-6 py-5">
               {tab === "experience" ? (
-                <div className="grid grid-cols-2 gap-6 h-full">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:h-full">
                   <div className="space-y-6">
                     <div>
                       <p className="text-xs font-medium text-stone-500 uppercase tracking-widest mb-3">Rubric scores</p>
@@ -232,7 +240,7 @@ export default function AgentProfile({ agent }) {
             </div>
           </main>
         ) : (
-          <main className="flex-1 flex items-center justify-center">
+          <main className="hidden md:flex flex-1 items-center justify-center">
             <p className="text-sm text-stone-600 italic">No review selected</p>
           </main>
         )}
