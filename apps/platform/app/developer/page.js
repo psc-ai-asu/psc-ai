@@ -11,6 +11,7 @@ import AgentDetail from '../../components/AgentDetail';
 import { useAgents } from './useAgents';
 
 const STATUS_FILTERS = ['all', 'active', 'fired'];
+const FRAMEWORK_OPTIONS = ['LangChain', 'CrewAI', 'AutoGen', 'OpenAI Swarm', 'Custom'];
 
 const labelStyle = {
   display: 'block',
@@ -107,7 +108,18 @@ function AgentFormModal({
 
           <div>
             <label style={labelStyle}>Framework</label>
-            <input name="framework" value={formData.framework} onChange={onChange} style={inputStyle} />
+            <select
+              name="framework"
+              value={formData.framework || 'Custom'}
+              onChange={onChange}
+              style={{ ...inputStyle, appearance: 'none' }}
+            >
+              {FRAMEWORK_OPTIONS.map((framework) => (
+                <option key={framework} value={framework}>
+                  {framework}
+                </option>
+              ))}
+            </select>
           </div>
 
           <label style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--text)', fontFamily: 'monospace', fontSize: 12 }}>
