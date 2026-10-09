@@ -141,7 +141,7 @@ export default function PlatformPage() {
             </Link>
             <nav className="topbar-nav">
               <a href="#features">Features</a>
-              <a href="#who-its-for">Who It's For</a>
+              <a href="#who-its-for">Who It&apos;s For</a>
             </nav>
           </div>
           <div className="topbar-right">
@@ -171,14 +171,14 @@ export default function PlatformPage() {
             Explore agents and leave reviews. Help developers build <span className="highlight">better ones</span>.
           </h1>
           <p className="hero-sub">
-            Browse agents built by the community, rate the ones you've used,
-            and give developers the real-world feedback they can't get anywhere else.
+            Browse agents built by the community, rate the ones you&apos;ve used,
+            and give developers the real-world feedback they can&apos;t get anywhere else.
           </p>
           <div className="hero-actions">
             <a href="#features" className="btn-primary">
               Explore Platform
             </a>
-            <a href="#who-its-for" className="btn-secondary">Who It's For</a>
+            <a href="#who-its-for" className="btn-secondary">Who It&apos;s For</a>
           </div>
         </div>
       </section>
