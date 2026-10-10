@@ -7,12 +7,19 @@ function buildAgentRow(row = {}) {
     id: row.id,
     name: row.name ?? 'Untitled Agent',
     description: row.description ?? '',
-    framework: row.framework ?? 'Custom',
+    framework: normalizeFramework(row.framework),
     status: row.status ?? 'active',
     public_metrics: Boolean(row.public_metrics),
     developed_by: row.developed_by,
     created_at: row.created_at,
   };
+}
+
+function normalizeFramework(value) {
+  const framework = typeof value === 'string' ? value.trim() : '';
+  const validFrameworks = ['LangChain', 'CrewAI', 'AutoGen', 'OpenAI Swarm', 'Custom'];
+
+  return validFrameworks.includes(framework) ? framework : 'Custom';
 }
 
 export async function getAgentsAction() {
@@ -58,7 +65,7 @@ export async function addAgentAction(formData = {}) {
     developed_by: user.id,
     name: formData.name?.trim() || 'Untitled Agent',
     description: formData.description ?? '',
-    framework: formData.framework || 'Custom',
+    framework: normalizeFramework(formData.framework),
     public_metrics: Boolean(formData.public_metrics),
     status: 'active',
   };
@@ -92,7 +99,7 @@ export async function updateAgentAction(agentId, formData = {}) {
   const payload = {
     name: formData.name?.trim() || 'Untitled Agent',
     description: formData.description ?? '',
-    framework: formData.framework || 'Custom',
+    framework: normalizeFramework(formData.framework),
     public_metrics: Boolean(formData.public_metrics),
   };
 

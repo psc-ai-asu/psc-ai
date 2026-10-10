@@ -2,6 +2,14 @@
 
 'use client';
 
+const FRAMEWORK_COLORS = {
+  LangChain: '#1AA260',
+  CrewAI: '#7C3AED',
+  AutoGen: '#0EA5E9',
+  'OpenAI Swarm': '#F59E0B',
+  Custom: '#94A3B8',
+};
+
 export default function AgentDetail({ agent, onEdit, onDelete, isDeleting = false }) {
   if (!agent) {
     return (
@@ -25,6 +33,7 @@ export default function AgentDetail({ agent, onEdit, onDelete, isDeleting = fals
   }
 
   const statusColor = agent.status === 'active' ? 'var(--green)' : '#FF4D4D';
+  const frameworkColor = FRAMEWORK_COLORS[agent.framework] || '#94A3B8';
   const formattedDate = agent.created_at
     ? new Date(agent.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
     : 'Unknown';
@@ -121,11 +130,11 @@ export default function AgentDetail({ agent, onEdit, onDelete, isDeleting = fals
           <span style={{
             fontSize: 10,
             fontFamily: 'monospace',
-            color: 'var(--accent)',
+            color: frameworkColor,
             padding: '4px 10px',
-            border: '1px solid rgba(139,92,246,0.4)',
+            border: `1px solid ${frameworkColor}66`,
             borderRadius: 4,
-            background: 'var(--accent-soft)',
+            background: `${frameworkColor}1A`,
           }}>
             {agent.framework}
           </span>
