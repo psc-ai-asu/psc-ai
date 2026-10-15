@@ -1,7 +1,16 @@
 // card for a single agent in the sidebar list
 
+const FRAMEWORK_COLORS = {
+  LangChain: '#1AA260',
+  CrewAI: '#7C3AED',
+  AutoGen: '#0EA5E9',
+  'OpenAI Swarm': '#F59E0B',
+  Custom: '#94A3B8',
+};
+
 export default function AgentCard({ agent, selected, onClick }) {
   const statusColor = agent.status === 'active' ? 'var(--green)' : '#FF4D4D';
+  const frameworkColor = FRAMEWORK_COLORS[agent.framework] || '#94A3B8';
 
   return (
     <div
@@ -58,7 +67,14 @@ export default function AgentCard({ agent, selected, onClick }) {
       <div style={{
         fontFamily: 'monospace',
         fontSize: 11,
-        color: 'var(--text-muted)',
+        color: frameworkColor,
+        background: `${frameworkColor}1A`,
+        border: `1px solid ${frameworkColor}66`,
+        borderRadius: 4,
+        padding: '3px 7px',
+        display: 'inline-flex',
+        alignItems: 'center',
+        width: 'fit-content',
       }}>
         {agent.framework}
       </div>
