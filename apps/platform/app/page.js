@@ -1,8 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { createClient } from '@/lib/supabase/client';
 import useScrollFade from './hooks/useScrollFade';
 import useAuth from './hooks/useAuth';
 
@@ -21,6 +21,10 @@ function StatusBadge({ status }) {
 export default function PlatformPage() {
   // Auth state for the home page
   const { user, logout } = useAuth();
+
+  // Mobile nav menu (the topbar collapses into a hamburger on narrow screens)
+  const [menuOpen, setMenuOpen] = useState(false);
+  const closeMenu = () => setMenuOpen(false);
 
   //scroll fade effect for card
   const pageRef = useScrollFade({ threshold: 0.1 });
@@ -146,21 +150,64 @@ export default function PlatformPage() {
           </div>
           <div className="topbar-right">
             {user ? (
-              <button className="topbar-logout-btn" onClick={logout}>Log Out</button>
+              <button className="topbar-logout-btn topbar-desktop-only" onClick={logout}>Log Out</button>
             ) : (
               <>
-                <Link href="/login?mode=signup" className="topbar-signup-btn">Sign Up</Link>
+                <Link href="/login?mode=signup" className="topbar-signup-btn topbar-desktop-only">Sign Up</Link>
                 <Link href="/login" className="topbar-signup-btn">Sign In</Link>
               </>
             )}
             {user && (
               <>
-                <Link href="/agents" className="topbar-btn">Agent Directory</Link>
-                <Link href="/developer" className="topbar-btn">Developer Dashboard</Link>
+                <Link href="/agents" className="topbar-btn topbar-desktop-only">Agent Directory</Link>
+                <Link href="/developer" className="topbar-btn topbar-desktop-only">Developer Dashboard</Link>
               </>
             )}
+            <button
+              type="button"
+              className="topbar-menu-btn"
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={menuOpen}
+              aria-controls="topbar-menu"
+              onClick={() => setMenuOpen((open) => !open)}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                {menuOpen ? (
+                  <>
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </>
+                ) : (
+                  <>
+                    <line x1="4" y1="7" x2="20" y2="7" />
+                    <line x1="4" y1="12" x2="20" y2="12" />
+                    <line x1="4" y1="17" x2="20" y2="17" />
+                  </>
+                )}
+              </svg>
+            </button>
           </div>
         </div>
+
+        {/*mobile menu panel */}
+        {menuOpen && (
+          <nav id="topbar-menu" className="topbar-menu" aria-label="Mobile navigation">
+            <a href="#features" onClick={closeMenu}>Features</a>
+            <a href="#who-its-for" onClick={closeMenu}>Who It’s For</a>
+            {user ? (
+              <>
+                <Link href="/agents" onClick={closeMenu}>Agent Directory</Link>
+                <Link href="/developer" onClick={closeMenu}>Developer Dashboard</Link>
+                <button type="button" className="topbar-menu-logout" onClick={() => { closeMenu(); logout(); }}>Log Out</button>
+              </>
+            ) : (
+              <>
+                <Link href="/login?mode=signup" onClick={closeMenu}>Sign Up</Link>
+                <Link href="/login" onClick={closeMenu}>Sign In</Link>
+              </>
+            )}
+          </nav>
+        )}
       </header>
 
       {/*hero with decorative grid pattern */}

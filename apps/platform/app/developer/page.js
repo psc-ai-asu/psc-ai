@@ -1,6 +1,7 @@
 // The main page for developer dashboard
 'use client';
 
+import { useRef } from 'react';
 import NavigationBar from '../../components/NavigationBar';
 import PlatformHeader from '../../components/PlatformHeader';
 import Footer from '../../components/Footer';
@@ -65,15 +66,17 @@ function AgentFormModal({
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      zIndex: 50,
+      zIndex: 200,
       padding: 20,
     }}>
       <form
         onSubmit={onSubmit}
         style={{
           width: '100%',
-          maxWidth: 520,
-          background: 'var(--surface)',
+          maxWidth: 480,
+          maxHeight: '100%',
+          overflowY: 'auto',
+          background: 'var(--bg-raised)',
           border: '1px solid var(--border)',
           borderRadius: 16,
           padding: 24,
@@ -256,18 +259,18 @@ export default function DeveloperPage() {
         padding: '48px 0 36px',
       }}>
         <div className="container">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
             <div>
               <h1 style={{
                 fontFamily: "'Inter', sans-serif",
-                fontSize: 36,
+                fontSize: 'clamp(28px, 6vw, 36px)',
                 fontWeight: 700,
                 letterSpacing: '-0.5px',
                 color: 'var(--text)',
                 marginBottom: 10,
                 lineHeight: 1.2,
               }}>
-                Agent performance reviews
+                My Agents
               </h1>
               <p style={{
                 fontSize: 15,
@@ -275,7 +278,7 @@ export default function DeveloperPage() {
                 fontWeight: 300,
                 marginBottom: 0,
               }}>
-                Monitor, evaluate, and manage your agents.
+                Monitor, evaluate, and manage the agents you’ve onboarded.
               </p>
             </div>
             <button
@@ -322,13 +325,8 @@ export default function DeveloperPage() {
       )}
 
       {/* Details for Agent Browser Column */}
-      <div className="container" style={{ padding: '32px 40px' }}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '320px minmax(0, 1fr)',
-          gap: 20,
-          alignItems: 'start',
-        }}>
+      <div className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
+        <div className="developer-grid">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <SearchFilters
               search={search}
@@ -340,15 +338,17 @@ export default function DeveloperPage() {
             <AgentList
               filtered={filtered}
               selectedId={selectedId}
-              setSelectedId={setSelectedId}
+              setSelectedId={handleSelectAgent}
             />
           </div>
-          <AgentDetail
-            agent={selectedAgent}
-            onEdit={handleEditAgent}
-            onDelete={handleDeleteAgent}
-            isDeleting={isDeleting}
-          />
+          <div ref={detailRef} style={{ scrollMarginTop: 112 }}>
+            <AgentDetail
+              agent={selectedAgent}
+              onEdit={handleEditAgent}
+              onDelete={handleDeleteAgent}
+              isDeleting={isDeleting}
+            />
+          </div>
         </div>
       </div>
       <Footer />
