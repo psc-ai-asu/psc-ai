@@ -12,13 +12,23 @@ import AgentDetail from '../../components/AgentDetail';
 import { useAgents } from './useAgents';
 
 const STATUS_FILTERS = ['all', 'active', 'fired'];
+const FRAMEWORK_OPTIONS = ['LangChain', 'CrewAI', 'AutoGen', 'OpenAI Swarm', 'Custom'];
+const FRAMEWORK_COLORS = {
+  LangChain: '#1AA260',
+  CrewAI: '#7C3AED',
+  AutoGen: '#0EA5E9',
+  'OpenAI Swarm': '#F59E0B',
+  Custom: '#94A3B8',
+};
 
 const labelStyle = {
   display: 'block',
-  marginBottom: 6,
+  marginBottom: 8,
   color: 'var(--text-muted)',
-  fontFamily: 'monospace',
+  fontFamily: 'var(--font-mono)',
   fontSize: 11,
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
 };
 
 const inputStyle = {
@@ -26,12 +36,13 @@ const inputStyle = {
   boxSizing: 'border-box',
   background: 'var(--bg)',
   border: '1px solid var(--border)',
-  borderRadius: 6,
-  padding: '8px 10px',
-  fontFamily: 'monospace',
-  fontSize: 12,
+  borderRadius: 10,
+  padding: '10px 12px',
+  fontFamily: 'var(--font-sans)',
+  fontSize: 14,
   color: 'var(--text)',
   outline: 'none',
+  transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
 };
 
 // Styles for the modal overlay and form
@@ -45,6 +56,7 @@ function AgentFormModal({
   error,
 }) {
   const isEdit = mode === 'edit';
+  const frameworkColor = FRAMEWORK_COLORS[formData.framework || 'Custom'] || '#94A3B8';
 
   return (
     <div style={{
@@ -66,35 +78,41 @@ function AgentFormModal({
           overflowY: 'auto',
           background: 'var(--bg-raised)',
           border: '1px solid var(--border)',
-          borderRadius: 12,
-          padding: 20,
-          boxShadow: '0 16px 40px rgba(0,0,0,0.35)',
+          borderRadius: 16,
+          padding: 24,
+          boxShadow: '0 16px 40px rgba(0,0,0,0.38)',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <h3 style={{ margin: 0, color: 'var(--text)', fontFamily: 'monospace' }}>
-            {isEdit ? 'Edit Agent' : 'Add Agent'}
-          </h3>
-          <button
-            type="button"
-            onClick={onClose}
-            style={{
-              background: 'transparent',
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <div>
+            <div style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 10,
               color: 'var(--text-muted)',
-              border: '1px solid var(--border)',
-              borderRadius: 6,
-              padding: '6px 10px',
-              cursor: 'pointer',
-            }}
-          >
-            Close
-          </button>
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              marginBottom: 8,
+            }}>
+              {isEdit ? 'Edit agent' : 'Add agent'}
+            </div>
+            <h3 style={{ margin: 0, color: 'var(--text)', fontSize: 28, fontWeight: 700, letterSpacing: '-0.04em' }}>
+              {isEdit ? 'Update agent' : 'Create agent'}
+            </h3>
+          </div>
         </div>
 
-        <div style={{ display: 'grid', gap: 14 }}>
+        <div style={{ display: 'grid', gap: 16 }}>
           <div>
             <label style={labelStyle}>Name</label>
-            <input name="name" value={formData.name} onChange={onChange} style={inputStyle} required />
+            <input
+              name="name"
+              value={formData.name}
+              onChange={onChange}
+              style={inputStyle}
+              required
+              onFocus={(e) => e.target.style.borderColor = 'var(--accent)'}
+              onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
+            />
           </div>
 
           <div>
@@ -104,43 +122,94 @@ function AgentFormModal({
               value={formData.description}
               onChange={onChange}
               rows={4}
-              style={{ ...inputStyle, resize: 'vertical' }}
+              style={{ ...inputStyle, resize: 'vertical', minHeight: 120 }}
+              onFocus={(e) => e.target.style.borderColor = 'var(--accent)'}
+              onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
             />
           </div>
 
           <div>
             <label style={labelStyle}>Framework</label>
-            <input name="framework" value={formData.framework} onChange={onChange} style={inputStyle} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <select
+                name="framework"
+                value={formData.framework || 'Custom'}
+                onChange={onChange}
+                style={{ ...inputStyle, appearance: 'none', paddingRight: 32 }}
+                onFocus={(e) => e.target.style.borderColor = 'var(--accent)'}
+                onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
+              >
+                {FRAMEWORK_OPTIONS.map((framework) => (
+                  <option key={framework} value={framework}>
+                    {framework}
+                  </option>
+                ))}
+              </select>
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minWidth: 90,
+                padding: '7px 10px',
+                borderRadius: 999,
+                border: `1px solid ${frameworkColor}66`,
+                background: `${frameworkColor}1A`,
+                color: frameworkColor,
+                fontFamily: 'var(--font-mono)',
+                fontSize: 10,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                fontWeight: 700,
+              }}>
+                {formData.framework || 'Custom'}
+              </span>
+            </div>
           </div>
 
-          <label style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--text)', fontFamily: 'monospace', fontSize: 12 }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--text)', fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
             <input
               type="checkbox"
               name="public_metrics"
               checked={formData.public_metrics}
               onChange={onChange}
-              style={{ accentColor: 'var(--accent)' }}
+              style={{ accentColor: 'var(--accent)', width: 16, height: 16 }}
             />
             Public metrics
           </label>
 
           {error && (
-            <div style={{ color: '#FF4D4D', fontFamily: 'monospace', fontSize: 12 }}>{error}</div>
+            <div style={{ color: '#FF6B6B', fontFamily: 'var(--font-mono)', fontSize: 12 }}>{error}</div>
           )}
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 6 }}>
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                background: 'transparent',
+                color: 'var(--text)',
+                border: '1px solid var(--border)',
+                borderRadius: 8,
+                padding: '10px 14px',
+                fontFamily: 'var(--font-mono)',
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              Cancel
+            </button>
             <button type="submit" disabled={isSubmitting} style={{
               background: 'var(--accent)',
               color: '#fff',
               border: 'none',
               borderRadius: 8,
               padding: '10px 16px',
-              fontFamily: 'monospace',
+              fontFamily: 'var(--font-mono)',
               fontWeight: 700,
               cursor: isSubmitting ? 'not-allowed' : 'pointer',
               opacity: isSubmitting ? 0.7 : 1,
             }}>
-              {isSubmitting ? 'Saving…' : (isEdit ? 'Save Changes' : 'Save Agent')}
+              {isSubmitting ? 'Saving…' : (isEdit ? 'Save changes' : 'Save agent')}
             </button>
           </div>
         </div>
@@ -176,31 +245,6 @@ export default function DeveloperPage() {
     handleEditAgent,
   } = useAgents();
 
-  const detailRef = useRef(null);
-
-  // When the list and detail are stacked, the detail sits below the fold, so bring it into view
-  const handleSelectAgent = (id) => {
-    setSelectedId(id);
-    if (window.matchMedia('(max-width: 720px)').matches) {
-      detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
-  // Ensures the user is authenticated
-  // Change this to a proper redirect to the sign-in page.
-  
-  if (!user) {
-    return (
-      <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
-        <NavigationBar />
-        <div className="container" style={{ padding: '48px 40px', color: 'var(--text)' }}>
-          <h2 style={{ marginBottom: 12 }}>Sign in to view your agents</h2>
-          <p style={{ color: 'var(--text-muted)' }}>Your agents are scoped to the authenticated Supabase user.</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       <PlatformHeader current="developer" />
@@ -211,7 +255,7 @@ export default function DeveloperPage() {
       */}
       <div style={{
         borderBottom: '1px solid var(--border)',
-        background: 'var(--bg-raised)',
+        background: 'var(--bg)',
         padding: '48px 0 36px',
       }}>
         <div className="container">
@@ -244,15 +288,19 @@ export default function DeveloperPage() {
                 background: 'var(--accent)',
                 color: '#fff',
                 border: 'none',
-                borderRadius: 8,
+                borderRadius: 10,
                 padding: '10px 16px',
-                fontFamily: 'monospace',
+                fontFamily: 'var(--font-mono)',
+                fontSize: 11,
                 fontWeight: 700,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
+                boxShadow: '0 10px 24px rgba(139, 92, 246, 0.25)',
               }}
             >
-              {showAddForm ? 'Close' : 'Add Agent'}
+              {showAddForm ? 'Close' : 'Add agent'}
             </button>
           </div>
           <div style={{ marginTop: 32 }}>
