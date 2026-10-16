@@ -1,6 +1,27 @@
-[auth.email]
-otp_length = 6
+# Local dev only. Unlisted keys use Supabase CLI defaults:
+# https://supabase.com/docs/guides/local-development/cli/config
+project_id = "platform"
+
+[db]
+major_version = 17
+
+[auth]
+site_url = "http://127.0.0.1:3001"
+additional_redirect_urls = ["http://localhost:3001", "http://127.0.0.1:3001"]
 
 [auth.email.template.recovery]
 subject = "Reset your ReviewMyAgent password"
 content_path = "./supabase/templates/recovery.html"
+
+# Unused by the app; disabled to speed up `supabase start`
+[realtime]
+enabled = false
+
+[storage]
+enabled = false
+
+[edge_runtime]
+enabled = false
+
+[analytics]
+enabled = false
