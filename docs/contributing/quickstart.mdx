@@ -1,0 +1,48 @@
+---
+title: "Quickstart"
+description: "Get the PSC-AI monorepo running on your machine."
+---
+
+This is the monorepo for the PSC-AI platform at [reviewmyagent.today](https://www.reviewmyagent.today). It contains two apps:
+
+- **platform**: the main PSC-AI platform
+- **landing**: the pre-launch sign-up page (no longer in active development)
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org) (v18 or higher)
+- [npm](https://www.npmjs.com)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) and the [Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started), for the platform's local database
+
+## Installation
+
+<Steps>
+  <Step title="Clone the repository">
+    ```bash
+    git clone https://github.com/psc-ai-asu/psc-ai.git
+    cd psc-ai
+    ```
+  </Step>
+  <Step title="Install dependencies from the repo root">
+    ```bash
+    npm install
+    ```
+  </Step>
+  <Step title="Set up the local database and environment variables">
+    Follow [Local Setup](/contributing/local-setup). It runs a local Supabase database with test data in Docker, so local development never touches the live database.
+
+    <Warning>
+      The deployed project's Supabase and hCaptcha environment variables are set in Railway. Never put production keys in a local `.env.local` file.
+    </Warning>
+  </Step>
+  <Step title="Start the platform app">
+    ```bash
+    npx turbo dev --filter=@psc-ai/platform
+    ```
+    The platform runs at [http://localhost:3001](http://localhost:3001).
+  </Step>
+</Steps>
+
+<Note>
+  `npx turbo dev` without the filter starts both apps (landing on [http://localhost:3000](http://localhost:3000)), but only the platform is set up for local development.
+</Note>

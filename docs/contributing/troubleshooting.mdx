@@ -1,0 +1,22 @@
+---
+title: "Troubleshooting"
+description: "Fixes for common local development problems."
+---
+
+<AccordionGroup>
+  <Accordion title="supabase start says Docker isn't running">
+    Open Docker Desktop and wait for it to finish starting.
+  </Accordion>
+  <Accordion title="Port already in use">
+    Another Supabase project may be running. Stop it with `supabase stop --project-id <id>`, or stop all of them with `supabase stop --all`.
+  </Accordion>
+  <Accordion title="The app can't connect or shows no data">
+    Check that `.env.local` points to `http://127.0.0.1:54321` and has the local anon key. Restart the dev server after changing `.env.local`.
+  </Accordion>
+  <Accordion title={'Seeded users can\'t log in ("Database error querying schema")'}>
+    An empty-string token column is missing from the `auth.users` insert in `seed.sql`. See [Seed Data](/contributing/seed-data).
+  </Accordion>
+  <Accordion title="Errors after pulling new changes">
+    Run `supabase db reset` to apply new migrations.
+  </Accordion>
+</AccordionGroup>

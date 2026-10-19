@@ -1,0 +1,56 @@
+---
+title: "Project Structure"
+description: "How the monorepo and the platform app are laid out."
+---
+
+## Monorepo
+
+```
+apps/
+├── landing/                  # Pre-launch sign-up page (no longer in active development)
+└── platform/                 # Main PSC-AI platform
+docs/                         # This documentation site (Mintlify)
+turbo.json                    # Turborepo task configuration
+package.json                  # Root package.json (workspaces)
+```
+
+## Platform app
+
+```
+apps/platform/
+├── app/                      # Next.js routes and pages
+│   ├── page.js               # Home page (/)
+│   ├── agents/               # Agent Directory (/agents) and agent pages (/agents/[id])
+│   ├── review/               # Review flow (/review)
+│   ├── developer/            # Developer Dashboard (/developer)
+│   ├── login/                # Sign up, log in, password reset (/login)
+│   ├── hooks/                # React hooks
+│   └── lib/                  # App-level helpers
+├── components/               # React components
+├── lib/                      # Shared helpers (Supabase clients, etc.)
+├── public/                   # Static files
+├── supabase/
+│   ├── config.toml           # Local Supabase settings (auth, ports, email templates)
+│   ├── migrations/           # Database schema, applied in filename order
+│   ├── seed.sql              # Local test data
+│   └── templates/            # Auth email templates (password recovery)
+└── .env.example              # Template for .env.local
+```
+
+## Docs
+
+```
+docs/
+├── docs.json                 # Site config and navigation
+├── index.mdx                 # Docs home page
+├── guides/                   # User docs (Guides tab)
+└── contributing/             # Contributor docs (Contributing tab)
+```
+
+To preview the docs locally:
+
+```bash
+npm i -g mint
+cd docs
+mint dev --port 3333
+```
