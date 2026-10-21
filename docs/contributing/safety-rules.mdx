@@ -1,0 +1,10 @@
+---
+title: "Safety Rules"
+description: "Rules that keep local development away from production."
+---
+
+<Warning>
+  - Never put production Supabase keys in `.env.local`. Local development only uses the local database.
+  - Never change the production schema from the dashboard. Every change goes through a [migration](/contributing/database-changes).
+  - Before running any Supabase command with `--linked`, check which project you're linked to.
+</Warning>

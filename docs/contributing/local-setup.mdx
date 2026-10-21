@@ -1,0 +1,52 @@
+---
+title: "Local Setup"
+description: "Run the platform against a local Supabase database."
+---
+
+The platform is built with Next.js and Supabase. This guide covers running it locally against a **local Supabase database**, so local development never touches the live database.
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org) (v18 or higher) and npm
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (must be running whenever you use the local database)
+- [Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started) (macOS: `brew install supabase/tap/supabase`)
+
+<Tip>
+  You don't need to install PostgreSQL. The Supabase CLI runs Postgres and the rest of Supabase in Docker.
+</Tip>
+
+## First-time setup
+
+<Steps>
+  <Step title="Install dependencies from the repo root">
+    ```bash
+    npm install
+    ```
+  </Step>
+  <Step title="Start the local Supabase stack from apps/platform">
+    ```bash
+    cd apps/platform
+    supabase start
+    ```
+    The first run downloads the Docker images, which takes a few minutes. It then builds the database from `supabase/migrations/` and loads test data from `supabase/seed.sql`.
+  </Step>
+  <Step title="Create your env file">
+    ```bash
+    cp .env.example .env.local
+    ```
+    Then replace the `NEXT_PUBLIC_SUPABASE_ANON_KEY` placeholder with the `ANON_KEY` value from:
+    ```bash
+    supabase status -o env
+    ```
+    The hCaptcha values in `.env.example` are hCaptcha's official test keys and always pass, so leave them as they are.
+  </Step>
+  <Step title="Start the app from the repo root">
+    ```bash
+    npx turbo dev --filter=@psc-ai/platform
+    ```
+    The app runs at [http://localhost:3001](http://localhost:3001).
+  </Step>
+  <Step title="Log in">
+    Use one of the [test accounts](/contributing/test-accounts).
+  </Step>
+</Steps>

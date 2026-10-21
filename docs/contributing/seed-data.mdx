@@ -1,0 +1,14 @@
+---
+title: "Seed Data"
+description: "How the local test data works and the rules for editing it."
+---
+
+`supabase/seed.sql` holds the test data: users, profiles, agents and reviews. It reloads on every `supabase db reset`.
+
+<Warning>
+  Use fake data only. Never copy production data into the seed.
+</Warning>
+
+- Users are inserted into `auth.users`. The `on_auth_user_created` trigger creates each matching `public.profiles` row from the `username` in `raw_user_meta_data`.
+- Usernames must be 3–30 characters, using only letters, numbers, `_` and `-`, or the seed fails with `Invalid username`.
+- Keep the empty-string (`''`) token columns in the `auth.users` insert. Without them, seeded users can't log in.

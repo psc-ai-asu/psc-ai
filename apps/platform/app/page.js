@@ -146,6 +146,7 @@ export default function PlatformPage() {
             <nav className="topbar-nav">
               <a href="#features">Features</a>
               <a href="#who-its-for">Who It&apos;s For</a>
+              <a href="https://docs.reviewmyagent.today">Docs</a>
             </nav>
           </div>
           <div className="topbar-right">
@@ -194,6 +195,7 @@ export default function PlatformPage() {
           <nav id="topbar-menu" className="topbar-menu" aria-label="Mobile navigation">
             <a href="#features" onClick={closeMenu}>Features</a>
             <a href="#who-its-for" onClick={closeMenu}>Who It’s For</a>
+            <a href="https://docs.reviewmyagent.today" onClick={closeMenu}>Docs</a>
             {user ? (
               <>
                 <Link href="/agents" onClick={closeMenu}>Agent Directory</Link>
