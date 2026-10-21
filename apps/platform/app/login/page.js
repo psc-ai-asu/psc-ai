@@ -7,14 +7,39 @@ import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { createClient } from '@/lib/supabase/client';
 import { verifyCaptchaAction } from '../actions';
 
-// Password rules: 8+ chars, starts with capital, ends with special char
+// Password rules: 12+ chars with a lowercase letter, uppercase letter, number and symbol anywhere.
+// These mirror minimum_password_length and password_requirements in supabase/config.toml,
+// and the symbol set matches the one Supabase accepts, so the client and server agree.
 const PASSWORD_RULES = [
-  { label: 'be at least 8 characters', display: 'At least 8 characters', test: (p) => p.length >= 8 },
-  { label: 'start with a capital letter', display: 'Starts with a capital letter', test: (p) => /^[A-Z]/.test(p) },
-  { label: 'end with a special character (!@#$%^&*)', display: 'Ends with a special character (!@#$%^&*)', test: (p) => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]$/.test(p) },
+  { label: 'be at least 12 characters', display: 'At least 12 characters', test: (p) => p.length >= 12 },
+  { label: 'include a lowercase letter', display: 'A lowercase letter', test: (p) => /[a-z]/.test(p) },
+  { label: 'include an uppercase letter', display: 'An uppercase letter', test: (p) => /[A-Z]/.test(p) },
+  { label: 'include a number', display: 'A number', test: (p) => /[0-9]/.test(p) },
+  { label: 'include a symbol (!@#$%…)', display: 'A symbol (!@#$%…)', test: (p) => /[!@#$%^&*()_+\-=[\]{};'\\:"|<>?,./`~]/.test(p) },
 ];
 
 const validatePassword = (p) => PASSWORD_RULES.every(r => r.test(p));
+
+// Hint before the user starts typing, then a live checklist of which rules are met
+function PasswordRules({ password }) {
+  if (password.length === 0) {
+    return <p className="password-hint">Min. 12 chars · upper &amp; lowercase · number · symbol</p>;
+  }
+
+  return (
+    <ul className="password-rules">
+      {PASSWORD_RULES.map((rule) => {
+        const ok = rule.test(password);
+        return (
+          <li key={rule.display} className={`password-rule ${ok ? 'rule-ok' : 'rule-fail'}`}>
+            <span className="rule-icon">{ok ? 'Met' : 'Needed'}</span>
+            {rule.display}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
 
 // Email must match full RFC-style format (no fake domains blocked by pattern)
 const validateEmail = (em) => /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z]{2,})+$/.test(em.trim());
@@ -444,22 +469,7 @@ function LoginForm() {
                   value={passwordValue}
                   onChange={(e) => setPasswordValue(e.target.value)}
                 />
-                {/* {passwordValue.length > 0 && (
-                  <ul className="password-rules">
-                    {PASSWORD_RULES.map((rule) => {
-                      const ok = rule.test(passwordValue);
-                      return (
-                        <li key={rule.display} className={`password-rule ${ok ? 'rule-ok' : 'rule-fail'}`}>
-                          <span className="rule-icon">{ok ? '✓' : '✗'}</span>
-                          {rule.display}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-                {passwordValue.length === 0 && (
-                  <p className="password-hint">Min. 8 chars · starts with capital · ends with special (!@#$%…)</p>
-                )} */}
+                <PasswordRules password={passwordValue} />
               </div>
               <div className="signup-field">
                 <label htmlFor="signup-confirm-password" className="signup-label mono">Confirm Password</label>
@@ -549,21 +559,7 @@ function LoginForm() {
                   <div className="signup-field">
                     <label htmlFor="reset-password" className="signup-label mono">New Password</label>
                     <input id="reset-password" type={showPassword ? 'text' : 'password'} className="signup-input" placeholder="••••••••" autoComplete="new-password" value={resetPasswordValue} onChange={(e) => setResetPasswordValue(e.target.value)} required />
-                    {resetPasswordValue.length > 0 ? (
-                      <ul className="password-rules">
-                        {PASSWORD_RULES.map((rule) => {
-                          const ok = rule.test(resetPasswordValue);
-                          return (
-                            <li key={rule.display} className={`password-rule ${ok ? 'rule-ok' : 'rule-fail'}`}>
-                              <span className="rule-icon">{ok ? 'Met' : 'Needed'}</span>
-                              {rule.display}
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    ) : (
-                      <p className="password-hint">Min. 8 chars · starts with capital · ends with special (!@#$%…)</p>
-                    )}
+                    <PasswordRules password={resetPasswordValue} />
                   </div>
                   <div className="signup-field">
                     <label htmlFor="reset-password-confirm" className="signup-label mono">Confirm New Password</label>

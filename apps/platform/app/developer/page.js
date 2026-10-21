@@ -245,6 +245,16 @@ export default function DeveloperPage() {
     handleEditAgent,
   } = useAgents();
 
+  const detailRef = useRef(null);
+
+  // When the list and detail are stacked, the detail sits below the fold, so bring it into view
+  const handleSelectAgent = (id) => {
+    setSelectedId(id);
+    if (window.matchMedia('(max-width: 720px)').matches) {
+      detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       <PlatformHeader current="developer" />
