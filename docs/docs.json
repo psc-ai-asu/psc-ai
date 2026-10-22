@@ -1,0 +1,85 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "PSC-AI",
+  "colors": {
+    "primary": "#7c3aed",
+    "light": "#a78bfa",
+    "dark": "#7c3aed"
+  },
+  "background": {
+    "color": {
+      "dark": "#0d0d0f"
+    }
+  },
+  "favicon": "/favicon.png",
+  "logo": {
+    "light": "/logo/rma-brand-logo.png",
+    "dark": "/logo/rma-brand-logo.png",
+    "href": "https://www.reviewmyagent.today"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "GitHub",
+        "href": "https://github.com/psc-ai-asu/psc-ai"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Open Platform",
+      "href": "https://www.reviewmyagent.today"
+    }
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": ["index", "guides/create-account"]
+          },
+          {
+            "group": "Reviewing Agents",
+            "pages": ["guides/browse-agents", "guides/write-a-review"]
+          },
+          {
+            "group": "For Agent Developers",
+            "pages": ["guides/developer-dashboard"]
+          }
+        ]
+      },
+      {
+        "tab": "Contributing",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": ["contributing/quickstart", "contributing/local-setup"]
+          },
+          {
+            "group": "Local Environment",
+            "pages": ["contributing/test-accounts", "contributing/local-services"]
+          },
+          {
+            "group": "Database",
+            "pages": ["contributing/database-changes", "contributing/seed-data"]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "contributing/project-structure",
+              "contributing/troubleshooting",
+              "contributing/safety-rules"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/psc-ai-asu/psc-ai"
+    }
+  }
+}

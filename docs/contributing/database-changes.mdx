@@ -1,0 +1,46 @@
+---
+title: "Database Changes"
+description: "Everyday Supabase commands and how to make schema changes with migrations."
+---
+
+## Everyday commands
+
+Run these from `apps/platform`.
+
+| Command | What it does |
+|---|---|
+| `supabase start` | Start the local database. Data is kept between runs. |
+| `supabase stop` | Stop the local database. |
+| `supabase status` | Show local URLs and keys. |
+| `supabase db reset` | Wipe the local database, re-run all migrations, and reload the seed data. |
+
+After pulling changes that add a migration, run `supabase db reset` to bring your local database up to date.
+
+## Making schema changes
+
+Schema changes are made as **migration files** in `supabase/migrations/` and committed with your code.
+
+<Warning>
+  Never change the production schema from the Supabase dashboard.
+</Warning>
+
+<Steps>
+  <Step title="Create a migration">
+    Either write the SQL yourself:
+    ```bash
+    supabase migration new <short_description>
+    ```
+    or make changes in local Studio and generate the SQL from them:
+    ```bash
+    supabase db diff -f <short_description>
+    ```
+  </Step>
+  <Step title="Test it">
+    Run `supabase db reset`. This rebuilds the database from every migration, so it catches errors before they reach production.
+  </Step>
+  <Step title="Open a PR">
+    Commit the migration file with the code that uses it, and open a PR into `develop`.
+  </Step>
+</Steps>
+
+Migrations are applied to production separately, after the PR is merged. Check with the team before running any command against production.

@@ -2,6 +2,14 @@
 
 'use client';
 
+const FRAMEWORK_COLORS = {
+  LangChain: '#1AA260',
+  CrewAI: '#7C3AED',
+  AutoGen: '#0EA5E9',
+  'OpenAI Swarm': '#F59E0B',
+  Custom: '#94A3B8',
+};
+
 export default function AgentDetail({ agent, onEdit, onDelete, isDeleting = false }) {
   if (!agent) {
     return (
@@ -25,6 +33,7 @@ export default function AgentDetail({ agent, onEdit, onDelete, isDeleting = fals
   }
 
   const statusColor = agent.status === 'active' ? 'var(--green)' : '#FF4D4D';
+  const frameworkColor = FRAMEWORK_COLORS[agent.framework] || '#94A3B8';
   const formattedDate = agent.created_at
     ? new Date(agent.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
     : 'Unknown';
@@ -42,8 +51,8 @@ export default function AgentDetail({ agent, onEdit, onDelete, isDeleting = fals
         paddingBottom: 20,
         borderBottom: '1px solid var(--border)',
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-          <div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 14 }}>
+          <div style={{ minWidth: 0 }}>
             <div style={{
               fontFamily: 'monospace',
               fontSize: 10,
@@ -60,7 +69,8 @@ export default function AgentDetail({ agent, onEdit, onDelete, isDeleting = fals
               fontWeight: 700,
               color: 'var(--text)',
               letterSpacing: '-0.5px',
-              margin: '0 0 14px 0',
+              margin: 0,
+              overflowWrap: 'anywhere',
             }}>
               {agent.name}
             </h2>
@@ -121,11 +131,11 @@ export default function AgentDetail({ agent, onEdit, onDelete, isDeleting = fals
           <span style={{
             fontSize: 10,
             fontFamily: 'monospace',
-            color: 'var(--accent)',
+            color: frameworkColor,
             padding: '4px 10px',
-            border: '1px solid rgba(139,92,246,0.4)',
+            border: `1px solid ${frameworkColor}66`,
             borderRadius: 4,
-            background: 'var(--accent-soft)',
+            background: `${frameworkColor}1A`,
           }}>
             {agent.framework}
           </span>
@@ -183,7 +193,7 @@ export default function AgentDetail({ agent, onEdit, onDelete, isDeleting = fals
         }}>
           Metadata
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: 12 }}>
           <InfoCard label="Agent ID" value={agent.id} />
           <InfoCard label="Framework" value={agent.framework} />
           <InfoCard label="Status" value={agent.status} />
@@ -201,6 +211,7 @@ function InfoCard({ label, value }) {
       border: '1px solid var(--border)',
       borderRadius: 8,
       padding: '10px 12px',
+      minWidth: 0,
     }}>
       <div style={{
         fontFamily: 'monospace',

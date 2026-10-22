@@ -8,6 +8,8 @@ export default function Footer() {
         <span className="text-sm text-[var(--text-dim)]">© 2026 Gentle Systems</span>
 
         <nav className="flex items-center gap-1">
+          <a href="https://docs.reviewmyagent.today" className="text-sm text-[var(--text-muted)] hover:text-[var(--text)] transition-colors duration-200 px-2 py-1">Docs</a>
+          <div className="w-px h-3.5 bg-[var(--border)]" />
           <Link href="/privacy-policy" className="text-sm text-[var(--text-muted)] hover:text-[var(--text)] transition-colors duration-200 px-2 py-1">Privacy Policy</Link>
           <div className="w-px h-3.5 bg-[var(--border)]" />
           <Link href="/terms-of-service" className="text-sm text-[var(--text-muted)] hover:text-[var(--text)] transition-colors duration-200 px-2 py-1">Terms of Service</Link>

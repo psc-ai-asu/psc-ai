@@ -1,36 +1,28 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# PSC-AI Platform
 
-## Getting Started
+The main PSC-AI platform, built with Next.js and Supabase.
 
-First, run the development server:
+Developer docs live at **[docs.reviewmyagent.today/contributing](https://docs.reviewmyagent.today/contributing/quickstart)**:
+
+- [Local Setup](https://docs.reviewmyagent.today/contributing/local-setup) — run the platform against a local Supabase database
+- [Test Accounts](https://docs.reviewmyagent.today/contributing/test-accounts) and [Local Services](https://docs.reviewmyagent.today/contributing/local-services)
+- [Database Changes](https://docs.reviewmyagent.today/contributing/database-changes) and [Seed Data](https://docs.reviewmyagent.today/contributing/seed-data)
+- [Troubleshooting](https://docs.reviewmyagent.today/contributing/troubleshooting)
+- [Safety Rules](https://docs.reviewmyagent.today/contributing/safety-rules)
+
+## Quickstart
+
+From `apps/platform`, with Docker Desktop running:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+supabase start
+cp .env.example .env.local   # then paste ANON_KEY from `supabase status -o env`
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then from the repo root:
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+```bash
+npx turbo dev --filter=@psc-ai/platform
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The app runs at [http://localhost:3001](http://localhost:3001).

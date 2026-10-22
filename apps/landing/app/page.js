@@ -51,7 +51,7 @@ export default function LandingPage() {
     { name: "LangChain", color: "#1AA260" },
     { name: "CrewAI", color: "#7C3AED" },
     { name: "AutoGen", color: "#0EA5E9" },
-    { name: "OpenAI Swarm", color: "#F59E0B" }
+    { name: "OpenAI Agents SDK", color: "#F59E0B" }
   ]
 
   // This function handles submitting the e-mail entered into the input form to the database.
@@ -164,7 +164,7 @@ export default function LandingPage() {
               <div className="why-card-icon">⚙️</div>
               <h3>Framework-agnostic</h3>
               <p>
-                LangChain, CrewAI, AutoGen, OpenAI Swarm — it doesn't matter how you built
+                LangChain, CrewAI, AutoGen, OpenAI Agents SDK — it doesn't matter how you built
                 your agent. ReviewMyAgent works with any framework so you can compare
                 performance across your entire stack.
               </p>
