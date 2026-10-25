@@ -36,7 +36,10 @@ values
   ('a0000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000001',
    'Code Reviewer', 'Reviews pull requests for bugs and style issues.', 'OpenAI Agents SDK', true, 'active'),
   ('a0000000-0000-0000-0000-000000000003', '10000000-0000-0000-0000-000000000002',
-   'Trip Planner', 'Plans itineraries from a budget and dates.', 'CrewAI', false, 'fired');
+   'Trip Planner', 'Plans itineraries from a budget and dates.', 'CrewAI', false, 'fired'),
+  -- The demo agent in examples/course-planner; its .env points at this id.
+  ('a0000000-0000-0000-0000-000000000004', '10000000-0000-0000-0000-000000000001',
+   'Course Planner', 'Plans a one-semester class schedule from a student''s request.', 'LangChain', true, 'active');
 
 -- Reviews (scores are 1-5; overall_score is calculated automatically)
 insert into public.reviews (agent_id, review_by, task, date, goal_completion, helpfulness, coherence,
