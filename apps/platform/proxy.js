@@ -27,6 +27,7 @@ export async function proxy(request) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    // Trace ingest authenticates with its own token, not a login session.
+    '/((?!_next/static|_next/image|favicon.ico|api/otel|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
