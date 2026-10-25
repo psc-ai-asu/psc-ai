@@ -1,0 +1,5 @@
+{
+  "name": "Demo Student",
+  "completed": ["CSE 110", "CSE 205", "CSE 230", "CSE 310", "MAT 265", "MAT 266"],
+  "max_credits": 18
+}
