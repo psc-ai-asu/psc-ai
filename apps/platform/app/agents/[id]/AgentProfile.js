@@ -4,7 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import PlatformHeader from "@/components/PlatformHeader";
 
-import { ScoreBar, ScoreBadge, VerificationBadge } from "./components";
+import { formatDuration, formatTokens, plural } from "@/lib/format";
+import { ScoreBar, ScoreBadge, TRACE_BACKED_EXPLANATION, VerificationBadge } from "./components";
+import TraceView from "./TraceView";
 
 function formatDate(dateString) {
   return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric'});
@@ -19,7 +21,9 @@ function mapReview(review) {
   };
 }
 
-export default function AgentProfile({ agent }) {
+// `sessions` maps a session id to its runs and totals (see page.js); it's
+// empty when this viewer can't see the agent's traces.
+export default function AgentProfile({ agent, sessions }) {
   const allReviews = (agent.reviews ?? [])
     .map(mapReview)
     .sort((a, b) => new Date(b.rawDate) - new Date(a.rawDate));
@@ -33,6 +37,10 @@ export default function AgentProfile({ agent }) {
   const filtered = allReviews.filter((r) =>
     r.reviewedBy.toLowerCase().includes(search.toLowerCase())
   );
+
+  // The session behind the selected review, when it's Trace-backed and visible to this viewer.
+  const session = selected?.session_id ? sessions[selected.session_id] : null;
+  const prompts = session?.runs.filter((run) => run.prompt) ?? [];
 
   const experienceFields = [
     { key: "goal_completion", label: "Goal Completion" },
@@ -49,10 +57,10 @@ export default function AgentProfile({ agent }) {
       <div className="flex flex-1 min-h-0 overflow-hidden">
         <aside className={`${mobileDetailOpen ? "hidden" : "flex"} md:flex w-full md:w-72 md:border-r border-stone-800 flex-col overflow-hidden flex-shrink-0`}>
           <div className="px-4 pt-4 pb-3 border-b border-stone-800">
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <div>
-                <p className="text-sm font-medium text-stone-200">{agent.name}</p>
-                <p className="text-xs text-stone-600 font-mono">{agent.framework}</p>
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <div className="min-w-0">
+                <h1 className="text-lg font-semibold text-stone-100 leading-tight">{agent.name}</h1>
+                <p className="text-xs text-stone-500 font-mono mt-0.5">{agent.framework}</p>
               </div>
               <Link
                 href={`/review?agent=${agent.id}`}
@@ -62,16 +70,16 @@ export default function AgentProfile({ agent }) {
               </Link>
             </div>
             {agent.description && (
-              <p className="text-xs text-stone-500 leading-relaxed mb-2">{agent.description}</p>
+              <p className="text-sm text-stone-400 leading-relaxed mb-2">{agent.description}</p>
             )}
             <div className="flex items-center gap-3">
-              <span className="text-xs text-stone-600">
+              <span className="text-xs text-stone-500">
                 by {agent.developer?.username ? (
-                  <span className="text-stone-400">{agent.developer.username}</span>
+                  <span className="text-stone-300">{agent.developer.username}</span>
                 ) : "unknown"}
               </span>
               <span className="text-xs text-stone-700">·</span>
-              <span className="text-xs text-stone-600">{allReviews.length} review{allReviews.length === 1 ? "" : "s"}</span>
+              <span className="text-xs text-stone-500">{allReviews.length} review{allReviews.length === 1 ? "" : "s"}</span>
             </div>
           </div>
 
@@ -125,7 +133,7 @@ export default function AgentProfile({ agent }) {
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <span className="text-sm text-stone-300 truncate block">{r.reviewedBy}</span>
+                      <span className="text-sm text-stone-300 block [overflow-wrap:anywhere]">{r.reviewedBy}</span>
                       <span className="text-xs font-mono text-stone-600">{r.date}</span>
                     </div>
                     <div className="flex flex-col items-end gap-1 flex-shrink-0">
@@ -147,14 +155,18 @@ export default function AgentProfile({ agent }) {
                   onClick={() => setMobileDetailOpen(false)}
                   className="md:hidden block text-xs text-stone-500 hover:text-stone-300 transition-colors py-1 mb-1"
                 >
-                  ← All reviews
+                  ← All {agent.name} reviews
                 </button>
-                <h1 className="text-lg font-semibold text-stone-100 mb-0.5">{agent.name}</h1>
-                <p className="text-xs text-stone-500 mb-2 flex flex-wrap items-center gap-2">
-                  <span>Review by {selected.reviewedBy} · {selected.date}</span>
+                <h2 className="text-lg font-semibold text-stone-100 mb-1 [overflow-wrap:anywhere]">
+                  Review by <span className="text-violet-300">{selected.reviewedBy}</span>
+                </h2>
+                <p className="text-xs text-stone-500 flex flex-wrap items-center gap-2">
+                  <span className="font-mono">{selected.date}</span>
                   <VerificationBadge status={selected.verification_status} />
+                  {selected.verification_status === "verified" && (
+                    <span className="text-stone-600">{TRACE_BACKED_EXPLANATION}</span>
+                  )}
                 </p>
-                <span className="text-xs text-stone-600 font-mono">{agent.framework}</span>
               </div>
               <div className="flex-shrink-0 text-right">
                 <div className="text-2xl font-mono font-semibold text-stone-100">{selected.overall_score?.toFixed(1)}</div>
@@ -162,7 +174,21 @@ export default function AgentProfile({ agent }) {
               </div>
             </div>
 
-            <div className="px-6 pt-4 pb-0 border-b border-stone-800">
+            {session && (
+              <div className="px-6 py-3 border-b border-stone-800 bg-stone-900 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-stone-400">
+                <span className="text-[11px] font-medium uppercase tracking-widest text-teal-400">Session</span>
+                <span><span className="font-mono text-stone-100">{session.runs.length}</span> {session.runs.length === 1 ? "run" : "runs"}</span>
+                <span><span className="font-mono text-stone-100">{formatDuration(session.durationMs)}</span> agent time</span>
+                <span><span className="font-mono text-stone-100">{session.modelCalls}</span> model calls</span>
+                <span>
+                  <span className="font-mono text-stone-100">{session.toolCalls}</span> tool calls
+                  {session.failedToolCalls > 0 && <> · <span className="text-amber-400">{session.failedToolCalls} returned errors</span></>}
+                </span>
+                <span><span className="font-mono text-stone-100">{formatTokens(session.tokens)}</span> tokens</span>
+              </div>
+            )}
+
+            <div className="px-6 py-4 border-b border-stone-800">
               <div className="flex w-fit bg-stone-900 border border-stone-700/50 rounded-lg p-0.5">
                 {["experience", "metrics"].map((t) => (
                   <button
@@ -173,6 +199,9 @@ export default function AgentProfile({ agent }) {
                     }`}
                   >
                     {t === "experience" ? "Experience" : "Metrics"}
+                    {t === "metrics" && session && (
+                      <span className="ml-1.5 font-mono text-[11px] text-teal-400">{plural(session.runs.length, "run")}</span>
+                    )}
                   </button>
                 ))}
               </div>
@@ -203,6 +232,26 @@ export default function AgentProfile({ agent }) {
                       </div>
                     </div>
 
+                    {prompts.length > 0 && (
+                      <div>
+                        <p className="text-xs font-medium text-stone-500 uppercase tracking-widest mb-3 flex flex-wrap items-center gap-2">
+                          What the agent was asked
+                          <span className="normal-case tracking-normal font-normal text-stone-600">
+                            🔒 from the trace · only you and the agent owner see this
+                          </span>
+                        </p>
+                        <div className="bg-stone-900 border border-stone-700/50 rounded-lg">
+                          {session.runs.map((run, i) => run.prompt && (
+                            <div key={run.id} className="px-4 py-2.5 border-b border-stone-800 last:border-b-0 grid grid-cols-[52px_1fr_auto] gap-3 items-baseline">
+                              <span className="text-[11px] font-mono text-violet-400">Run {i + 1}</span>
+                              <span className="text-sm text-stone-300 leading-relaxed">{run.prompt}</span>
+                              <span className="text-xs font-mono text-stone-600">{formatDuration(run.durationMs)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     <div>
                       <p className="text-xs font-medium text-stone-500 uppercase tracking-widest mb-3">Reviewer note</p>
                       <div className="bg-stone-900 border border-stone-700/50 rounded-lg px-4 py-3">
@@ -220,7 +269,9 @@ export default function AgentProfile({ agent }) {
                     </div>
                   </div>
                 </div>
-              ) : !agent.public_metrics ? (
+              ) : session ? (
+                <TraceView key={selected.session_id} session={session} />
+              ) : !agent.public_metrics && selected.session_id ? (
                 <div className="flex flex-col items-center justify-center h-40 gap-2 text-center">
                   <svg className="w-6 h-6 text-stone-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25z" />
@@ -233,7 +284,7 @@ export default function AgentProfile({ agent }) {
                   <svg className="w-6 h-6 text-stone-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z" />
                   </svg>
-                  <p className="text-sm text-stone-400">No trace data yet</p>
+                  <p className="text-sm text-stone-400">No trace data</p>
                   <p className="text-xs text-stone-600">This review doesn’t have an attached execution trace.</p>
                 </div>
               )}

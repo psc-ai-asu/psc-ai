@@ -1,6 +1,8 @@
 "use client";
 
 import { ScaleInput, TextInput } from "./components"
+import { RunList } from "./SessionPicker";
+import { formatDuration, formatTokens, formatWhen, plural } from "@/lib/format";
 import Link from "next/link";
 import { useState } from "react";
 import { createClient } from '@/lib/supabase/client';
@@ -37,8 +39,35 @@ function getErrorMessage(error, status) {
   }
 }
 
+// Codes raised by submit_trace_backed_review(); the messages are the ones in
+// the Metric Integration user workflow doc. Anything else falls back to
+// getErrorMessage().
+function getTraceBackedErrorMessage(error, status) {
+  switch (error.code) {
+    case "42501":
+      return "This session was recorded by another account.";
+    case "P0002":
+      return "This session couldn't be found.";
+    case "55000":
+      return "This session is still in progress. Try again in a moment.";
+    case "22023":
+      return "This session has no model calls to back a review.";
+    case "23505":
+      // Two unique indexes can raise it: one session per review, and one
+      // Trace-backed review per reviewer per agent.
+      return error.message.includes("reviews_one_verified_per_reviewer")
+        ? "You've already written a Trace-backed review of this agent."
+        : "This session already backs a review.";
+    default:
+      return getErrorMessage(error, status);
+  }
+}
+
 // `agent` is looked up by page.js before this renders, so it's always a real agent.
-export default function AgentReviewForm({ agent }) {
+// `session` is the session picked in step 1, which makes the review Trace-backed;
+// without one, `unverifiedReason` says why the review is unverified.
+// `onChooseSession`, when set, means the form is step 2 of ReviewFlow.
+export default function AgentReviewForm({ agent, session = null, onChooseSession = null, unverifiedReason = null }) {
   const [answers, setAnswers] = useState({});
 
   // Set once the insert succeeds. Shows the confirmation toast and keeps the
@@ -78,23 +107,36 @@ export default function AgentReviewForm({ agent }) {
         return;
       }
 
-      const { error, status } = await supabase
-        .from('reviews')
-        .insert({
-          agent_id: agent.id,
-          task: answers.task_description,
-          goal_completion: answers.completion,
-          helpfulness: answers.helpfulness,
-          coherence: answers.coherence,
-          factuality: answers.factuality,
-          safety: answers.safety,
-          review_note: answers.note,
-          review_by: user.id,
+      // A picked session goes through the RPC, the only way to mark a review
+      // Trace-backed; without one it's a plain unverified insert.
+      const { error, status } = session
+        ? await supabase.rpc('submit_trace_backed_review', {
+          p_session_id: session.id,
+          p_task: answers.task_description,
+          p_goal_completion: answers.completion,
+          p_helpfulness: answers.helpfulness,
+          p_coherence: answers.coherence,
+          p_factuality: answers.factuality,
+          p_safety: answers.safety,
+          p_review_note: answers.note,
         })
+        : await supabase
+          .from('reviews')
+          .insert({
+            agent_id: agent.id,
+            task: answers.task_description,
+            goal_completion: answers.completion,
+            helpfulness: answers.helpfulness,
+            coherence: answers.coherence,
+            factuality: answers.factuality,
+            safety: answers.safety,
+            review_note: answers.note,
+            review_by: user.id,
+          })
 
       if (error) {
         console.log(error);
-        setSubmitError(getErrorMessage(error, status));
+        setSubmitError(session ? getTraceBackedErrorMessage(error, status) : getErrorMessage(error, status));
       } else {
         setSubmitSuccess(true);
 
@@ -136,11 +178,20 @@ export default function AgentReviewForm({ agent }) {
       <div className="border-b border-zinc-800/80 sticky top-0 bg-zinc-950/90 backdrop-blur-sm z-10">
         <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
           <div>
-            <Link href={`/agents/${agent.id}`} className="text-xs text-zinc-500 hover:text-zinc-300">
-              ← Back to agent
-            </Link>
+            {onChooseSession ? (
+              <button type="button" onClick={onChooseSession} className="text-xs text-zinc-500 hover:text-zinc-300 cursor-pointer">
+                ← {session ? "Choose a different session" : "Back to your sessions"}
+              </button>
+            ) : (
+              <Link href={`/agents/${agent.id}`} className="text-xs text-zinc-500 hover:text-zinc-300">
+                ← Back to agent
+              </Link>
+            )}
             <h1 className="text-lg font-bold tracking-tight mt-1">Reviewing {agent.name}</h1>
-            <p className="text-xs text-zinc-500 font-mono mt-0.5">{answered}/{totalQuestions} answered</p>
+            <p className="text-xs text-zinc-500 mt-0.5">
+              {onChooseSession && "Step 2 of 2 · "}
+              <span className="font-mono">{answered}/{totalQuestions} answered</span>
+            </p>
           </div>
           {/* Progress bar */}
           <div className="flex items-center gap-3">
@@ -157,6 +208,8 @@ export default function AgentReviewForm({ agent }) {
         <div className="mb-10">
           <p className="text-zinc-400 text-sm leading-relaxed max-w-lg">Answer each question to help evaluate the quality of the work.</p>
         </div>
+
+        {session && <AttachedSession session={session} onChange={onChooseSession} />}
 
         {/* Questions */}
         <div className="space-y-7">
@@ -201,10 +254,15 @@ export default function AgentReviewForm({ agent }) {
           </div>
         </div>
 
-        <div className="mt-4 flex items-start gap-2 text-xs text-zinc-500 bg-zinc-900/40 border border-zinc-800/60 rounded-lg px-3 py-2">
-          <span className="text-violet-400">ⓘ</span>
-          <span>This review will be marked <span className="text-zinc-300 font-medium">Unverified</span>. Verified reviews backed by execution traces are coming soon.</span>
-        </div>
+        {!session && (
+          <div className="mt-4 flex items-start gap-2 text-xs text-zinc-500 bg-zinc-900/40 border border-zinc-800/60 rounded-lg px-3 py-2">
+            <span className="text-violet-400">ⓘ</span>
+            <span>
+              This review will be marked <span className="text-zinc-300 font-medium">Unverified</span>.
+              {unverifiedReason && ` ${unverifiedReason}`}
+            </span>
+          </div>
+        )}
 
         {/* Submit */}
         <div className="mt-12 pt-8 border-t border-zinc-800 flex items-center justify-between">
@@ -221,10 +279,54 @@ export default function AgentReviewForm({ agent }) {
               }`}
             style={answered === totalQuestions ? { backgroundColor: "#8B5CF6", boxShadow: "0 4px 24px #8B5CF640" } : {}}
           >
-            Submit review
+            {session ? "Submit Trace-backed review" : "Submit review"}
           </button>
         </div>
       </div>
     </div>
+  );
+}
+
+// The session picked in step 1: what it contains and that it makes the review Trace-backed.
+function AttachedSession({ session, onChange }) {
+  const tiles = [
+    [session.runs.length, "runs"],
+    [formatDuration(session.durationMs), "agent time"],
+    [formatTokens(session.tokens), "tokens"],
+    [session.modelCalls, "model calls"],
+  ];
+
+  return (
+    <section aria-label="Attached session" className="mb-7 border border-teal-400/35 bg-teal-400/5 rounded-2xl p-5 space-y-3.5">
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div className="flex gap-3 items-start">
+          <span className="w-8 h-8 rounded-lg bg-teal-400/15 text-teal-400 flex items-center justify-center shrink-0" aria-hidden="true">✓</span>
+          <div>
+            <p className="text-[15px] font-medium" suppressHydrationWarning>
+              {formatWhen(session.startedAt)} · {plural(session.runs.length, "run")}
+            </p>
+            <p className="text-xs text-zinc-400 leading-relaxed mt-1">
+              This review will be published as <span className="text-teal-400 font-medium">Trace-backed</span> and cover these runs. Runs you send after submitting start a new session.
+            </p>
+          </div>
+        </div>
+        <button type="button" onClick={onChange} className="text-xs text-violet-400 hover:text-violet-300 cursor-pointer">
+          Change
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        {tiles.map(([value, label]) => (
+          <div key={label} className="border border-zinc-700 bg-zinc-900/60 rounded-lg p-2.5">
+            <div className="font-mono text-lg font-medium">{value}</div>
+            <div className="text-xs text-zinc-400">{label}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex flex-col border-t border-teal-400/20 pt-2.5">
+        <RunList runs={session.runs} />
+      </div>
+    </section>
   );
 }

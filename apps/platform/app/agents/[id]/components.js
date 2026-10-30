@@ -33,14 +33,22 @@ export function ScoreBadge({ score }) {
   );
 };
 
+export const TRACE_BACKED_EXPLANATION = "The reviewer ran this agent and sent its trace with their own token.";
+
+// "Trace-backed" for a review submitted with a session (verification_status
+// "verified"), "Unverified" otherwise.
 export function VerificationBadge({ status }) {
   const isVerified = status === "verified";
   const color = isVerified
     ? "text-teal-400 bg-teal-400/10 border-teal-400/20"
     : "text-stone-500 bg-stone-800/50 border-stone-700/50";
   return (
-    <span className={`text-xs font-mono font-medium px-2 py-0.5 rounded border ${color}`}>
-      {isVerified ? "Verified" : "Unverified"}
+    <span
+      title={isVerified ? TRACE_BACKED_EXPLANATION : "The reviewer didn't attach a trace of their session."}
+      className={`text-xs font-mono font-medium px-2 py-0.5 rounded border inline-flex items-center gap-1 ${color}`}
+    >
+      {isVerified && <span aria-hidden="true">✓</span>}
+      {isVerified ? "Trace-backed" : "Unverified"}
     </span>
   );
 }
