@@ -2,6 +2,7 @@ import { gunzipSync } from "node:zlib";
 import { createClient } from "@/lib/supabase/server";
 import { decodeTraceRequest } from "@/lib/otel/decode";
 import { printTraceRequest } from "@/lib/otel/print-trace";
+import { captureTraceRequest } from "@/lib/otel/capture";
 
 // OTLP/HTTP trace ingest. For now it checks a single dev token from the
 // environment and prints what arrives; storing traces comes later.
@@ -69,6 +70,7 @@ export async function POST(request) {
   }
 
   printTraceRequest({ agent, resources, bodyBytes: body.length });
+  await captureTraceRequest(body);
 
   // An empty ExportTraceServiceResponse is a zero-length protobuf body.
   return new Response(new Uint8Array(0), {
