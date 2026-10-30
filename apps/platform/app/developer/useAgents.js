@@ -9,6 +9,7 @@ export const EMPTY_FORM = {
   description: '',
   framework: 'Custom',
   public_metrics: false,
+  github_repo_url: '',
 };
 
 /**
@@ -130,6 +131,7 @@ export function useAgents() {
       description: agent.description ?? '',
       framework: agent.framework ?? 'Custom',
       public_metrics: Boolean(agent.public_metrics),
+      github_repo_url: agent.github_repo_url ?? '',
     });
     setError('');
     setShowAddForm(false);

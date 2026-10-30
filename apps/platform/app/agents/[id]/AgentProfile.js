@@ -64,6 +64,16 @@ export default function AgentProfile({ agent }) {
             {agent.description && (
               <p className="text-xs text-stone-500 leading-relaxed mb-2">{agent.description}</p>
             )}
+            {agent.github_repo_url && (
+              <a
+                href={agent.github_repo_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-xs font-mono text-violet-400 hover:text-violet-300 truncate mb-2"
+              >
+                {agent.github_repo_url.replace("https://github.com/", "")}
+              </a>
+            )}
             <div className="flex items-center gap-3">
               <span className="text-xs text-stone-600">
                 by {agent.developer?.username ? (

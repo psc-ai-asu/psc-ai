@@ -198,6 +198,19 @@ export default function AgentDetail({ agent, onEdit, onDelete, isDeleting = fals
           <InfoCard label="Framework" value={agent.framework} />
           <InfoCard label="Status" value={agent.status} />
           <InfoCard label="Public Metrics" value={agent.public_metrics ? 'Enabled' : 'Disabled'} />
+          <InfoCard
+            label="GitHub Repo"
+            value={agent.github_repo_url ? (
+              <a
+                href={agent.github_repo_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: 'var(--accent)', textDecoration: 'none' }}
+              >
+                {agent.github_repo_url.replace('https://github.com/', '')}
+              </a>
+            ) : 'Not linked'}
+          />
         </div>
       </div>
     </div>

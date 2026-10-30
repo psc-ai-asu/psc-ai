@@ -166,6 +166,22 @@ function AgentFormModal({
             </div>
           </div>
 
+          <div>
+            <label style={labelStyle} htmlFor="github_repo_url">GitHub repo (optional)</label>
+            <input
+              id="github_repo_url"
+              name="github_repo_url"
+              value={formData.github_repo_url}
+              onChange={onChange}
+              placeholder="https://github.com/owner/repo"
+              autoComplete="off"
+              spellCheck={false}
+              style={inputStyle}
+              onFocus={(e) => e.target.style.borderColor = 'var(--accent)'}
+              onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
+            />
+          </div>
+
           <label style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--text)', fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
             <input
               type="checkbox"

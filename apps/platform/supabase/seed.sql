@@ -54,3 +54,8 @@ values
   ('a0000000-0000-0000-0000-000000000003', '10000000-0000-0000-0000-000000000003',
    'Plan a 3-day trip under $500', now() - interval '10 days',
    2, 3, 3, 3, 4, 'Went over budget by $120.', 'verified');
+
+-- Example GitHub link so the repo field renders locally.
+update public.agents
+set github_repo_url = 'https://github.com/example-org/research-assistant'
+where id = 'a0000000-0000-0000-0000-000000000001';
