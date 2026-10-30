@@ -95,9 +95,6 @@ function AgentFormModal({
             }}>
               {isEdit ? 'Edit agent' : 'Add agent'}
             </div>
-            <h3 style={{ margin: 0, color: 'var(--text)', fontSize: 28, fontWeight: 700, letterSpacing: '-0.04em' }}>
-              {isEdit ? 'Update agent' : 'Create agent'}
-            </h3>
           </div>
         </div>
 
