@@ -1,9 +1,11 @@
 """The course planner's three tools.
 
-Each tool reads the local JSON in data/ and returns a small dict. Problems the
-model can recover from (no matches, missing prerequisites, conflicts) come back
-as results with an "error" or "met": false rather than exceptions, so the
-agent can react and the tool span still shows what happened.
+Each tool reads the local JSON in data/ and returns a small dict, never an
+exception, so the agent can react and the tool span still shows what happened.
+Answers the model asked for, like no matching sections or a missing
+prerequisite, are ordinary results ("message", "met": false). Only requests the
+tool can't carry out, like an unknown course or a schedule with conflicts, come
+back with "error" or "ok": false, which the platform counts as a failed call.
 """
 
 import json
@@ -68,7 +70,7 @@ def search_catalog(query: str, earliest_start: str | None = None, days: list[str
         matches.append(section_summary(section))
 
     if not matches:
-        return {"sections": [], "error": f"No sections match '{query}' with those filters."}
+        return {"sections": [], "message": f"No sections match '{query}' with those filters."}
 
     return {
         "sections": matches[:MAX_SEARCH_RESULTS],

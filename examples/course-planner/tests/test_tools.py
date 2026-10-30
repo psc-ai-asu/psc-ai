@@ -28,10 +28,11 @@ def test_search_by_tag_and_days():
     assert {s["code"] for s in result["sections"]} == {"CS 284", "CS 418", "MATH 341"}
 
 
-def test_search_with_no_matches_returns_error_result():
+def test_search_with_no_matches_is_an_answer_not_an_error():
     result = search_catalog.invoke({"query": "underwater basket weaving"})
     assert result["sections"] == []
-    assert "error" in result
+    assert "message" in result
+    assert "error" not in result
 
 
 def test_prerequisites_met():
