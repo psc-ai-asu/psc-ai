@@ -5,10 +5,10 @@ description: "Seeded users for logging in to the local platform."
 
 The seed data creates these users. Every password is `password123`.
 
-| Email | Username | Notes |
+| Email | Username | Role in the demo |
 |---|---|---|
-| dev1@example.com | alice_builder | Owns two agents |
-| dev2@example.com | bob_reviewer | Owns one agent, has written reviews |
-| dev3@example.com | casey_reviewer | Has written reviews |
+| developer@example.com | demo_developer | The developer. Owns every agent, including the Course Planner demo agent |
+| reviewer1@example.com | demo_reviewer_1 | Runs the Course Planner and writes the Trace-backed review. Has written plain reviews of other agents |
+| reviewer2@example.com | demo_reviewer_2 | A second reviewer, e.g. to show that one reviewer's session can't back another's review. Has written plain reviews |
 
 You can also sign up new users locally. Confirmation emails and password-reset codes don't actually send. They show up in [Mailpit](/contributing/local-services).
