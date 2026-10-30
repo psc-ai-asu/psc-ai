@@ -1,6 +1,4 @@
 import { Roboto, Roboto_Mono } from 'next/font/google';
-import { Suspense } from 'react';
-import NavigationHistory from '@/components/NavigationHistory';
 import "./globals.css";
 import './home.css';
 
@@ -27,9 +25,6 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${roboto.variable} ${robotoMono.variable}`}>
       <body style={{ fontFamily: 'var(--font-sans)' }}>
-        <Suspense fallback={null}>
-          <NavigationHistory />
-        </Suspense>
         {children}
       </body>
     </html>
