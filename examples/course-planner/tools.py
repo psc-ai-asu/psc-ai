@@ -19,7 +19,7 @@ MAX_SEARCH_RESULTS = 6
 
 @cache
 def load_catalog():
-    return json.loads((DATA_DIR / "catalog.json").read_text())
+    return json.loads((DATA_DIR / "catalog.json").read_text())["sections"]
 
 
 @cache
@@ -28,7 +28,7 @@ def load_student():
 
 
 def normalize_code(code):
-    # "cse340", "CSE 340" and " cse  340 " all become "CSE 340"
+    # "cs336", "CS 336" and " cs  336 " all become "CS 336"
     compact = "".join(code.split()).upper()
     letters = compact.rstrip("0123456789")
     return f"{letters} {compact[len(letters):]}"
@@ -46,7 +46,7 @@ def section_summary(section):
 @tool
 def search_catalog(query: str, earliest_start: str | None = None, days: list[str] | None = None) -> dict:
     """Search the course catalog for sections. Use this to find sections of a
-    specific course (query is a course code like "CSE 340") or to discover
+    specific course (query is a course code like "CS 336") or to discover
     courses by keyword or tag (e.g. "elective", "security", "ai").
 
     earliest_start filters out sections starting before a 24-hour "HH:MM" time
@@ -96,8 +96,8 @@ def check_prerequisites(course_code: str) -> dict:
 
 @tool
 def build_schedule(section_ids: list[str]) -> dict:
-    """Build a weekly schedule from a list of section IDs (e.g. ["CSE340-01",
-    "CSE365-01"]). Use this once you have chosen sections, and again after
+    """Build a weekly schedule from a list of section IDs (e.g. ["CS336-01",
+    "CS284-01"]). Use this once you have chosen sections, and again after
     changing them. Returns the schedule by day with total credits, or the time
     conflicts and credit-limit problems that prevent it.
     """

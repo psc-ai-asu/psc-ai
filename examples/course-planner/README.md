@@ -10,7 +10,9 @@ The agent has three tools, all reading local JSON in `data/`:
 | `check_prerequisites` | Checks a course against the student's completed courses |
 | `build_schedule` | Builds a weekly schedule, or reports time conflicts and the 18-credit limit |
 
-Only the model call uses the network. The course data is made up for the demo.
+Only the model call uses the network.
+
+> **Synthetic data.** Every course, section, time and prerequisite in `data/catalog.json`, and the student in `data/student.json`, was generated for this demo. They do not represent real or active courses at any university, and any resemblance to a real catalog is coincidental.
 
 ## Setup
 
@@ -30,8 +32,8 @@ Start the platform first (`supabase start` and `npm run dev` in `apps/platform`)
 
 ```bash
 python agent.py                  # chat; press Enter on an empty line to finish
-python agent.py "Plan my spring semester: I need CSE 340 and two electives, nothing before 10am." \
-                "Add CSE 434 too."   # scripted, one run per message
+python agent.py "Plan my spring semester: I need CS 336 and two electives, nothing before 10am." \
+                "Swap one of the electives for an AI course."   # scripted, one run per message
 ```
 
 The platform's terminal prints each batch of spans it receives. The agent prints the session's model calls, token counts and an estimated cost at list prices; the Console's Usage page shows the exact charge.

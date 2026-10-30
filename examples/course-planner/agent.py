@@ -1,7 +1,7 @@
 """Course Planner: a LangGraph agent that plans a semester.
 
 Interactive:   python agent.py
-Scripted:      python agent.py "Plan my spring semester..." "Add CSE 434 too."
+Scripted:      python agent.py "Plan my spring semester..." "Swap one of the electives for an AI course."
 
 The agent has no tracing code. The variables in .env turn on LangSmith's
 OpenTelemetry export and point it at ReviewMyAgent, which receives every model

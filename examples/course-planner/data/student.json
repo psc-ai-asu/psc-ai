@@ -1,5 +1,6 @@
 {
+  "notice": "Synthetic demo data: a made-up student, not a real person or transcript.",
   "name": "Demo Student",
-  "completed": ["CSE 110", "CSE 205", "CSE 230", "CSE 310", "MAT 265", "MAT 266"],
+  "completed": ["CS 110", "CS 175", "MATH 104", "MATH 218"],
   "max_credits": 18
 }
