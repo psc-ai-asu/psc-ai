@@ -26,3 +26,13 @@ npx turbo dev --filter=@psc-ai/platform
 ```
 
 The app runs at [http://localhost:3001](http://localhost:3001).
+
+## Personal trace tokens
+
+Open **Personal traces & tokens** from the review dashboard or agent directory.
+Tokens belong to the signed-in user and work across agents. Apply the token
+migration to your local database before testing. See
+[setup and integration](../../docs/personal-trace-tokens.md).
+
+Run ingestion, saved-run storage, metrics, and review attachment persistence are
+not implemented. The review form shows an optional attachment empty state.
