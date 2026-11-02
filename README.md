@@ -26,3 +26,15 @@ npm install
 ```
 
 Then follow [Local Setup](https://docs.reviewmyagent.today/contributing/local-setup) to start the local database and run the platform at [http://localhost:3001](http://localhost:3001).
+
+## Personal trace tokens and local telemetry spike
+
+The review dashboard and agent directory include **Personal traces & tokens** at
+`/review/trace-tokens`. Review forms include an optional saved-run selector, shown
+in an empty state until run capture and metric attachments are implemented. See
+[local migration/setup and checks](docs/personal-trace-tokens.md) and the isolated
+[LangGraph OTLP capture spike](spikes/langgraph-otel/README.md), including five
+sanitized SDK captures and their observed attribute mapping. Production trace
+ingestion is a later workstream and is not implemented here.
+
+Personal metric tokens provide optional run ownership via `X-RMA-Trace-Token`: a valid token maps traces to the user UUID; missing or invalid tokens leave ownership unknown without blocking ingestion. The platform ingestion endpoint is still pending.

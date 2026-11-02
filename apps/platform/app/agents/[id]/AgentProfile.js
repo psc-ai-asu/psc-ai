@@ -75,6 +75,13 @@ export default function AgentProfile({ agent }) {
             </div>
           </div>
 
+          <div className="px-4 py-3 border-b border-stone-800 bg-violet-500/5">
+            <Link href="/review/trace-tokens" className="text-xs font-medium text-violet-400 hover:text-violet-300">
+              Personal traces &amp; tokens →
+            </Link>
+            <p className="text-xs text-stone-500 mt-1">Manage the runs and metrics you’ll attach to reviews.</p>
+          </div>
+
           <div className="px-3 pt-3 pb-2 border-b border-stone-800">
             <div className="relative">
               <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { createClient } from '@/lib/supabase/client';
 import { isAuthRetryableFetchError } from "@supabase/supabase-js";
+import RunMetricsAttachment from "./RunMetricsAttachment";
 
 // These are only the five "scale" questions (1 - 5 input), which are passed into 
 // the ScaleInput component to dynamically create the unique scale rating.
@@ -160,6 +161,7 @@ export default function AgentReviewForm({ agent }) {
 
         {/* Questions */}
         <div className="space-y-7">
+          <RunMetricsAttachment />
           <div className={`p-5 rounded-2xl border transition-all duration-200 ${answers.task_description ? "border-zinc-700 bg-zinc-900/50" : "border-zinc-800/60 bg-zinc-900/20"}`}>
             <label className="text-sm text-zinc-200 font-medium leading-snug">
               Describe the agent task

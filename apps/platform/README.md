@@ -26,3 +26,17 @@ npx turbo dev --filter=@psc-ai/platform
 ```
 
 The app runs at [http://localhost:3001](http://localhost:3001).
+
+## Personal trace tokens
+
+In the review dashboard or agent directory, click **Personal traces & tokens**
+to open `/review/trace-tokens`. Tokens belong to the signed-in reviewer and work
+across agents; no agent selection or developer role is required. Review forms
+include an optional saved-run selector with an empty state until capture and
+metric attachment persistence are implemented.
+Apply the new migration only to your local database before testing. See
+[setup, security and validation](../../docs/personal-trace-tokens.md) and the
+[isolated tracing spike](../../spikes/langgraph-otel/README.md), which contains
+the technical setup instructions. Production ingestion is not implemented.
+
+Personal metric tokens provide optional run ownership via `X-RMA-Trace-Token`: a valid token maps traces to the user UUID; missing or invalid tokens leave ownership unknown without blocking ingestion. The platform ingestion endpoint is still pending.
