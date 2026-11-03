@@ -26,3 +26,11 @@ npm install
 ```
 
 Then follow [Local Setup](https://docs.reviewmyagent.today/contributing/local-setup) to start the local database and run the platform at [http://localhost:3001](http://localhost:3001).
+
+## Personal trace tokens
+
+The review dashboard and agent directory link to **Personal traces & tokens** at
+`/review/trace-tokens`. Signed-in users can create, list, and revoke their own
+tokens. Review forms include an optional saved-run selector with an empty state
+until run capture and metric attachments are implemented. See
+[setup and integration](docs/personal-trace-tokens.md).
