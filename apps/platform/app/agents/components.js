@@ -1,4 +1,4 @@
-// presentational pieces for the Agent Directory — scoped to this page only
+// presentational pieces for the Agent Directory (ScoreBadge is also used on agent profiles)
 
 import Link from "next/link";
 

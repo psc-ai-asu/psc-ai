@@ -1,6 +1,6 @@
 'use server';
 
-import { createClient } from '../../lib/supabaseServer';
+import { createClient } from '@/lib/supabase/server';
 import { createToken, listTokens, revokeToken } from '../../../lib/trace-tokens/service.mjs';
 
 // Expected errors are safe messages; never serialize database errors or credentials.

@@ -21,18 +21,6 @@ export function MetricTile({ label, value, sub, highlight }) {
   );
 };
 
-export function ScoreBadge({ score }) {
-  const color = score >= 4 ? "text-emerald-400 bg-emerald-400/10 border-emerald-400/20"
-              : score >= 3 ? "text-amber-400 bg-amber-400/10 border-amber-400/20"
-              : "text-rose-400 bg-rose-400/10 border-rose-400/20";
-
-  return (
-    <span className={`text-xs font-mono font-medium px-2 py-0.5 rounded border ${color}`}>
-      {score.toFixed(1)}
-    </span>
-  );
-};
-
 export const TRACE_BACKED_EXPLANATION = "The reviewer ran this agent and sent its trace with their own token.";
 
 // "Trace-backed" for a review submitted with a session (verification_status

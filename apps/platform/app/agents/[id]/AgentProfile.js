@@ -5,7 +5,8 @@ import Link from "next/link";
 import PlatformHeader from "@/components/PlatformHeader";
 
 import { formatDuration, formatTokens, plural } from "@/lib/format";
-import { ScoreBar, ScoreBadge, TRACE_BACKED_EXPLANATION, VerificationBadge } from "./components";
+import { ScoreBar, TRACE_BACKED_EXPLANATION, VerificationBadge } from "./components";
+import { ScoreBadge } from "../components";
 import TraceView from "./TraceView";
 
 function formatDate(dateString) {
