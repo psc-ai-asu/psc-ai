@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import PlatformHeader from "@/components/PlatformHeader";
 import { AgentListItem, SearchFilterBar } from "./components";
@@ -63,9 +62,7 @@ export default function AgentDirectoryPage() {
         <div className="max-w-2xl mx-auto px-6 py-10">
           <div className="mb-8">
             <h1 className="text-xl font-semibold text-stone-100 mb-1">Agent Directory</h1>
-            <p className="text-sm text-stone-500">Browse agents onboarded to the platform. Select one to see its reviews, or filter by developer.</p>
-            <Link href="/review/trace-tokens" className="inline-block mt-3 text-sm text-violet-400 hover:text-violet-300">Personal traces &amp; tokens →</Link>
-          </div>
+            <p className="text-sm text-stone-500">Browse agents onboarded to the platform. Select one to see its reviews, or filter by developer.</p>          </div>
 
           <SearchFilterBar
             search={search}

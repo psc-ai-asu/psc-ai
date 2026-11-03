@@ -164,6 +164,158 @@ a {
   background: var(--surface2);
 }
 
+.app-header-left,
+.app-header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.app-header-right {
+  gap: 8px;
+}
+
+.app-auth-btn {
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 160ms ease, border-color 160ms ease;
+}
+
+.app-auth-btn:hover {
+  color: var(--text);
+  border-color: var(--border-hover);
+}
+
+.app-auth-signup {
+  color: var(--accent-light);
+  border-color: rgba(139, 92, 246, 0.35);
+  background: var(--accent-soft);
+}
+
+.app-profile {
+  position: relative;
+}
+
+.app-profile-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px 4px 4px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  background: transparent;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 160ms ease, border-color 160ms ease;
+}
+
+.app-profile-btn:hover,
+.app-profile-btn[aria-expanded="true"] {
+  color: var(--text);
+  border-color: var(--border-hover);
+}
+
+.app-profile-initial {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-light);
+  background: var(--accent-soft);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.app-profile-caret {
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.app-profile-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 180px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-hover);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+.app-profile-item {
+  padding: 9px 10px;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  background: transparent;
+  font-size: 13px;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.app-profile-item:hover {
+  color: var(--text);
+  background: var(--surface2);
+}
+
+.app-profile-logout {
+  color: var(--red);
+}
+
+.app-profile-logout:hover {
+  color: var(--red);
+  background: rgba(255, 77, 77, 0.08);
+}
+
+.app-menu-btn {
+  display: none;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  background: transparent;
+  cursor: pointer;
+}
+
+.app-mobile-menu {
+  display: none;
+  flex-direction: column;
+  padding: 4px 16px 10px;
+  border-top: 1px solid var(--border);
+}
+
+.app-mobile-menu a {
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 15px;
+  text-decoration: none;
+}
+
+.app-mobile-menu a:last-child {
+  border-bottom: none;
+}
+
+.app-mobile-menu a[aria-current="page"] {
+  color: var(--text);
+}
+
 .app-page {
   width: min(1120px, 100%);
   margin: 0 auto;
@@ -212,17 +364,20 @@ a {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .app-header-inner {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 8px;
-    padding-block: 12px;
+  .app-nav,
+  .app-profile-name,
+  .app-profile-caret,
+  .app-auth-signup {
+    display: none;
   }
 
-  .app-nav {
-    width: 100%;
-    overflow-x: auto;
-    padding-bottom: 2px;
+  .app-profile-btn {
+    padding: 3px;
+  }
+
+  .app-menu-btn,
+  .app-mobile-menu {
+    display: flex;
   }
 
   .app-page {

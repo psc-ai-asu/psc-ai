@@ -15,17 +15,23 @@ function SecretDialog({ secret, onClose }) {
   async function copy() {
     try {
       await navigator.clipboard.writeText(secret);
-      setCopyStatus('Copied. Keep this token somewhere safe.');
+      setCopyStatus('copied');
     } catch {
-      setCopyStatus('Copy failed. Select the token and copy it manually.');
+      setCopyStatus('failed');
     }
   }
   return <dialog ref={dialog} className={styles.dialog} aria-labelledby="token-secret-title" onCancel={onClose} onClose={onClose}>
-    <h2 id="token-secret-title">Copy your token</h2>
-    <p>Save this somewhere safe. You won’t be able to see it again after closing this window.</p>
-    <input className={styles.secret} aria-label="New personal trace token" value={secret} readOnly onFocus={(event) => event.target.select()} />
-    <p role="status">{copyStatus}</p>
-    <div className={styles.buttons}><button type="button" onClick={copy}>Copy token</button><button type="button" className={styles.secondary} onClick={onClose}>Done</button></div>
+    <div className={styles.dialogBody}>
+      <h2 id="token-secret-title">Copy your token</h2>
+      <p>Save this somewhere safe. You won’t be able to see it again after closing this window.</p>
+      <input className={styles.secret} aria-label="New personal trace token" value={secret} readOnly onFocus={(event) => event.target.select()} />
+      {copyStatus === 'failed' && <p className={styles.error}>Copy failed. Select the token and copy it manually.</p>}
+      <p role="status" className="sr-only">{copyStatus === 'copied' ? 'Token copied.' : ''}</p>
+      <div className={styles.buttons}>
+        <button type="button" onClick={copy}>{copyStatus === 'copied' ? 'Copied ✓' : 'Copy token'}</button>
+        <button type="button" className={styles.secondary} onClick={onClose}>Done</button>
+      </div>
+    </div>
   </dialog>;
 }
 
@@ -68,7 +74,7 @@ export default function TraceTokens() {
       const result = await createTraceTokenAction(name);
       if (result.error) { setError(result.error); return; }
       setTokens((items) => [result.data.token, ...items]);
-      setSecret(result.data.secret); setName(''); setNotice('Token created.');
+      setSecret(result.data.secret); setName('');
     });
   }
   async function revoke(id) {
@@ -90,13 +96,12 @@ export default function TraceTokens() {
   if (loading) return <p role="status">Loading your tokens…</p>;
 
   return <>
-    <p className={styles.intro}>Your personal metric token identifies which runs belong to you, like the user attached to a review. It works across agents. Traces sent without a valid token are rejected.</p>
     <div role="alert" className={styles.error}>{error}</div>
     <p role="status" aria-live="polite">{busy ? 'Working…' : notice}</p>
     <div className={styles.grid}>
       <section className={styles.panel} aria-labelledby="your-tokens-title">
         <h2 id="your-tokens-title">Your tokens</h2>
-        <p>Send your token in the X-RMA-Trace-Token header with your traces to identify yourself. The token only identifies ownership; it does not grant access or verify a run. You can revoke it whenever you need to.</p>
+        <p>Add a token to your agent&apos;s <code>x-rma-trace-token</code> header. One token works for every agent, and you can revoke it at any time.</p>
         <form onSubmit={create} className={styles.form}>
           <label htmlFor="trace-token-name">Token name</label>
           <input id="trace-token-name" value={name} maxLength={80} required placeholder="e.g. My laptop" onChange={(event) => setName(event.target.value)} />
