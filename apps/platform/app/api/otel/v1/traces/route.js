@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { decodeTraceRequest } from "@/lib/otel/decode";
 import { normalizeTraceRequest } from "@/lib/otel/normalize";
 import { captureTraceRequest } from "@/lib/otel/capture";
+import { TRACE_TOKEN_HEADER, resolveTraceUser } from "@/lib/trace-tokens/attribution.mjs";
 
 // OTLP/HTTP trace ingest. Decodes an export request, normalizes its spans and
 // stores them through ingest_trace_spans() with the service-role key.
@@ -14,17 +15,6 @@ const MAX_BODY_BYTES = 5 * 1024 * 1024;
 function reject(status, message) {
   console.warn(`[otel] rejected ${status}: ${message}`);
   return new Response(message, { status, headers: { "Content-Type": "text/plain" } });
-}
-
-/**
- * Which account sent this request, or null. Until personal trace tokens exist
- * there is one dev token, mapped to one account by RMA_DEV_TRACE_USER_ID.
- * This is the only place that decides who sent a trace.
- */
-function senderOf(request) {
-  const devToken = process.env.RMA_DEV_TRACE_TOKEN;
-  if (!devToken || request.headers.get("x-rma-token") !== devToken) return null;
-  return process.env.RMA_DEV_TRACE_USER_ID;
 }
 
 // normalize.js fields → the keys ingest_trace_spans() reads.
@@ -52,13 +42,22 @@ function toRow(span) {
 
 export async function POST(request) {
   const supabase = createAdminClient();
-  if (!process.env.RMA_DEV_TRACE_TOKEN || !process.env.RMA_DEV_TRACE_USER_ID || !supabase) {
-    return reject(503, "Trace ingest is not configured: set RMA_DEV_TRACE_TOKEN, RMA_DEV_TRACE_USER_ID and SUPABASE_SERVICE_ROLE_KEY.");
+  if (!supabase) {
+    return reject(503, "Trace ingest is not configured: set SUPABASE_SERVICE_ROLE_KEY.");
   }
 
-  const submittedBy = senderOf(request);
+  // The reviewer's personal trace token is the only thing that decides who
+  // sent a trace. A trace with no owner can't back a review, so it's rejected.
+  let submittedBy;
+  try {
+    submittedBy = await resolveTraceUser(supabase, request.headers);
+  } catch (error) {
+    // 5xx, so the exporter retries once the token lookup works again.
+    console.error(`[otel] token lookup failed: ${error.message}`);
+    return new Response("Couldn't check the trace token. Try again.", { status: 503, headers: { "Content-Type": "text/plain" } });
+  }
   if (!submittedBy) {
-    return reject(401, "Missing or invalid x-rma-token header.");
+    return reject(401, `Missing, invalid or revoked ${TRACE_TOKEN_HEADER} header.`);
   }
 
   const agentId = request.headers.get("x-rma-agent-id");

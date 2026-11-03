@@ -90,7 +90,7 @@ export default function TraceTokens() {
   if (loading) return <p role="status">Loading your tokens…</p>;
 
   return <>
-    <p className={styles.intro}>Your personal metric token identifies which runs belong to you, like the user attached to a review. It works across agents. Traces sent without a token have unknown ownership. Platform trace uploads aren’t available yet.</p>
+    <p className={styles.intro}>Your personal metric token identifies which runs belong to you, like the user attached to a review. It works across agents. Traces sent without a valid token are rejected.</p>
     <div role="alert" className={styles.error}>{error}</div>
     <p role="status" aria-live="polite">{busy ? 'Working…' : notice}</p>
     <div className={styles.grid}>

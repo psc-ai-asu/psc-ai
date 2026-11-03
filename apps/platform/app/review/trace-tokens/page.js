@@ -17,12 +17,9 @@ export default async function TraceTokensPage() {
     <main className={styles.main}>
       <Link href="/agents" className={styles.back}>← Back to reviews</Link>
       <h1>Personal traces</h1>
-      <p className={styles.agentName}>Manage your tokens and the runs you’ll use in reviews. Your tokens work across agents.</p>
-      <section className={styles.panel} aria-labelledby="saved-runs-title">
-        <h2 id="saved-runs-title">Saved runs &amp; metrics</h2>
-        <p>No saved runs yet. Run capture and metrics are coming soon. Once available, runs captured with your personal token will appear here for you to choose when writing a review.</p>
-        <Link href="/agents" className={styles.back}>Choose an agent to review →</Link>
-      </section>
+      <p className={styles.agentName}>Manage the tokens that tie your agent runs to your account. Your tokens work across agents.</p>
+      <p className={styles.agentName}>Sessions you send with a token appear when you review that agent, where you can attach one to make the review Trace-backed.</p>
+      <Link href="/agents" className={styles.back}>Choose an agent to review →</Link>
       <h2 className={styles.sectionTitle}>Personal trace tokens</h2>
       <TraceTokens />
     </main>

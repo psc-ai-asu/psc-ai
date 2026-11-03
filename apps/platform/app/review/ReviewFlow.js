@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import AgentReviewForm from "./AgentReviewForm";
 import SessionPicker from "./SessionPicker";
@@ -16,7 +17,17 @@ export default function ReviewFlow({ agent, sessions, hasTraceBackedReview }) {
     return <AgentReviewForm agent={agent} unverifiedReason="You've already written a Trace-backed review of this agent." />;
   }
   if (sessions.length === 0) {
-    return <AgentReviewForm agent={agent} unverifiedReason="To write a Trace-backed review, run the agent with tracing turned on, then come back here." />;
+    // New tab, so a half-written review isn't lost.
+    const reason = (
+      <>
+        To write a Trace-backed review,{" "}
+        <Link href="/review/trace-tokens" target="_blank" rel="noopener noreferrer" className="text-violet-400 hover:text-violet-300">
+          create a personal trace token
+        </Link>
+        , run the agent with it, then come back here.
+      </>
+    );
+    return <AgentReviewForm agent={agent} unverifiedReason={reason} />;
   }
 
   if (step === "pick") {

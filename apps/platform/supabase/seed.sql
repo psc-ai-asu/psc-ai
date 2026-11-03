@@ -64,3 +64,13 @@ values
   ('a0000000-0000-0000-0000-000000000003', '10000000-0000-0000-0000-000000000003',
    'Plan a 3-day trip under $500', now() - interval '10 days',
    2, 3, 3, 3, 4, 'Went over budget by $120.', 'unverified');
+
+-- Personal trace tokens for the two reviewers, so a fresh reset can send traces
+-- without creating one on /review/trace-tokens first. Local seed only: these
+-- secrets are public, and seed.sql never runs against production.
+insert into public.trace_tokens (user_id, name, token_hash, token_prefix)
+select user_id, 'Seeded demo token', encode(sha256(convert_to(secret, 'UTF8')), 'hex'), left(secret, 18)
+from (values
+  ('10000000-0000-0000-0000-000000000002'::uuid, 'rma_trace_demo1_local_seed_only_not_a_real_secret_000'),
+  ('10000000-0000-0000-0000-000000000003'::uuid, 'rma_trace_demo2_local_seed_only_not_a_real_secret_000')
+) as demo (user_id, secret);

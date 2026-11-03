@@ -259,7 +259,7 @@ export default function AgentReviewForm({ agent, session = null, onChooseSession
             <span className="text-violet-400">ⓘ</span>
             <span>
               This review will be marked <span className="text-zinc-300 font-medium">Unverified</span>.
-              {unverifiedReason && ` ${unverifiedReason}`}
+              {unverifiedReason && <> {unverifiedReason}</>}
             </span>
           </div>
         )}
