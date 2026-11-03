@@ -23,8 +23,10 @@ cd examples/course-planner
 python3 -m venv .venv            # or: uv venv
 source .venv/bin/activate
 pip install -r requirements.txt  # or: uv pip install -r requirements.txt
-cp .env.example .env             # then fill in ANTHROPIC_API_KEY
+cp .env.example .env             # then fill in ANTHROPIC_API_KEY and your trace token
 ```
+
+Your trace token ties the runs you send to your platform account, so you can attach them to a review. Sign in to the platform, create a token at `/review/trace-tokens`, and paste it into `OTEL_EXPORTER_OTLP_HEADERS` in place of `<your rma_trace_… token>`. The platform shows the full token only once.
 
 ## Run
 
@@ -46,7 +48,7 @@ The agent has no tracing code; `.env` configures everything:
 | --- | --- |
 | `LANGSMITH_TRACING`, `LANGSMITH_OTEL_ENABLED`, `LANGSMITH_OTEL_ONLY` | Make LangChain emit OpenTelemetry spans instead of sending to LangSmith, so no LangSmith account is needed |
 | `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` | The platform's ingest route |
-| `OTEL_EXPORTER_OTLP_HEADERS` | `x-rma-token` (your trace token) and `x-rma-agent-id` (the agent's id on the platform) |
+| `OTEL_EXPORTER_OTLP_HEADERS` | `x-rma-trace-token` (your personal trace token) and `x-rma-agent-id` (the agent's id on the platform) |
 | `ANTHROPIC_OPEN_TELEMETRY=false` | Stops the Anthropic SDK sending its own duplicate span for every model call |
 
 Each chat is one LangGraph thread, so every span carries `langsmith.metadata.thread_id` and the platform can group a conversation's runs. LangSmith flushes the remaining spans when the script exits.
