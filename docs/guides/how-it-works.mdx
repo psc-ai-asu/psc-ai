@@ -1,0 +1,74 @@
+---
+title: "How PSC-AI Works"
+description: "A walkthrough of the platform, from signing up to reviewing agents and onboarding your own."
+---
+
+PSC-AI connects two groups of people around the same agents. **Reviewers** use an agent and rate how it did. **Agent developers** onboard their agents and see those ratings. You can be both with one account.
+
+## The flow at a glance
+
+<Steps>
+  <Step title="Create an account">
+    Sign up with a username, email and password. You need an account for every page of the platform except the home page. See [Create an Account](/guides/create-account).
+  </Step>
+  <Step title="Find an agent">
+    Open the **Agent Directory** to see every onboarded agent with its average score. See [Browse Agents](/guides/browse-agents).
+  </Step>
+  <Step title="Review it">
+    From an agent's page, choose **+ Review**, describe what you asked it to do and rate it on five questions. See [Write a Review](/guides/write-a-review).
+  </Step>
+  <Step title="Onboard your own agents">
+    In the **Developer Dashboard**, add your agents so others can find and review them. See [Developer Dashboard](/guides/developer-dashboard).
+  </Step>
+</Steps>
+
+## Getting around
+
+The bar at the top of every page links to the three main areas:
+
+| Link | What it's for |
+|---|---|
+| **Home** | What the platform does, and the sign-in and sign-up buttons |
+| **Agent Directory** | Browsing agents and reading their reviews |
+| **Developer Dashboard** | Managing the agents you've onboarded |
+
+## How scores work
+
+Every review rates an agent from 1 to 5 on five questions: goal completion, helpfulness, coherence, factuality and safety. A review's **overall score** is the average of the five. An agent's score in the directory is the average overall score of all its reviews.
+
+Scores are colored the same way everywhere:
+
+| Score | Color |
+|---|---|
+| 4.0 and above | Green |
+| 3.0 to 3.9 | Amber |
+| Below 3.0 | Red |
+
+## Unverified and verified reviews
+
+Every review is labeled **Unverified** or **Verified**.
+
+- **Unverified** reviews are based on what the reviewer reports. Every review written today is unverified.
+- **Verified** reviews will be backed by an execution trace: a record of what the agent actually did while the reviewer used it.
+
+<Badge color="blue">In progress</Badge> Verified, trace-backed reviews are being built. Until then, every new review is marked Unverified.
+
+## What's available and what's coming
+
+<Badge color="green">Available</Badge> means you can use it today. <Badge color="blue">In progress</Badge> means it's being built now. <Badge color="orange">Coming soon</Badge> means it's planned but not started.
+
+| Feature | For | Status |
+|---|---|---|
+| Accounts, sign-up and password reset | Everyone | <Badge color="green">Available</Badge> |
+| Agent Directory with search and developer filter | Reviewers | <Badge color="green">Available</Badge> |
+| Rubric reviews with a task description and notes | Reviewers | <Badge color="green">Available</Badge> |
+| Onboarding, editing and deleting agents | Developers | <Badge color="green">Available</Badge> |
+| Public or private metrics setting per agent | Developers | <Badge color="green">Available</Badge> |
+| Linking an agent's GitHub repository | Developers | <Badge color="blue">In progress</Badge> |
+| Execution traces sent from your agent | Developers | <Badge color="blue">In progress</Badge> |
+| Verified, trace-backed reviews | Reviewers | <Badge color="blue">In progress</Badge> |
+| Agent metrics: tokens, latency and tool-call success rate | Developers | <Badge color="blue">In progress</Badge> |
+| Personal trace tokens for sending traces | Developers | <Badge color="orange">Coming soon</Badge> |
+| Cost per run | Developers | <Badge color="orange">Coming soon</Badge> |
+| Comparing agent versions over time | Developers | <Badge color="orange">Coming soon</Badge> |
+| Your review history | Reviewers | <Badge color="orange">Coming soon</Badge> |

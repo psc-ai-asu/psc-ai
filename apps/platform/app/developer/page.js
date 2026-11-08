@@ -10,6 +10,7 @@ import SearchFilters from '../../components/SearchFilters';
 import AgentList from '../../components/AgentList';
 import AgentDetail from '../../components/AgentDetail';
 import { useAgents } from './useAgents';
+import { STATUS_NOTE_MAX_LENGTH, STATUS_NOTE_MIN_LENGTH } from '@/lib/agentPerformance';
 
 const STATUS_FILTERS = ['all', 'active', 'fired'];
 const FRAMEWORK_OPTIONS = ['LangChain', 'CrewAI', 'AutoGen', 'OpenAI Swarm', 'Custom'];
@@ -231,6 +232,101 @@ function AgentFormModal({
   );
 }
 
+// Asks for the reason when firing, and what was improved when rehiring
+function StatusChangeModal({ change, agent, note, onNoteChange, onSubmit, onClose, isSubmitting, error }) {
+  const isFiring = change === 'fire';
+
+  return (
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      background: 'rgba(0,0,0,0.7)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 200,
+      padding: 20,
+    }}>
+      <form
+        onSubmit={onSubmit}
+        style={{
+          width: '100%',
+          maxWidth: 480,
+          maxHeight: '100%',
+          overflowY: 'auto',
+          background: 'var(--bg-raised)',
+          border: '1px solid var(--border)',
+          borderRadius: 16,
+          padding: 24,
+          boxShadow: '0 16px 40px rgba(0,0,0,0.38)',
+        }}
+      >
+        <h3 style={{ margin: '0 0 10px', color: 'var(--text)', fontSize: 22, fontWeight: 700, overflowWrap: 'anywhere' }}>
+          {isFiring ? `Fire ${agent.name}?` : `Rehire ${agent.name}?`}
+        </h3>
+        <p style={{ margin: '0 0 18px', color: 'var(--text-muted)', fontSize: 13, lineHeight: 1.6 }}>
+          {isFiring
+            ? 'It will stop accepting reviews and be hidden from the Agent Directory by default. Existing reviews stay visible. To bring it back, you\'ll need to say what you improved.'
+            : 'It will accept reviews and appear in the Agent Directory again.'}
+        </p>
+
+        <label style={labelStyle} htmlFor="status_note">
+          {isFiring ? 'Why are you firing it?' : 'What did you improve?'}
+        </label>
+        <textarea
+          id="status_note"
+          value={note}
+          onChange={(e) => onNoteChange(e.target.value)}
+          rows={4}
+          required
+          minLength={STATUS_NOTE_MIN_LENGTH}
+          maxLength={STATUS_NOTE_MAX_LENGTH}
+          style={{ ...inputStyle, resize: 'vertical', minHeight: 110 }}
+        />
+        <div style={{ marginTop: 6, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: 11 }}>
+          Shown publicly on the agent&apos;s page.
+        </div>
+
+        {error && (
+          <div role="alert" style={{ marginTop: 12, color: '#FF6B6B', fontFamily: 'var(--font-mono)', fontSize: 12 }}>{error}</div>
+        )}
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 18 }}>
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              background: 'transparent',
+              color: 'var(--text)',
+              border: '1px solid var(--border)',
+              borderRadius: 8,
+              padding: '10px 14px',
+              fontFamily: 'var(--font-mono)',
+              fontWeight: 700,
+              cursor: 'pointer',
+            }}
+          >
+            Cancel
+          </button>
+          <button type="submit" disabled={isSubmitting} style={{
+            background: isFiring ? '#FF4D4D' : 'var(--accent)',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 8,
+            padding: '10px 16px',
+            fontFamily: 'var(--font-mono)',
+            fontWeight: 700,
+            cursor: isSubmitting ? 'not-allowed' : 'pointer',
+            opacity: isSubmitting ? 0.7 : 1,
+          }}>
+            {isSubmitting ? 'Saving…' : (isFiring ? 'Fire agent' : 'Rehire agent')}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
 export default function DeveloperPage() {
   const {
     agents,
@@ -256,6 +352,14 @@ export default function DeveloperPage() {
     handleUpdateAgent,
     handleDeleteAgent,
     handleEditAgent,
+    statusChange,
+    statusNote,
+    setStatusNote,
+    statusError,
+    isChangingStatus,
+    openStatusChange,
+    closeStatusChange,
+    handleStatusChange,
   } = useAgents();
 
   const detailRef = useRef(null);
@@ -347,6 +451,20 @@ export default function DeveloperPage() {
         />
       )}
 
+      {/* Handle Fire/Rehire */}
+      {statusChange && selectedAgent && (
+        <StatusChangeModal
+          change={statusChange}
+          agent={selectedAgent}
+          note={statusNote}
+          onNoteChange={setStatusNote}
+          onSubmit={handleStatusChange}
+          onClose={closeStatusChange}
+          isSubmitting={isChangingStatus}
+          error={statusError}
+        />
+      )}
+
       {/* Details for Agent Browser Column */}
       <div className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
         <div className="developer-grid">
@@ -369,6 +487,8 @@ export default function DeveloperPage() {
               agent={selectedAgent}
               onEdit={handleEditAgent}
               onDelete={handleDeleteAgent}
+              onFire={() => openStatusChange('fire')}
+              onRehire={() => openStatusChange('rehire')}
               isDeleting={isDeleting}
             />
           </div>

@@ -14,12 +14,16 @@ export default async function ReviewPage({ searchParams }) {
   const supabase = await createClient();
   const { data: agent } = await supabase
     .from("agents")
-    .select("id, name")
+    .select("id, name, status")
     .eq("id", agentId)
     .maybeSingle();
 
   if (!agent) {
     return <AgentUnavailable message="This agent couldn't be found. It may have been removed." />;
+  }
+
+  if (agent.status === "fired") {
+    return <AgentUnavailable message={`${agent.name} has been fired and isn't accepting reviews.`} />;
   }
 
   return <AgentReviewForm agent={agent} />;

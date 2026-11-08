@@ -38,7 +38,7 @@
         "groups": [
           {
             "group": "Getting Started",
-            "pages": ["index", "guides/create-account"]
+            "pages": ["index", "guides/how-it-works", "guides/create-account"]
           },
           {
             "group": "Reviewing Agents",

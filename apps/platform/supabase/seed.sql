@@ -59,3 +59,9 @@ values
 update public.agents
 set github_repo_url = 'https://github.com/example-org/research-assistant'
 where id = 'a0000000-0000-0000-0000-000000000001';
+
+-- Why the seeded fired agent was fired, shown on its page and dashboard.
+insert into public.agent_status_events (agent_id, status, note, changed_by)
+select id, 'fired', 'Goes over budget and needs better cost tracking before it can plan trips again.', developed_by
+from public.agents
+where id = 'a0000000-0000-0000-0000-000000000003';

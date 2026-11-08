@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { addAgentAction, deleteAgentAction, getAgentsAction, updateAgentAction } from './actions';
+import { addAgentAction, deleteAgentAction, fireAgentAction, getAgentsAction, rehireAgentAction, updateAgentAction } from './actions';
 import { createClient } from '../lib/supabaseClient';
 
 export const EMPTY_FORM = {
@@ -32,6 +32,12 @@ export function useAgents() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState('');
+
+  // 'fire' or 'rehire' while the status change modal is open
+  const [statusChange, setStatusChange] = useState(null);
+  const [statusNote, setStatusNote] = useState('');
+  const [statusError, setStatusError] = useState('');
+  const [isChangingStatus, setIsChangingStatus] = useState(false);
 
   useEffect(() => {
     async function loadUserAndAgents() {
@@ -182,6 +188,48 @@ export function useAgents() {
     }
   };
 
+  const openStatusChange = (change) => {
+    setStatusChange(change);
+    setStatusNote('');
+    setStatusError('');
+  };
+
+  const closeStatusChange = () => {
+    setStatusChange(null);
+    setStatusNote('');
+    setStatusError('');
+  };
+
+  const handleStatusChange = async (event) => {
+    event.preventDefault();
+
+    if (!selectedAgent) {
+      return;
+    }
+
+    setStatusError('');
+    setIsChangingStatus(true);
+
+    try {
+      const action = statusChange === 'fire' ? fireAgentAction : rehireAgentAction;
+      const { agent: updatedAgent, error: changeError } = await action(selectedAgent.id, statusNote);
+
+      if (changeError) {
+        setStatusError(changeError);
+        return;
+      }
+
+      setAgents((current) => current.map((agent) => (
+        agent.id === updatedAgent.id ? updatedAgent : agent
+      )));
+      closeStatusChange();
+    } catch (err) {
+      setStatusError('Could not change this agent. Please try again.');
+    } finally {
+      setIsChangingStatus(false);
+    }
+  };
+
   return {
     // data
     agents,
@@ -202,6 +250,12 @@ export function useAgents() {
     isSubmitting,
     isDeleting,
     error,
+    // fire/rehire modal state
+    statusChange,
+    statusNote,
+    setStatusNote,
+    statusError,
+    isChangingStatus,
     // actions
     openAddForm,
     resetFormState,
@@ -210,5 +264,8 @@ export function useAgents() {
     handleUpdateAgent,
     handleDeleteAgent,
     handleEditAgent,
+    openStatusChange,
+    closeStatusChange,
+    handleStatusChange,
   };
 }

@@ -28,7 +28,14 @@ export function AgentListItem({ agent }) {
     >
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-sm font-medium text-stone-100 truncate">{agent.name}</div>
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="text-sm font-medium text-stone-100 truncate">{agent.name}</div>
+            {agent.status === "fired" && (
+              <span className="text-xs font-mono font-medium px-1.5 py-0.5 rounded border text-rose-400 bg-rose-400/10 border-rose-400/20 flex-shrink-0">
+                Fired
+              </span>
+            )}
+          </div>
           <div className="text-xs text-stone-500 mt-0.5">
             {agent.framework} · by {agent.developerUsername}
           </div>

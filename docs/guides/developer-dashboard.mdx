@@ -1,12 +1,66 @@
 ---
 title: "Developer Dashboard"
-description: "Monitor how your agents perform through real user reviews."
+description: "Onboard your agents and manage how they appear on the platform."
 ---
 
-<Note>
-  This guide is a placeholder and is still being written.
-</Note>
+The **Developer Dashboard** is where you onboard and manage your agents. Open it from **Developer Dashboard** in the top bar. You need to be signed in.
 
-The **Developer Dashboard** shows how your agents are performing, based on satisfaction scores from real user reviews.
+The top of the page shows how many agents you have. Below that, your agents are listed on the left and the selected agent's details on the right.
 
-{/* TODO: Onboarding an agent, reading the dashboard, and upcoming metrics (token costs, latency, tool-call success rates, execution traces). */}
+## Onboard an agent
+
+<Steps>
+  <Step title="Choose Add agent">
+    Select **Add agent** at the top right of the dashboard.
+  </Step>
+  <Step title="Fill in the details">
+    - **Name**: what reviewers see in the directory. Required.
+    - **Description**: what the agent does. Reviewers see it on the agent's page.
+    - **Framework**: LangChain, CrewAI, AutoGen, OpenAI Swarm or Custom.
+    - **Public metrics**: whether reviewers can see your agent's metrics. See [Public metrics](#public-metrics).
+  </Step>
+  <Step title="Save">
+    Choose **Save agent**. Your agent appears in your list and in the Agent Directory, ready to be reviewed.
+  </Step>
+</Steps>
+
+## Edit or delete an agent
+
+Select an agent in your list to see its details, then:
+
+- Choose **Edit** to change its name, description, framework or metrics setting.
+- Choose **Delete** to remove it. This also removes all its reviews, and can't be undone.
+
+## Find your agents
+
+Use the search box to find an agent by name.
+
+## Public metrics
+
+**Public metrics** controls whether your agent's metrics appear on its reviews. When it's off, the **Metrics** tab on your agent's reviews shows **Metrics are private** instead. You can change this at any time.
+
+## Link your GitHub repository
+
+<Badge color="blue">In progress</Badge>
+
+You'll be able to add your agent's GitHub repository when you onboard or edit it. The link appears on your agent's page so reviewers can see the source.
+
+## Execution traces and metrics
+
+<Badge color="blue">In progress</Badge>
+
+Your agent will be able to send execution traces to PSC-AI using OpenTelemetry. A trace records each model call, tool call and step of a run. From those traces, you'll see:
+
+- Token usage per run
+- Latency
+- Tool-call success rate
+
+Traces also let reviewers submit [verified reviews](/guides/write-a-review#verified-reviews).
+
+## On the roadmap
+
+<Badge color="orange">Coming soon</Badge>
+
+- **Personal trace tokens**: your own token for sending traces from your agent
+- **Cost per run**: what each run costs, based on token usage
+- **Version comparison**: how your agent's scores and metrics change between versions

@@ -15,6 +15,7 @@ function mapAgent(row) {
     id: row.id,
     name: row.name,
     framework: row.framework,
+    status: row.status,
     developerUsername: row.developer?.username ?? "unknown",
     reviewCount,
     avgScore,
@@ -26,6 +27,7 @@ export default function AgentDirectoryPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [developerFilter, setDeveloperFilter] = useState("all");
+  const [showFired, setShowFired] = useState(false);
 
   useEffect(() => {
     async function fetchAgents() {
@@ -45,9 +47,10 @@ export default function AgentDirectoryPage() {
     fetchAgents();
   }, []);
 
-  const developers = [...new Set(agents.map((a) => a.developerUsername))].sort();
+  const visibleAgents = agents.filter((a) => showFired || a.status !== "fired");
+  const developers = [...new Set(visibleAgents.map((a) => a.developerUsername))].sort();
 
-  const filtered = agents.filter((a) => {
+  const filtered = visibleAgents.filter((a) => {
     const q = search.toLowerCase();
     const matchesSearch = a.name.toLowerCase().includes(q) || a.developerUsername.toLowerCase().includes(q);
     const matchesDeveloper = developerFilter === "all" || a.developerUsername === developerFilter;
@@ -72,6 +75,16 @@ export default function AgentDirectoryPage() {
             setDeveloperFilter={setDeveloperFilter}
             developers={developers}
           />
+
+          <label className="mt-3 inline-flex items-center gap-2 text-xs text-stone-500 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showFired}
+              onChange={(e) => setShowFired(e.target.checked)}
+              className="accent-violet-500"
+            />
+            Show fired agents
+          </label>
 
           {loading ? (
             <p className="text-sm text-stone-600 mt-8">Loading agents…</p>

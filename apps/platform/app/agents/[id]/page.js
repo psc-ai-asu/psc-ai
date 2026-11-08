@@ -8,7 +8,7 @@ export default async function AgentPage({ params }) {
 
   const { data: agent, error } = await supabase
     .from("agents")
-    .select(`*, developer:profiles!developed_by ( username ), reviews (*, reviewer:profiles!review_by ( username ))`)
+    .select(`*, developer:profiles!developed_by ( username ), reviews (*, reviewer:profiles!review_by ( username )), status_events:agent_status_events ( status, note, created_at )`)
     .eq("id", id)
     .single();
 
