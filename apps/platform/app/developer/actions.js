@@ -1,6 +1,9 @@
 'use server';
 
 import { createClient } from '../lib/supabaseServer';
+import { averageScore, sortStatusEvents } from '@/lib/agentPerformance';
+
+const AGENT_SELECT = '*, reviews(overall_score), status_events:agent_status_events(status, note, created_at)';
 
 function buildAgentRow(row = {}) {
   return {
@@ -10,9 +13,40 @@ function buildAgentRow(row = {}) {
     framework: normalizeFramework(row.framework),
     status: row.status ?? 'active',
     public_metrics: Boolean(row.public_metrics),
+    github_repo_url: row.github_repo_url ?? '',
+    reviewCount: row.reviews?.length ?? 0,
+    avgScore: averageScore(row.reviews),
+    statusEvents: sortStatusEvents(row.status_events),
     developed_by: row.developed_by,
     created_at: row.created_at,
   };
+}
+
+// Accepts "owner/repo", "github.com/owner/repo", or any github.com URL inside the repo
+// (e.g. .../tree/main or ...repo.git) and returns https://github.com/<owner>/<repo>.
+// Returns null when empty; throws when the value is not a GitHub repo.
+function normalizeGithubRepoUrl(value) {
+  const raw = typeof value === 'string' ? value.trim() : '';
+
+  if (!raw) {
+    return null;
+  }
+
+  const path = raw
+    .replace(/^(https?:\/\/)?(www\.)?github\.com\//i, '')
+    .split(/[?#]/)[0];
+  const [owner, repo = ''] = path.split('/');
+  const repoName = repo.replace(/\.git$/i, '');
+
+  if (
+    raw.includes('://') && !/^https?:\/\/(www\.)?github\.com\//i.test(raw)
+    || !/^[A-Za-z0-9][A-Za-z0-9-]{0,38}$/.test(owner)
+    || !/^[A-Za-z0-9._-]{1,100}$/.test(repoName)
+  ) {
+    throw new Error('GitHub repo must look like https://github.com/owner/repo.');
+  }
+
+  return `https://github.com/${owner}/${repoName}`;
 }
 
 function normalizeFramework(value) {
@@ -37,7 +71,7 @@ export async function getAgentsAction() {
 
   const { data, error } = await client
     .from('agents')
-    .select('*')
+    .select(AGENT_SELECT)
     .eq('developed_by', user.id)
     .order('created_at', { ascending: false });
 
@@ -67,13 +101,14 @@ export async function addAgentAction(formData = {}) {
     description: formData.description ?? '',
     framework: normalizeFramework(formData.framework),
     public_metrics: Boolean(formData.public_metrics),
+    github_repo_url: normalizeGithubRepoUrl(formData.github_repo_url),
     status: 'active',
   };
 
   const { data, error } = await client
     .from('agents')
     .insert([payload])
-    .select()
+    .select(AGENT_SELECT)
     .single();
 
   if (error) {
@@ -101,6 +136,7 @@ export async function updateAgentAction(agentId, formData = {}) {
     description: formData.description ?? '',
     framework: normalizeFramework(formData.framework),
     public_metrics: Boolean(formData.public_metrics),
+    github_repo_url: normalizeGithubRepoUrl(formData.github_repo_url),
   };
 
   const { data, error } = await client
@@ -108,7 +144,7 @@ export async function updateAgentAction(agentId, formData = {}) {
     .update(payload)
     .eq('id', agentId)
     .eq('developed_by', user.id)
-    .select()
+    .select(AGENT_SELECT)
     .single();
 
   if (error) {
@@ -120,6 +156,42 @@ export async function updateAgentAction(agentId, formData = {}) {
   }
 
   return buildAgentRow(data);
+}
+
+// Returns { agent } or { error } instead of throwing: Next.js hides the message
+// of errors thrown from server actions in production, and these are for the user.
+async function changeAgentStatus(rpc, agentId, params) {
+  const client = await createClient();
+
+  if (!client) {
+    return { error: 'Supabase client is not configured.' };
+  }
+
+  const { error } = await client.rpc(rpc, { p_agent_id: agentId, ...params });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  const { data, error: loadError } = await client
+    .from('agents')
+    .select(AGENT_SELECT)
+    .eq('id', agentId)
+    .single();
+
+  if (loadError) {
+    return { error: loadError.message };
+  }
+
+  return { agent: buildAgentRow(data) };
+}
+
+export async function fireAgentAction(agentId, reason) {
+  return changeAgentStatus('fire_agent', agentId, { p_reason: reason });
+}
+
+export async function rehireAgentAction(agentId, improvements) {
+  return changeAgentStatus('rehire_agent', agentId, { p_improvements: improvements });
 }
 
 export async function deleteAgentAction(agentId) {

@@ -29,7 +29,7 @@ function getErrorMessage(error, status) {
     case "23503":
       return "This agent couldn't be found. It may have been removed.";
     case "42501":
-      return "You don't have permission to submit this review.";
+      return "You don't have permission to submit this review. The agent may no longer be accepting reviews.";
     case "PGRST301":
     case "PGRST303":
       return "Your session has expired. Please sign in again.";

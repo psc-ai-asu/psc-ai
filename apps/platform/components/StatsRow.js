@@ -4,6 +4,7 @@ export default function StatsRow({ activeCount, firedCount }) {
   return (
     <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
       <StatChip label="Active Agents" value={activeCount} sub="running" valueColor="var(--green)" />
+      <StatChip label="Fired Agents" value={firedCount} sub="out of use" valueColor="#FF4D4D" />
       <StatChip label="Total Agents"  value={activeCount + firedCount}  sub="all time" valueColor="var(--text)" />
     </div>
   );

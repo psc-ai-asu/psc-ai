@@ -2,6 +2,8 @@
 
 'use client';
 
+import { MIN_REVIEWS_FOR_FLAG, POOR_SCORE_THRESHOLD, isPerformingPoorly } from '@/lib/agentPerformance';
+
 const FRAMEWORK_COLORS = {
   LangChain: '#1AA260',
   CrewAI: '#7C3AED',
@@ -10,7 +12,7 @@ const FRAMEWORK_COLORS = {
   Custom: '#94A3B8',
 };
 
-export default function AgentDetail({ agent, onEdit, onDelete, isDeleting = false }) {
+export default function AgentDetail({ agent, onEdit, onDelete, onFire, onRehire, isDeleting = false }) {
   if (!agent) {
     return (
       <div style={{
@@ -32,6 +34,9 @@ export default function AgentDetail({ agent, onEdit, onDelete, isDeleting = fals
     );
   }
 
+  const isFired = agent.status === 'fired';
+  const statusEvents = agent.statusEvents ?? [];
+  const firing = isFired ? statusEvents[0] : null;
   const statusColor = agent.status === 'active' ? 'var(--green)' : '#FF4D4D';
   const frameworkColor = FRAMEWORK_COLORS[agent.framework] || '#94A3B8';
   const formattedDate = agent.created_at
@@ -95,6 +100,22 @@ export default function AgentDetail({ agent, onEdit, onDelete, isDeleting = fals
             </button>
             <button
               type="button"
+              onClick={() => (isFired ? onRehire?.() : onFire?.())}
+              style={{
+                background: 'transparent',
+                color: isFired ? 'var(--green)' : '#FF4D4D',
+                border: `1px solid ${isFired ? 'var(--green)' : 'rgba(255,77,77,0.4)'}`,
+                borderRadius: 6,
+                padding: '7px 10px',
+                cursor: 'pointer',
+                fontFamily: 'monospace',
+                fontSize: 11,
+              }}
+            >
+              {isFired ? 'Rehire' : 'Fire'}
+            </button>
+            <button
+              type="button"
               onClick={() => onDelete?.()}
               disabled={isDeleting}
               style={{
@@ -152,6 +173,25 @@ export default function AgentDetail({ agent, onEdit, onDelete, isDeleting = fals
         </div>
       </div>
 
+      {/* status notices */}
+      {isFired && (
+        <Notice color="#FF4D4D" title="Fired: out of use">
+          <p style={{ margin: 0 }}>
+            {firing?.note ?? 'No reason was recorded.'}
+          </p>
+          <p style={{ margin: '8px 0 0', color: 'var(--text-muted)' }}>
+            It isn&apos;t accepting reviews. Improve the agent, then rehire it and describe what changed.
+          </p>
+        </Notice>
+      )}
+      {isPerformingPoorly(agent) && (
+        <Notice color="#F59E0B" title="Consider firing this agent">
+          <p style={{ margin: 0 }}>
+            It averages {agent.avgScore.toFixed(1)} across {agent.reviewCount} reviews. Agents are flagged below {POOR_SCORE_THRESHOLD.toFixed(1)} once they have {MIN_REVIEWS_FOR_FLAG} reviews.
+          </p>
+        </Notice>
+      )}
+
       {/* description section */}
       {agent.description && (
         <div style={{ marginBottom: 28 }}>
@@ -194,12 +234,80 @@ export default function AgentDetail({ agent, onEdit, onDelete, isDeleting = fals
           Metadata
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: 12 }}>
+          <InfoCard label="Average Score" value={agent.avgScore == null ? 'No reviews' : agent.avgScore.toFixed(1)} />
+          <InfoCard label="Reviews" value={agent.reviewCount ?? 0} />
           <InfoCard label="Agent ID" value={agent.id} />
           <InfoCard label="Framework" value={agent.framework} />
           <InfoCard label="Status" value={agent.status} />
           <InfoCard label="Public Metrics" value={agent.public_metrics ? 'Enabled' : 'Disabled'} />
+          <InfoCard
+            label="GitHub Repo"
+            value={agent.github_repo_url ? (
+              <a
+                href={agent.github_repo_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: 'var(--accent)', textDecoration: 'none' }}
+              >
+                {agent.github_repo_url.replace('https://github.com/', '')}
+              </a>
+            ) : 'Not linked'}
+          />
         </div>
       </div>
+
+      {/* status history section */}
+      {statusEvents.length > 0 && (
+        <div style={{ marginTop: 28 }}>
+          <div style={{
+            fontFamily: 'monospace',
+            fontSize: 10,
+            color: 'var(--text-muted)',
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            marginBottom: 10,
+          }}>
+            Status History
+          </div>
+          <div style={{ display: 'grid', gap: 8 }}>
+            {statusEvents.map((event) => (
+              <div key={`${event.status}-${event.created_at}`} style={{
+                background: 'var(--bg)',
+                border: '1px solid var(--border)',
+                borderRadius: 8,
+                padding: '10px 12px',
+              }}>
+                <div style={{ fontFamily: 'monospace', fontSize: 11, color: event.status === 'fired' ? '#FF4D4D' : 'var(--green)', marginBottom: 4 }}>
+                  {event.status === 'fired' ? 'Fired' : 'Rehired'} · {new Date(event.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                </div>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, lineHeight: 1.5, color: 'var(--text)', overflowWrap: 'anywhere' }}>
+                  {event.note}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Notice({ color, title, children }) {
+  return (
+    <div style={{
+      marginBottom: 28,
+      padding: '12px 14px',
+      border: `1px solid ${color}66`,
+      background: `${color}1A`,
+      borderRadius: 8,
+      fontFamily: "'Inter', sans-serif",
+      fontSize: 13,
+      lineHeight: 1.5,
+      color: 'var(--text)',
+      overflowWrap: 'anywhere',
+    }}>
+      <div style={{ fontWeight: 700, color, marginBottom: 4 }}>{title}</div>
+      {children}
     </div>
   );
 }
