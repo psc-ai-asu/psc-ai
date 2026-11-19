@@ -1,0 +1,54 @@
+---
+title: "Personal Trace Tokens"
+description: "Create a token to attribute execution traces from your agent to your account."
+---
+
+A **personal trace token** identifies you when your agent sends execution traces to PSC-AI. Tokens belong to your account and work across all your agents. You can have several, for example one per machine.
+
+<Note>
+  Token management is available now. Receiving traces, saved runs and metrics are <Badge color="blue">In progress</Badge>. Until they ship, a token has nothing to attach to yet.
+</Note>
+
+## Open the token page
+
+Choose **Personal traces & tokens** on any agent's page in the Agent Directory. The page also has a **Saved runs & metrics** section, which is empty until run capture is available.
+
+## Create a token
+
+<Steps>
+  <Step title="Name it">
+    Enter a **Token name** that helps you remember where it's used, such as `My laptop`. Names can be up to 80 characters.
+  </Step>
+  <Step title="Create the token">
+    Choose **Create token**.
+  </Step>
+  <Step title="Copy the secret">
+    Choose **Copy token** and store it somewhere safe, such as a password manager.
+  </Step>
+</Steps>
+
+<Warning>
+  The full token is shown **once**. When you close the dialog it's cleared, and PSC-AI keeps only a hash of it, so it can't be shown again. If you lose it, revoke it and create a new one.
+</Warning>
+
+## Use a token
+
+Send the token in the `X-RMA-Trace-Token` HTTP header with your trace exports. With an OpenTelemetry OTLP exporter:
+
+```bash
+export OTEL_EXPORTER_OTLP_TRACES_HEADERS="X-RMA-Trace-Token=<your-token>"
+```
+
+The token only says whose traces they are. It doesn't prove a run is genuine or give anyone access to your traces.
+
+<Warning>
+  Never put a token in a URL, a log or a span attribute, and never commit it to a repository.
+</Warning>
+
+## Revoke a token
+
+Choose **Revoke** next to the token in **Your tokens**. A revoked token stops attributing new traces to you. Revoking can't be undone, and earlier runs stay attributed to you.
+
+## What's next
+
+Once runs are captured, they'll appear on this page. When you write a review, you'll be able to attach one as evidence to make it a [verified review](/guides/write-a-review#verified-reviews).
