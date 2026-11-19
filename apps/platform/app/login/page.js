@@ -225,37 +225,10 @@ function LoginForm() {
     setAuthError('');
     setAuthLoading(true);
     const supabase = createClient();
-    const identifier = e.target.querySelector('#signin-identifier').value.trim();
+    const email = e.target.querySelector('#signin-email').value.trim();
     const password = e.target.querySelector('#signin-password').value;
 
-    let loginEmail = identifier;
-
-    // If identifier looks like a username (no @), try to resolve it to an email
-    if (!identifier.includes('@')) {
-      // First try the profiles table
-      let resolved = false;
-      try {
-        const { data: profile, error: profileErr } = await supabase
-          .from('profiles')
-          .select('email')
-          .eq('username', identifier)
-          .single();
-        if (!profileErr && profile?.email) {
-          loginEmail = profile.email;
-          resolved = true;
-        }
-      } catch (_) {
-        // profiles table unavailable
-      }
-
-      if (!resolved) {
-        setAuthError('Username not found. Please sign in with your email address instead.');
-        setAuthLoading(false);
-        return;
-      }
-    }
-
-    const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       setAuthError(error.message);
       setAuthLoading(false);
@@ -596,8 +569,8 @@ function LoginForm() {
             {authError && <div className="auth-error">{authError}</div>}
             <form className="signup-form" onSubmit={handleSignIn}>
               <div className="signup-field">
-                <label htmlFor="signin-identifier" className="signup-label mono">Email or Username</label>
-                <input id="signin-identifier" type="text" className="signup-input" placeholder="Enter email or username" autoComplete="username" required />
+                <label htmlFor="signin-email" className="signup-label mono">Email</label>
+                <input id="signin-email" type="email" className="signup-input" placeholder="Enter email" autoComplete="email" required />
               </div>
               <div className="signup-field">
                 <label htmlFor="signin-password" className="signup-label mono">Password</label>

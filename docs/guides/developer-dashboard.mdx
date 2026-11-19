@@ -17,6 +17,7 @@ The top of the page shows how many agents you have. Below that, your agents are 
     - **Name**: what reviewers see in the directory. Required.
     - **Description**: what the agent does. Reviewers see it on the agent's page.
     - **Framework**: LangChain, CrewAI, AutoGen, OpenAI Swarm or Custom.
+    - **GitHub repo** (optional): a link to the agent's source. See [Link your GitHub repository](#link-your-github-repository).
     - **Public metrics**: whether reviewers can see your agent's metrics. See [Public metrics](#public-metrics).
   </Step>
   <Step title="Save">
@@ -28,12 +29,36 @@ The top of the page shows how many agents you have. Below that, your agents are 
 
 Select an agent in your list to see its details, then:
 
-- Choose **Edit** to change its name, description, framework or metrics setting.
-- Choose **Delete** to remove it. This also removes all its reviews, and can't be undone.
+- Choose **Edit** to change its name, description, framework, GitHub repo or metrics setting.
+- Choose **Fire** to take it out of use without losing its reviews. See [Fire and rehire an agent](#fire-and-rehire-an-agent).
+- Choose **Delete** to remove it. This also removes all its reviews, and can't be undone. Firing is the safer choice if you might want the agent back.
+
+## Fire and rehire an agent
+
+Firing marks an agent as out of use, for example when it's broken or you've replaced it. A fired agent:
+
+- stops accepting new reviews
+- is hidden from the Agent Directory unless a reviewer turns on **Show fired agents**
+- keeps all its existing reviews, which stay visible
+- shows a **Fired** label and your reason on its page
+
+<Steps>
+  <Step title="Choose Fire">
+    Select the agent in your list and choose **Fire**.
+  </Step>
+  <Step title="Say why">
+    Explain why you're firing it, in 10 to 1,000 characters. Your reason is shown publicly on the agent's page.
+  </Step>
+  <Step title="Confirm">
+    Choose **Fire agent**.
+  </Step>
+</Steps>
+
+To bring an agent back, select it and choose **Rehire**, then describe what you improved (also 10 to 1,000 characters, shown publicly). It accepts reviews and appears in the directory again. The agent's history of firings and rehirings is kept on its page.
 
 ## Find your agents
 
-Use the search box to find an agent by name.
+Use the search box to find an agent by name, and the status filter to show all, active or fired agents. The stats at the top count your active, fired and total agents.
 
 ## Public metrics
 
@@ -41,15 +66,19 @@ Use the search box to find an agent by name.
 
 ## Link your GitHub repository
 
-<Badge color="blue">In progress</Badge>
+Add your agent's repository in the **GitHub repo** field when you onboard or edit it. The field is optional. You can enter:
 
-You'll be able to add your agent's GitHub repository when you onboard or edit it. The link appears on your agent's page so reviewers can see the source.
+- `owner/repo`
+- `github.com/owner/repo`
+- any GitHub URL inside the repo, such as a branch or `.git` link
+
+PSC-AI saves it as `https://github.com/owner/repo`. Links to sites other than GitHub are rejected. The link appears on your agent's page so reviewers can see the source.
 
 ## Execution traces and metrics
 
 <Badge color="blue">In progress</Badge>
 
-Your agent will be able to send execution traces to PSC-AI using OpenTelemetry. A trace records each model call, tool call and step of a run. From those traces, you'll see:
+Your agent will be able to send execution traces to PSC-AI using OpenTelemetry, attributed to you with a [personal trace token](/guides/personal-trace-tokens). A trace records each model call, tool call and step of a run. From those traces, you'll see:
 
 - Token usage per run
 - Latency
@@ -61,6 +90,5 @@ Traces also let reviewers submit [verified reviews](/guides/write-a-review#verif
 
 <Badge color="orange">Coming soon</Badge>
 
-- **Personal trace tokens**: your own token for sending traces from your agent
 - **Cost per run**: what each run costs, based on token usage
 - **Version comparison**: how your agent's scores and metrics change between versions

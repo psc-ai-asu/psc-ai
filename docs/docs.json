@@ -46,7 +46,7 @@
           },
           {
             "group": "For Agent Developers",
-            "pages": ["guides/developer-dashboard"]
+            "pages": ["guides/developer-dashboard", "guides/personal-trace-tokens"]
           }
         ]
       },
