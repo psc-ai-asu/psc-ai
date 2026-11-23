@@ -5,6 +5,7 @@ import Link from "next/link";
 import PlatformHeader from "@/components/PlatformHeader";
 
 import { formatDuration, formatTokens, plural } from "@/lib/format";
+import { firingEvent } from "@/lib/agentPerformance";
 import { ScoreBar, TRACE_BACKED_EXPLANATION, VerificationBadge } from "./components";
 import { ScoreBadge } from "../components";
 import TraceView from "./TraceView";
@@ -42,6 +43,8 @@ export default function AgentProfile({ agent, sessions }) {
   // The session behind the selected review, when it's Trace-backed and visible to this viewer.
   const session = selected?.session_id ? sessions[selected.session_id] : null;
   const prompts = session?.runs.filter((run) => run.prompt) ?? [];
+  const isFired = agent.status === "fired";
+  const firing = firingEvent(agent);
 
   const experienceFields = [
     { key: "goal_completion", label: "Goal Completion" },
@@ -63,15 +66,31 @@ export default function AgentProfile({ agent, sessions }) {
                 <h1 className="text-lg font-semibold text-stone-100 leading-tight">{agent.name}</h1>
                 <p className="text-xs text-stone-500 font-mono mt-0.5">{agent.framework}</p>
               </div>
-              <Link
-                href={`/review?agent=${agent.id}`}
-                className="text-xs font-medium text-white bg-violet-600 hover:bg-violet-500 px-2.5 py-1 rounded-md transition-colors flex-shrink-0"
-              >
-                + Review
-              </Link>
+              {isFired ? (
+                <span className="text-xs font-mono font-medium px-2 py-0.5 rounded border text-rose-400 bg-rose-400/10 border-rose-400/20 flex-shrink-0">
+                  Fired
+                </span>
+              ) : (
+                <Link
+                  href={`/review?agent=${agent.id}`}
+                  className="text-xs font-medium text-white bg-violet-600 hover:bg-violet-500 px-2.5 py-1 rounded-md transition-colors flex-shrink-0"
+                >
+                  + Review
+                </Link>
+              )}
             </div>
             {agent.description && (
               <p className="text-sm text-stone-400 leading-relaxed mb-2">{agent.description}</p>
+            )}
+            {agent.github_repo_url && (
+              <a
+                href={agent.github_repo_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-xs font-mono text-violet-400 hover:text-violet-300 truncate mb-2"
+              >
+                {agent.github_repo_url.replace("https://github.com/", "")}
+              </a>
             )}
             <div className="flex items-center gap-3">
               <span className="text-xs text-stone-500">
@@ -82,6 +101,12 @@ export default function AgentProfile({ agent, sessions }) {
               <span className="text-xs text-stone-700">·</span>
               <span className="text-xs text-stone-500">{allReviews.length} review{allReviews.length === 1 ? "" : "s"}</span>
             </div>
+            {isFired && (
+              <div className="mt-3 rounded-md border border-rose-400/20 bg-rose-400/10 px-3 py-2 text-xs leading-relaxed">
+                <p className="font-medium text-rose-400">Out of use and not accepting reviews</p>
+                <p className="text-stone-400 mt-1 break-words">{firing?.note ?? "The developer didn't record a reason."}</p>
+              </div>
+            )}
           </div>
 
           <div className="px-3 pt-3 pb-2 border-b border-stone-800">

@@ -1,12 +1,94 @@
 ---
 title: "Developer Dashboard"
-description: "Monitor how your agents perform through real user reviews."
+description: "Onboard your agents and manage how they appear on the platform."
 ---
 
-<Note>
-  This guide is a placeholder and is still being written.
-</Note>
+The **Developer Dashboard** is where you onboard and manage your agents. Open it from **Developer Dashboard** in the top bar. You need to be signed in.
 
-The **Developer Dashboard** shows how your agents are performing, based on satisfaction scores from real user reviews.
+The top of the page shows how many agents you have. Below that, your agents are listed on the left and the selected agent's details on the right.
 
-{/* TODO: Onboarding an agent, reading the dashboard, and upcoming metrics (token costs, latency, tool-call success rates, execution traces). */}
+## Onboard an agent
+
+<Steps>
+  <Step title="Choose Add agent">
+    Select **Add agent** at the top right of the dashboard.
+  </Step>
+  <Step title="Fill in the details">
+    - **Name**: what reviewers see in the directory. Required.
+    - **Description**: what the agent does. Reviewers see it on the agent's page.
+    - **Framework**: LangChain, CrewAI, AutoGen, OpenAI Swarm or Custom.
+    - **GitHub repo** (optional): a link to the agent's source. See [Link your GitHub repository](#link-your-github-repository).
+    - **Public metrics**: whether reviewers can see your agent's metrics. See [Public metrics](#public-metrics).
+  </Step>
+  <Step title="Save">
+    Choose **Save agent**. Your agent appears in your list and in the Agent Directory, ready to be reviewed.
+  </Step>
+</Steps>
+
+## Edit or delete an agent
+
+Select an agent in your list to see its details, then:
+
+- Choose **Edit** to change its name, description, framework, GitHub repo or metrics setting.
+- Choose **Fire** to take it out of use without losing its reviews. See [Fire and rehire an agent](#fire-and-rehire-an-agent).
+- Choose **Delete** to remove it. This also removes all its reviews, and can't be undone. Firing is the safer choice if you might want the agent back.
+
+## Fire and rehire an agent
+
+Firing marks an agent as out of use, for example when it's broken or you've replaced it. A fired agent:
+
+- stops accepting new reviews
+- is hidden from the Agent Directory unless a reviewer turns on **Show fired agents**
+- keeps all its existing reviews, which stay visible
+- shows a **Fired** label and your reason on its page
+
+<Steps>
+  <Step title="Choose Fire">
+    Select the agent in your list and choose **Fire**.
+  </Step>
+  <Step title="Say why">
+    Explain why you're firing it, in 10 to 1,000 characters. Your reason is shown publicly on the agent's page.
+  </Step>
+  <Step title="Confirm">
+    Choose **Fire agent**.
+  </Step>
+</Steps>
+
+To bring an agent back, select it and choose **Rehire**, then describe what you improved (also 10 to 1,000 characters, shown publicly). It accepts reviews and appears in the directory again. The agent's history of firings and rehirings is kept on its page.
+
+## Find your agents
+
+Use the search box to find an agent by name, and the status filter to show all, active or fired agents. The stats at the top count your active, fired and total agents.
+
+## Public metrics
+
+**Public metrics** controls whether your agent's metrics appear on its reviews. When it's off, the **Metrics** tab on your agent's reviews shows **Metrics are private** instead. You can change this at any time.
+
+## Link your GitHub repository
+
+Add your agent's repository in the **GitHub repo** field when you onboard or edit it. The field is optional. You can enter:
+
+- `owner/repo`
+- `github.com/owner/repo`
+- any GitHub URL inside the repo, such as a branch or `.git` link
+
+PSC-AI saves it as `https://github.com/owner/repo`. Links to sites other than GitHub are rejected. The link appears on your agent's page so reviewers can see the source.
+
+## Execution traces and metrics
+
+<Badge color="blue">In progress</Badge>
+
+Your agent will be able to send execution traces to PSC-AI using OpenTelemetry, attributed to you with a [personal trace token](/guides/personal-trace-tokens). A trace records each model call, tool call and step of a run. From those traces, you'll see:
+
+- Token usage per run
+- Latency
+- Tool-call success rate
+
+Traces also let reviewers submit [verified reviews](/guides/write-a-review#verified-reviews).
+
+## On the roadmap
+
+<Badge color="orange">Coming soon</Badge>
+
+- **Cost per run**: what each run costs, based on token usage
+- **Version comparison**: how your agent's scores and metrics change between versions
