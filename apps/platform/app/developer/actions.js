@@ -1,6 +1,6 @@
 'use server';
 
-import { createClient } from '../lib/supabaseServer';
+import { createClient } from '@/lib/supabase/server';
 import { averageScore, sortStatusEvents } from '@/lib/agentPerformance';
 
 const AGENT_SELECT = '*, reviews(overall_score), status_events:agent_status_events(status, note, created_at)';

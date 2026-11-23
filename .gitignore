@@ -16,6 +16,9 @@ coverage
 # next.js
 .next
 out/
+# AI agent notes that `next dev` generates on every run
+apps/platform/AGENTS.md
+apps/platform/CLAUDE.md
 
 # production
 build

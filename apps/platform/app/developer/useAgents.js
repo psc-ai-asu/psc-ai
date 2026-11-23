@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
 import { addAgentAction, deleteAgentAction, fireAgentAction, getAgentsAction, rehireAgentAction, updateAgentAction } from './actions';
-import { createClient } from '../lib/supabaseClient';
 
 export const EMPTY_FORM = {
   name: '',

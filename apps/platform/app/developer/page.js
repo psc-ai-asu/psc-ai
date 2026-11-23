@@ -2,7 +2,6 @@
 'use client';
 
 import { useRef } from 'react';
-import NavigationBar from '../../components/NavigationBar';
 import PlatformHeader from '../../components/PlatformHeader';
 import Footer from '../../components/Footer';
 import StatsRow from '../../components/StatsRow';

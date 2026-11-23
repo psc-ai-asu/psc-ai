@@ -21,26 +21,22 @@ export function MetricTile({ label, value, sub, highlight }) {
   );
 };
 
-export function ScoreBadge({ score }) {
-  const color = score >= 4 ? "text-emerald-400 bg-emerald-400/10 border-emerald-400/20"
-              : score >= 3 ? "text-amber-400 bg-amber-400/10 border-amber-400/20"
-              : "text-rose-400 bg-rose-400/10 border-rose-400/20";
+export const TRACE_BACKED_EXPLANATION = "The reviewer ran this agent and sent its trace with their own token.";
 
-  return (
-    <span className={`text-xs font-mono font-medium px-2 py-0.5 rounded border ${color}`}>
-      {score.toFixed(1)}
-    </span>
-  );
-};
-
+// "Trace-backed" for a review submitted with a session (verification_status
+// "verified"), "Unverified" otherwise.
 export function VerificationBadge({ status }) {
   const isVerified = status === "verified";
   const color = isVerified
     ? "text-teal-400 bg-teal-400/10 border-teal-400/20"
     : "text-stone-500 bg-stone-800/50 border-stone-700/50";
   return (
-    <span className={`text-xs font-mono font-medium px-2 py-0.5 rounded border ${color}`}>
-      {isVerified ? "Verified" : "Unverified"}
+    <span
+      title={isVerified ? TRACE_BACKED_EXPLANATION : "The reviewer didn't attach a trace of their session."}
+      className={`text-xs font-mono font-medium px-2 py-0.5 rounded border inline-flex items-center gap-1 ${color}`}
+    >
+      {isVerified && <span aria-hidden="true">✓</span>}
+      {isVerified ? "Trace-backed" : "Unverified"}
     </span>
   );
 }
