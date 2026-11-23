@@ -3,6 +3,7 @@
 import { ScaleInput, TextInput } from "./components"
 import { RunList } from "./SessionPicker";
 import { formatDuration, formatTokens, formatWhen, plural } from "@/lib/format";
+import { REVIEW_FIELDS, countAnswered, isReviewComplete } from "@/lib/reviewForm";
 import Link from "next/link";
 import { useState } from "react";
 import { createClient } from '@/lib/supabase/client';
@@ -80,15 +81,16 @@ export default function AgentReviewForm({ agent, session = null, onChooseSession
 
   // Variables used to determine how many questions have been answered, 
   // and a calculation to determine the progress percentage of the form.
-  const totalQuestions = questions.length + 2;
-  const answered = Object.keys(answers).filter((k) => answers[k] !== "" && answers[k] !== undefined).length;
+  const totalQuestions = REVIEW_FIELDS.length;
+  const answered = countAnswered(answers);
+  const complete = isReviewComplete(answers);
   const progress = Math.round((answered / totalQuestions) * 100);
 
   const handleSubmit = async (e) => {
     // Prevent another insert if the review has already been submitted successfully.
     if (submitSuccess) return;
 
-    if (answered === totalQuestions) {
+    if (complete) {
       // Clear any previous error so a retry that fails again fades back in.
       setSubmitError(null);
 
@@ -118,7 +120,7 @@ export default function AgentReviewForm({ agent, session = null, onChooseSession
           p_coherence: answers.coherence,
           p_factuality: answers.factuality,
           p_safety: answers.safety,
-          p_review_note: answers.note,
+          p_review_note: answers.note || null,
         })
         : await supabase
           .from('reviews')
@@ -130,7 +132,7 @@ export default function AgentReviewForm({ agent, session = null, onChooseSession
             coherence: answers.coherence,
             factuality: answers.factuality,
             safety: answers.safety,
-            review_note: answers.note,
+            review_note: answers.note || null,
             review_by: user.id,
           })
 
@@ -242,7 +244,7 @@ export default function AgentReviewForm({ agent, session = null, onChooseSession
 
           <div className={`p-5 rounded-2xl border transition-all duration-200 ${answers.note ? "border-zinc-700 bg-zinc-900/50" : "border-zinc-800/60 bg-zinc-900/20"}`}>
             <label className="text-sm text-zinc-200 font-medium leading-snug">
-              Notes
+              Notes <span className="text-zinc-500 font-normal">(optional)</span>
               {answers.note && <span className="ml-2 text-xs text-green-600">✓</span>}
             </label>
             <TextInput
@@ -271,13 +273,13 @@ export default function AgentReviewForm({ agent, session = null, onChooseSession
           </p>
           <button
             onClick={handleSubmit}
-            disabled={answered < totalQuestions || submitSuccess}
+            disabled={!complete || submitSuccess}
             className={`px-7 py-3 rounded-full text-sm font-semibold transition-all duration-200
-              ${answered === totalQuestions
+              ${complete
                 ? "text-white hover:opacity-90 shadow-lg hover:scale-[1.02] cursor-pointer"
                 : "bg-zinc-800 text-zinc-600 cursor-not-allowed border border-zinc-700"
               }`}
-            style={answered === totalQuestions ? { backgroundColor: "#8B5CF6", boxShadow: "0 4px 24px #8B5CF640" } : {}}
+            style={complete ? { backgroundColor: "#8B5CF6", boxShadow: "0 4px 24px #8B5CF640" } : {}}
           >
             {session ? "Submit Trace-backed review" : "Submit review"}
           </button>
