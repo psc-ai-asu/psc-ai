@@ -53,13 +53,18 @@ test('create stores SHA-256 only; secret returned only on successful creation', 
   assert.ok(!JSON.stringify(rows).includes(created.secret));
   assert.ok(!('token_hash' in created.token));
   const listed = await listTokens(db);
+  assert.equal(listed.length, 1);
+  assert.equal(listed[0].id, created.token.id);
+  assert.equal(listed[0].name, 'Reviewer laptop');
   assert.ok(!JSON.stringify(listed).includes(created.secret));
   assert.ok(!('token_hash' in listed[0]));
   const revoked = await revokeToken(db, id);
   assert.ok(revoked.revoked_at);
   assert.ok(!('secret' in revoked));
   assert.ok(!('token_hash' in revoked));
+  const revokedAt = rows[0].revoked_at;
   await assert.rejects(revokeToken(db, id), /not found or already revoked/);
+  assert.equal(rows[0].revoked_at, revokedAt);
 });
 
 test('different tokens use independent cryptographic randomness', async () => {
